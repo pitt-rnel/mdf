@@ -113,19 +113,51 @@ classdef (Sealed) rfManage < handle
           end %if 
       end
 
-      function res = remove(obj, query)
-          % find the index of the object required
-          index = obj.index(query);
+      function res = removeByIndex(obj, index)
           % initialize output
           res = false;
           % remove object if it was found
           if ~isempty(index)   
               % object found, removed from memory arrays
-              obj.object(index(1)) = [];
-              obj.uuid(index(1)) = [];
-              obj.file(index(1)) = [];
+              obj.object(index) = [];
+              obj.uuid(index) = [];
+              obj.file(index) = [];
               res = true;
           end %if 
+      end %function
+      
+      function res = remove(obj, query)
+          % find the index of the object required
+          index = obj.index(query);
+          % remove object if it was found
+          res = obj.removeByIndex(index(1));
+      end %function
+      
+      function res = clear(obj,query)
+          % find the index of the object required
+          index = obj.index(query);
+          % initialize output
+          res = false;
+          % clear object from memory if it was found
+          if ~isempty(index)
+              % object found, 
+              % remove object from matlab memory
+              delete(obj.object(index(1)));
+              % removed from memory arrays
+              res = obj.removeByIndex(index(1));
+          end %if 
+      end %function
+      
+      function res = clearAll(obj)
+           % initialize output
+          res = false;
+          % loop on all objects in memory
+          for i = 1: length(obj.object)
+              % remove object from matlab memory
+              delete(obj.object(i));
+              % removed from memory arrays
+              res = obj.removeByIndex(i);             
+          end %for
       end %function
    end
 end

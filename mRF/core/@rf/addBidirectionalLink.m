@@ -23,7 +23,7 @@ function res = addBidirectionalLink(source,dest,sProp,dProp)
         uSource = source;
         oSource = rfObj.load(uSource);
         
-    elseif isa(Source,'rfObj')
+    elseif isa(source,'rfObj')
         % we got source object
         % extract uuid
         oSource = source;

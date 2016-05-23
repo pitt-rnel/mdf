@@ -73,6 +73,8 @@ classdef rfObj < handle
         res = save(obj);
         disp(obj,type);
         setDataInfo(obj,field, value);
+        res = setFiles(obj,indata);
+        res = getFiles(obj);
     end %methods
 
     % static methods defined here

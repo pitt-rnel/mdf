@@ -27,19 +27,35 @@ function outQuery = prepQuery(inquery)
     lf = fields(inquery);
     % initialize internal query
     iq = inquery;
+    % structure with rf fields
+    rff = {};
     % remove rf_fields
     for i = 1:length(lf)
          % find rf_ in field name
-         pos = strfind(lf(i),'rf_');
-         if ~isempty(pos{1}) && pos{1}==1
+         pos = strfind(lf{i},'rf_');
+         if ~isempty(pos) && pos==1
              % configuration field
+             % transfer to dedicated structure
+             rff{end+1} = lf{i};
              % remove it
-             iq = rmfield(iq,lf(i));
+             iq = rmfield(iq,lf{i});
          end %if
     end %for
     % we assume that we are doing a query on metadata
-    iq = struct('rf_metadata', iq);
-    
+    iq = struct();
+    if ~isempty(fields(iq))
+        iq.rf_metadata = iq;
+    end %if
+    % check if there is any rf fields that needs to be added
+    rff = intersect(rff,{'rf_type','rf_uuid','rf_vuuid'});
+    rf_def = struct();
+    for i = 1:length(rff)
+        rf_def.(rff{i}) = inquery.(rff{i});
+    end %if
+    if ~isempty(fields(rf_def))
+        iq.rf_def = rf_def;
+    end %if
+        
     if exact
         % user asked to transform query as it is
         outQuery = savejson('',iq);

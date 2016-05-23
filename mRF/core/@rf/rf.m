@@ -71,7 +71,7 @@ classdef (Sealed) rf < handle
         end %function
     end %methods
 
-    % stati methods defined in external files
+    % static methods defined in external files
     methods (Static)
         % add parent child relationship
         res = addParentChildRelation(parent,child,prop);
@@ -79,12 +79,24 @@ classdef (Sealed) rf < handle
         % remove parent child relationship
         res = rmParentChildRelation(parent,child,prop);
         res = rpcr(parent,child,prop);
+        % add links
+        res = addUnidirectionalLink(source,dest,sProp);
+        res = aul(source,dest,sProp);
+        res = addBidirectionalLink(source,dest,sProp,dProp);
+        res = abl(source,dest,sProp,dProp);
+        % rm links
+        res = rmUnidirectionalLink(source,dest,sProp);
+        res = rul(source,dest,sProp);
+        res = rmBidirectionalLink(source,dest,sProp,dProp);
+        res = rbl(source,dest,sProp,dProp);
         % generate uuid 
         uuid = UUID();
         % unload/remove object from memory
         res = unload(indata);
         % load object in memory
         outdata = load(indata);
+        % convert cell to struct
+        outdata = c2s(indata);
         
     end %methods
 end %function

@@ -1,16 +1,14 @@
-function res = addUnidirectionalLink(source,dest,sProp)
-    % function res = addUnidirectionalLink(source,dest,sProp)
+function res = rmUnidirectionalLink(source,dest,sProp)
+    % function res = rmBidirectionalLink(source,dest,sProp)
     %
-    % create a unidirectional link from source object to destination object
-    % under prop property in the source object.
-    % destination object is not aware of the link
-    %
+    % remove a unidirectional link between source object.
+    % 
     % INPUT
     % - source : (uuid or rfObj) source object or uuid of the source object
     % - dest   : (uuid or rfObj) destination object or uuid of the destination object
     % - sProp  : (string) property under which the destination object will be
     %            found in the source object
-    
+
     oSource = [];
     uSource = [];
     if ischar(source)
@@ -29,8 +27,15 @@ function res = addUnidirectionalLink(source,dest,sProp)
     if isempty(oSource) || isempty(uSource)
         throw( ...
             MException( ...
-                'rf:addUnidirectionalLink', ...
+                'rf:rmBidirectionalLink', ...
                 'Invalid Source object'));
+    end %if
+    
+    if ~any(strcmp(oSource.def.rf_links.rf_fields,sProp))
+        throw( ...
+            MException( ...
+                'rf:rmBidirectionalLink', ...
+                'Invalid Source Object property'));
     end %if
 
     oDest = [];
@@ -51,11 +56,11 @@ function res = addUnidirectionalLink(source,dest,sProp)
     if isempty(oDest) || isempty(uDest)
         throw( ...
             MException( ...
-                'rf:addUnidirectionalLink', ...
+                'rf:rmBidirectionalLink', ...
                 'Invalid Destination object'));
-    end %if
+    end %if  
     
-    % add destination object under designated property in source object
-    res = oSource.addLink(sProp,oDest,'u');
-    
+    % remove link from source object
+    res = oSource.rmLink(sProp,dest);
+        
 end %function

@@ -165,9 +165,19 @@ function [res] = subsref(obj,S)
             %
             % try to get the right child
             try
-                uuid = obj.def.rf_children.(S(2).subs)(S(3).subs{1}).rf_uuid;
+                % issues with the type of children
+                % needs to be addresses, but in the mean time,
+                % let's check which type of variable we have
+                switch class(obj.def.rf_children.(S(2).subs))
+                    case 'cell'
+                        uuid = obj.def.rf_children.(S(2).subs){S(3).subs{1}}.rf_uuid;
+                    case 'struct'
+                        uuid = obj.def.rf_children.(S(2).subs)(S(3).subs{1}).rf_uuid;
+                    otherwise
+                        throw(MException('rfObj:subsref',['Child property "' S(2).subs '(' num2str(S(3).subs{1}) ')" correupted']));
+                end %switch
             catch
-                throw(MException('rfObj:subsref',['Child property "' S(2).subs '[' S(3).subs{1} ']" not found']));
+                throw(MException('rfObj:subsref',['Child property "' S(2).subs '(' num2str(S(3).subs{1}) ')" not found']));
             end %try/catch
             % load children
             res = rfObj.load(uuid);

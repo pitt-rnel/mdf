@@ -1,16 +1,16 @@
-function res = addUnidirectionalLink(source,dest,sProp)
-    % function res = addUnidirectionalLink(source,dest,sProp)
+function res = rmBidirectionalLink(source,dest,sProp,dProp)
+    % function res = rmBidirectionalLink(source,dest,sProp,dProp)
     %
-    % create a unidirectional link from source object to destination object
-    % under prop property in the source object.
-    % destination object is not aware of the link
-    %
+    % remove a bidirectional link between source and destination object.
+    % 
     % INPUT
     % - source : (uuid or rfObj) source object or uuid of the source object
     % - dest   : (uuid or rfObj) destination object or uuid of the destination object
     % - sProp  : (string) property under which the destination object will be
     %            found in the source object
-    
+    % - sDest  : (string) property under which the source object will be
+    %            found in the destination object
+
     oSource = [];
     uSource = [];
     if ischar(source)
@@ -29,8 +29,15 @@ function res = addUnidirectionalLink(source,dest,sProp)
     if isempty(oSource) || isempty(uSource)
         throw( ...
             MException( ...
-                'rf:addUnidirectionalLink', ...
+                'rf:rmBidirectionalLink', ...
                 'Invalid Source object'));
+    end %if
+    
+    if ~any(strcmp(oSource.def.rf_links.rf_fields,sProp))
+        throw( ...
+            MException( ...
+                'rf:rmBidirectionalLink', ...
+                'Invalid Source Object property'));
     end %if
 
     oDest = [];
@@ -51,11 +58,21 @@ function res = addUnidirectionalLink(source,dest,sProp)
     if isempty(oDest) || isempty(uDest)
         throw( ...
             MException( ...
-                'rf:addUnidirectionalLink', ...
+                'rf:rmBidirectionalLink', ...
                 'Invalid Destination object'));
+    end %if  
+        
+    if ~any(strcmp(oDest.def.rf_links.rf_fields,dProp))
+        throw( ...
+            MException( ...
+                'rf:rmBidirectionalLink', ...
+                'Invalid Destination Object property'));
     end %if
     
-    % add destination object under designated property in source object
-    res = oSource.addLink(sProp,oDest,'u');
+    % remove link from source object
+    res = oSource.rmLink(sProp,dest);
+    
+    % remove link from destination object
+    res = oDest.rmLink(dProp,source);
     
 end %function

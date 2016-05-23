@@ -18,7 +18,7 @@ function outdata = load(indata)
     %
     % output 
     %   outdata = RF object instance fully populated
-    
+
     % check if we got a string in input
     if isa(indata,'char')
          indata = struct( ...
@@ -94,7 +94,7 @@ function outdata = load(indata)
         % runs the query as it is
         rf_data = odb.find(indata.rf_query);
     end %if
-    
+
     % next we check all the other fields and we use them to 
     % build a query and send it to the db
     if isempty(rf_data)
@@ -154,15 +154,15 @@ function outdata = load(indata)
         %        rf_uuid: xxxx
         %        rf_file: <file_path>
         %        rf_type: <class type>
-  
+
         % initialize outdata
         outdata = [];
-        
+
         % loop on all the object found
         for i = 1:length(rf_data)
             % get object data
             cdata = rf_data{i};
-            
+
             % create new object
             if length(outdata)<1
                 outdata = rfObj();
@@ -189,6 +189,23 @@ function outdata = load(indata)
                 outdata(i).status.loaded.data.(field) = 0;
                 outdata(i).status.size.data.(field) = 0;
             end %if
+            % convert rf_parent if needed
+            outdata(end).def.rf_parents = rf.c2s(outdata(end).def.rf_parents);
+            % convert each childrens list if needed
+            for j = 1:length(outdata(end).def.rf_children.rf_fields)
+                % get the field name
+                field = outdata(end).def.rf_children.rf_fields{j};
+                % convert the field
+                outdata(end).def.rf_children.(field) = rf.c2s(outdata(end).def.rf_children.(field));
+            end %for
+            % convert each link list if needed
+            for j = 1:length(outdata(end).def.rf_links.rf_fields)
+                % get the field name
+                field = outdata(end).def.rf_links.rf_fields{j};
+                % convert the field
+                outdata(end).def.rf_links.(field) = rf.c2s(outdata(end).def.rf_links.(field));
+            end %for
+            
             % extract children
             %outdata(i).children = cdata.rf_def.rf_children;
             % extract parents
@@ -203,3 +220,4 @@ function outdata = load(indata)
 
     end %if
 end %function
+

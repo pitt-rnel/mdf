@@ -59,7 +59,8 @@ function res = addLink(obj,prop,link,dir,pos)
     end %if
     
     % check if we have the object to insert or not
-    if nargin <= 2
+    % input argument: obj, prop, link, dir, pos
+    if nargin < 3
         % done
         return;
     end %if
@@ -67,6 +68,8 @@ function res = addLink(obj,prop,link,dir,pos)
     % we got link to insert
     % let's check if we have direcitonality
     if nargin <= 3
+        dir = 'b';
+    else
         % encode directionality
         % u[ni[directional]] = u
         % b[i[directionl]] = b
@@ -78,8 +81,6 @@ function res = addLink(obj,prop,link,dir,pos)
             otherwise
                 dir = 'b';
         end %switch
-    else
-        dir = 'b';
     end %if
     
     % we got position
@@ -145,7 +146,7 @@ function res = addLink(obj,prop,link,dir,pos)
         % check if uuid is already in list
         uuids = {obj.def.rf_links.(prop).rf_uuid};
         i = find(strcmp(uuids,uuid));
-        if isempty(i)
+        if ~isempty(i)
             throw(MException('rfObj:addLink',['Object with uuid ' uuid ' already inserted']));
         end %if
         % check if type matches the one already present

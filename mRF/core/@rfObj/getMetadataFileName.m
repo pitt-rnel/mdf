@@ -15,7 +15,7 @@ function mfn = getMetadataFileName(obj)
     elseif isfield(obj.def.rf_files,'rf_base') && ...
             ~isempty(obj.def.rf_files.rf_base)
         % use basename to build data file name
-        mfn = [obj.def.rf_files.rf_base '_md.yaml'];
+        mfn = [obj.def.rf_files.rf_base '_md.yml'];
         obj.def.rf_files.rf_metadata = mfn;
     end %if
 end %function
