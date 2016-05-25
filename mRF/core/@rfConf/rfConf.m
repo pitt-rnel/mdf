@@ -9,7 +9,7 @@ classdef rfConf < handle
         % type of configuration file
         % matches the type of configuration file type:
         % xml, json or legacy
-        fileType = 'unkown';
+        fileType = 'unknown';
         
         % data read from configuration file
         fileData;
@@ -41,7 +41,7 @@ classdef rfConf < handle
         
         % return file type
         type;
-    end
+    end % properties
     
     methods (Access = private)
         % constructor
@@ -60,108 +60,118 @@ classdef rfConf < handle
                     % if conf is a string, we assume that is the file name
                     % containing the configuration
 
-                    % check if user would like to automaticallyt search for conf file
-                    if strcmp(tolower(conf),'auto') || ...
-                      strcmp(tolower(conf),'<auto>')
-                        % user folder
-                        uhf = getuserdir();
-                        % possible path to local configuration file
-                        lcp = { ...
-                          fullfile(uhf,'.RNEL'), ...
-                          fullfile(uhf,'RNEL'), ...
-                          fullfile(uhf,'MATLAB'), ...
-                          fullfile(uhf,'Documents','MATLAB'), ...
-                        };
-                        % check if at least one path contains a configuration file
-                        for i = 1:length(lcp)
-                            % possible configuration file names
-                            lcf = { ...
-                              fullfile(lcp{i},'rf.json.conf'), ...
-                              fullfile(lcp{i},'rf.xml.conf'), ...
-                            };
-                            for j = 1:length(lcf)
-                                if exist(lcf{i})
-                                    % local configuration file exists
-                                    % use this one
-                                    obj.ConfigurationFile = lcf{i};
-                                    break;
-                                end %if
-                            end %for
-                        end %for
-                    else
-                        % we assume that user passed a file path name
-                        % save file
-                        obj.fileName = conf;
+                    % we assume that user passed a file path name
+                    % save file
+                    obj.fileName = conf;
+                    
+                elseif isa(conf,'struct')
+                    % if conf is a struct, we should have the following structure
+                    % conf.fileName     = name of the file containing the configuration
+                    % conf.automation   = here we specify if we want to load,
+                    %                     extract, select and start rneldb. Actions are
+                    %                     incrementals following the progression
+                    %                      1) load
+                    %                      2) extract
+                    %                      3) select
+                    %                      4) start
+                    % conf.menuType     = which type of menu: text, GUI or auto
+                    % conf.selection    = indicate the configuration
+                    %                     that we want to select automatically. It is
+                    %                     useful when automating tasks
+    
+                    if ( isfield(conf,'fileName') )
+                    	% save filename
+                        obj.fileName = conf.fileName;
                     end %if
-                else
-                    if isa(conf,'struct')
-                        % if conf is a struct, we should have the following structure
-                        % conf.fileName     = name of the file containing the configuration
-                        % conf.automation   = here we specify if we want to load,
-                        %                     extract, select and start rneldb. Actions are
-                        %                     incrementals following the progression
-                        %                      1) load
-                        %                      2) extract
-                        %                      3) select
-                        %                      4) start
-                        % conf.menuType     = which type of menu: text, GUI or auto
-                        % conf.selection    = indicate the configuration
-                        %                     that we want to select automatically. It is
-                        %                     useful when automating tasks
     
-                        if ( isfield(conf,'fileName') )
-                            % save filename
-                            obj.fileName = conf.fileName;
-                        end
+                    % check if we got automation in input and if it has
+                    % a valid value
+                    if ( isfield(conf,'automation') && ...
+                            ~isempty(find(cellfun(@(s)any(strcmp(s,conf.automation)),obj.automationList))) )
+                        % save automation settings
+                        obj.automation = conf.automation;
+                    end %if
     
-                        % check if we got automation in input and if it has
-                        % a valid value
-                        if ( isfield(conf,'automation') && ...
-                                ~isempty(find(cellfun(@(s)any(strcmp(s,conf.automation)),obj.automationList))) )
-                            % save automation settings
-                            obj.automation = conf.automation;
-                        end
-    
-                        % check if we have menutype in input and if it has
-                        % a valid value
-                        if ( isfield(conf,'menuType') && ...
-                                ~isempty(find(cellfun(@(s)any(strcmp(s,conf.menuType)),obj.menuTypeList))) )
-                            % save menu type
-                            obj.menuType = conf.menuType;
-                        end
+                    % check if we have menutype in input and if it has
+                    % a valid value
+                    if ( isfield(conf,'menuType') && ...
+                            ~isempty(find(cellfun(@(s)any(strcmp(s,conf.menuType)),obj.menuTypeList))) )
+                        % save menu type
+                        obj.menuType = conf.menuType;
+                    end %if
                         
-                        % check if we have a selection in input and if it
-                        % has a valid value
-                        if ( isfield(conf,'selection') && ...
-                                isnumeric(conf.selection) )
-                            % save menu type
-                            obj.selection = conf.selection;
-                        end
+                    % check if we have a selection in input and if it
+                    % has a valid value
+                    if ( isfield(conf,'selection') && ...
+                            isnumeric(conf.selection) )
+                        % save menu type
+                        obj.selection = conf.selection;
+                    end %if
+                end %if
+            end %if
     
-    
-                        % automate actions
-                        step = find(cellfun(@(s)any(strcmp(s,obj.automation)),obj.automationList));
-                        if ( step > 1 )
-                            % load file
-                            obj.load();
-                            if ( step > 2 ) 
-                                % extact configuration from file
-                                obj.extract();
-                                if ( step > 3 ) 
-                                    % select configuration
-                                    obj.select();
-                                    if ( step > 4 ) 
-                                        % start database
-                                        obj.start();
-                                    end
-                                end
-                            end
-                        end
-                    end
-                end
-            end
-        end
-    end
+            % check if user would like to automaticallyt search for conf file
+            if strcmp(lower(obj.fileName),'auto') || ...
+                    strcmp(lower(obj.fileName),'<auto>')
+                % add path to libraries that we need to use to
+                % start
+                addpath(fullfile(mfilename('fullpath'),'../../../libs/matlab'));
+                % user folder
+                uhf = getuserdir();
+                % possible path to local configuration file
+                lcp = { ...
+                    fullfile(uhf,'.RNEL'), ...
+                    fullfile(uhf,'RNEL'), ...
+                    fullfile(uhf,'MATLAB'), ...
+                    fullfile(uhf,'Documents','MATLAB'), ...
+                    };
+                % found flag
+                found = false;
+                % check if at least one path contains a configuration file
+                for i = 1:length(lcp)
+                    % possible configuration file names
+                    lcf = { ...
+                        fullfile(lcp{i},'rf.json.conf'), ...
+                        fullfile(lcp{i},'rf.xml.conf'), ...
+                        };
+                    for j = 1:length(lcf)
+                        if exist(lcf{j})
+                            % local configuration file exists
+                            % use this one
+                            obj.fileName = lcf{j};
+                            found = true;
+                            break;
+                        end %if
+                    end %for
+                    if found == true
+                        % exit outer for loop if we found the conf file
+                        break
+                    end %if
+                end %for
+            end %if
+
+            % automate actions
+            step = find(cellfun(@(s)any(strcmp(s,obj.automation)),obj.automationList));
+            if ( step > 1 )
+                % load file
+                obj.load();
+                if ( step > 2 )
+                    % extact configuration from file
+                    obj.extract();
+                    if ( step > 3 )
+                        % select configuration
+                        obj.select();
+                        if ( step > 4 )
+                            % start database
+                            obj.start();
+                        end %if
+                    end %if
+                end %if
+            end %if
+
+        end % function
+            
+    end %methods
     
     methods (Static)
         % static method in order to implement a singleton
@@ -357,7 +367,19 @@ classdef rfConf < handle
         % start database with selcted configuration
         start(obj);
         
+        % filter and substituted constants in string
+        outstring = filter(obj,inString);
+        
+        % return value of multi level key
+        C = getNCV(obj,selection,level)
+        
     end
+    
+    methods (Static)
+        % static version of the filter method
+        outstring = sfilter(inString);
+        
+    end %method
     
     methods (Access = private)
         % set function for file

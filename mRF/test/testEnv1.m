@@ -19,23 +19,34 @@ function res = testEnv1(path)
     %
     % Input
     % - path: folder where to save files. Optional. If not provides,
-    %         defaults to ../../../data/env1
+    %         defaults to <DATA_BASE>/env1
     %
     
     if nargin<1
-        fi = mfilename('fullpath');
-        path = fullfile(fi,'../../../../data/env1');
+        path = '<DATA_BASE>/env1';
     end %if
     
     % load data framework if not available
     try
         test = rfObj;
-        clean test;
+        delete(test);
+        %clean test;
     catch
+        % no luck
+        % get current fullpath
         fi = mfilename('fullpath');
+        % build path to core classes and add it
         rfpath = fullfile(fi,'../../core');
         addpath(rfpath);
-        rf.init;
+        % uses the rfConf class to set up the environment
+        % prepares configuration
+        srfc = struct();
+        srfc.fileName = 'Auto';
+        srfc.automation = 'start';
+        srfc.menuType = 'text';
+        % load everything that we need
+        orfc = rfConf.getInstance(srfc);
+        
     end %try/catch
     
     % insert 2 type of electrodes
@@ -165,7 +176,7 @@ function res = testEnv1(path)
         % add time
         oemg.d.time = [1:1000]/100;
         % set location
-        oemg.setFiles(fullfile(path,'sbj-1','trials',['tr-' num2str(j)],'emgs',['sbj-1.tr-' num2str(j) '.emgs']));
+        oemg.setFiles(fullfile(path,'sbj-1','trials',['tr-' num2str(j)],['sbj-1.tr-' num2str(j) '.emgs']));
         % append trial under experiment
         rf.apcr(otr1,oemg,'emgs');
         % add link to electrode used

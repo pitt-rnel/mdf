@@ -10,7 +10,8 @@ classdef rfObj < handle
         type = '';
         uuid = '';
         vuuid = '';
-        file = '';
+        created = '';
+        modified = '';
         data = struct();
         metadata = struct();
         %children = struct();
@@ -19,6 +20,8 @@ classdef rfObj < handle
             'rf_type', '', ...
             'rf_uuid', '', ...
             'rf_vuuid', '', ...
+            'rf_created', '', ...
+            'rf_modified', '', ...
             'rf_files', struct(), ...
             'rf_data', struct(), ...
             'rf_metadata', struct(), ...
@@ -40,7 +43,9 @@ classdef rfObj < handle
             addlistener(obj,'uuid','PreSet',@rfObj.handlePropChanges);
             addlistener(obj,'uuid','PostSet',@rfObj.handlePropChanges);
             addlistener(obj,'vuuid','PostSet',@rfObj.handlePropChanges);
-            addlistener(obj,'file','PostSet',@rfObj.handlePropChanges);
+            addlistener(obj,'created','PostSet',@rfObj.handlePropChanges);
+            addlistener(obj,'modified','PostSet',@rfObj.handlePropChanges);
+            %addlistener(obj,'file','PostSet',@rfObj.handlePropChanges);
             %addlistener(obj,'data','PostSet',@rfObj.handlePropChanges);
             %addlistener(obj,'metadata','PostSet',@rfObj.handlePropChanges);
             %addlistener(obj,'children','PostSet',@rfObj.handlePropChanges);
@@ -63,6 +68,8 @@ classdef rfObj < handle
             obj.status.changed.type = 0;
             obj.status.changed.uuid = 0;
             obj.status.p_uuids = {};
+            % set creation
+            obj.created = datestr(now,'yyyy-mm-dd HH:MM:SS');
         end %function
     end % methods
 
@@ -74,7 +81,12 @@ classdef rfObj < handle
         disp(obj,type);
         setDataInfo(obj,field, value);
         res = setFiles(obj,indata);
-        res = getFiles(obj);
+        res = getFiles(obj,filtered);
+        res = getDataFileName(obj,filtered);
+        res = getMetadataFileName(obj,filtered);
+        res = getDFN(obj,filtered);
+        res = getMFN(obj,filtered);
+      
     end %methods
 
     % static methods defined here
@@ -98,8 +110,12 @@ classdef rfObj < handle
                             obj.status.p_uuids(strcmp(obj.status.p_uuids,obj.uuid)) = [];
                         case 'vuuid'
                             obj.def.rf_vuuid = obj.vuuid;
-                        case 'file'
-                            obj.def.rf_file = obj.file;
+                        case 'created'
+                            obj.def.rf_created = obj.created;
+                        case 'modified'
+                            obj.def.rf_modified = obj.modified;
+                        %case 'file'
+                        %    obj.def.rf_file = obj.file;
                         case 'data'
                             % nothing to do
                         case 'metadata'

@@ -55,12 +55,17 @@ function disp(obj,type)
         printKeyValue('type',obj.type,ill1);
         % print object uuid
         printKeyValue('uuid',obj.uuid,ill1);
-        % print object vuuid
-        printKeyValue('vuuid',obj.vuuid,ill1);
     end %if
     if type == 'a'
+        % print object vuuid
+        printKeyValue('vuuid',obj.vuuid,ill1);
+        % print object created timestamp
+        printKeyValue('Created',obj.created,ill1);
+        % print object modified timestamp
+        printKeyValue('Modified',obj.modified,ill1);
+
         % print object file
-        printKeyValue('file',obj.file,ill1);
+        %printKeyValue('file',obj.file,ill1);
     end %if
     % print data properties
     if ~isfield(obj.def,'rf_data') || ...

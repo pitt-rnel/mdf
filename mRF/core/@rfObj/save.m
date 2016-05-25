@@ -9,8 +9,9 @@ function res = save(obj)
     % get db and manage singleton
     odb = rfDB.getInstance();
     
-    % update version uuid
+    % update version uuid and modified date
     obj.vuuid = rf.UUID();
+    obj.modified = datestr(now,'yyyy-mm-dd HH:MM:SS');
      
     % prepare variables
     mdData = struct( ...
@@ -35,7 +36,7 @@ function res = save(obj)
     end %if
     
     % get metadata file
-    mdFile = obj.getMetadataFileName();
+    mdFile = obj.getMetadataFileName(true);
     % make sure that folder where metadata file lives exists
     [mdDir,~,~] = fileparts(mdFile);
     if ~exist(mdDir,'dir')
@@ -45,7 +46,7 @@ function res = save(obj)
     WriteYaml(mdFile,mdData);
     
     % than update data file(s)
-    dFile = obj.getDataFileName();
+    dFile = obj.getDataFileName(true);
     % make sure that folder where data file lives exists
     [dDir,~,~] = fileparts(dFile);
     if ~exist(dDir,'dir')

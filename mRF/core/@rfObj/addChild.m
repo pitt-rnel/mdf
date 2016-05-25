@@ -71,7 +71,7 @@ function res = addChild(obj,prop,child,pos)
             % it's not in memory and not already defined
             % insert new object
             rfm = rfManage.getInstance();
-            rfm.insert(child.uuid,child.file,child);
+            rfm.insert(child.uuid,child.getMFN(),child);
             ochild = child;
         else
             % object already present 
@@ -98,7 +98,7 @@ function res = addChild(obj,prop,child,pos)
         obj.def.rf_children.(prop) = struct( ...
             'rf_uuid', ochild.uuid, ...
             'rf_type', ochild.type, ...
-            'rf_file', ochild.file );
+            'rf_file', ochild.getMFN(false) );
     else
         % check if uuid is already in list
         uuids = {obj.def.rf_children.(prop).rf_uuid};
@@ -117,7 +117,7 @@ function res = addChild(obj,prop,child,pos)
             struct( ...
                 'rf_uuid', ochild.uuid, ...
                 'rf_type', ochild.type, ...
-                'rf_file', ochild.file ), ...
+                'rf_file', ochild.getMFN(false) ), ...
             obj.def.rf_children.(prop)(pos:end)];
     end %if
     % add this object as parent

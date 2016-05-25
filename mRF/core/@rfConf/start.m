@@ -14,64 +14,38 @@ function start(obj)
     
     % add path for RNEL db functions
     %
-    % check if we have the functions info
-    if ( ~isfield(C,'FUNCTIONS_ROOT') && ...
-            ~exist(C.FUNCTIONS_ROOT,'dir') )
+    % check if we have rf code base
+    if ( ~isfield(C,'CODE_BASE') || ...
+            ~exist(C.CODE_BASE,'dir') )
         % we cannot proceed
         throw(MException('rfConf:start',...
-                '1: Configuration missing RNEL functions root folder!!!'));
+                '1: Configuration missing RF code folder!!!'));
     end
-          
-    % get list of dirs to ignore
-    fdi = {};
-    if ( isfield(C,'FUNCTIONS_DIR_IGNORE') && ...
-            ~isempty(C.FUNCTIONS_DIR_IGNORE) ) 
-        fdi = C.FUNCTIONS_DIR_IGNORE;
+    % check if we have rf core code base
+    if ( ~isfield(C,'CORE_BASE') || ...
+            ~exist(C.CORE_BASE,'dir') )
+        % we cannot proceed
+        throw(MException('rfConf:start',...
+                '2: Configuration missing RF core code folder!!!'));
     end
-        
+    % check if we have rf data base
+    if ( ~isfield(C,'DATA_BASE') || ...
+            ~exist(C.DATA_BASE,'dir') )
+        % we cannot proceed
+        throw(MException('rfConf:start',...
+                '3: Configuration missing RF data folder!!!'));
+    end
+    
     % first of all needs to add functions root
     % so we can use the function addpath_recurse
-    disp([' - adding functions root path: ' C.FUNCTIONS_ROOT]);
-    addpath(C.FUNCTIONS_ROOT);
+    disp([' - adding core code path: ' C.CORE_BASE]);
+    addpath(C.CORE_BASE);
     disp('...Done!!!');
         
-    % add all path needed to use RNEL matlab functions
-    disp([' - adding subfolders in functions root path.']);
-    % try the new version of addpath_recursive
-    % if it does not work, use old one
-    try 
-        obj.listPaths = addpath_recurse(C.FUNCTIONS_ROOT,fdi);
-    catch
-        obj.listPaths = {};
-        addpath_recurse(C.FUNCTIONS_ROOT,fdi);
-    end
+    % run rf init to include all the necessary libraries
+    disp([' - running rf init function: rf.init']);
+    rf.init();
     disp('...Done!!!');
-    
-    % add path for RNEL toolboxes
-    
-    %
-    % check if we have the root folder for the toolboxes
-    % and the list of which one we should load
-    disp(' - Importing Toolboxes.');
-    if ( isfield(C,'TOOLBOX_ROOT') && ...
-            exist(C.TOOLBOX_ROOT,'dir') && ...
-            isfield(C,'TOOLBOXES_LOAD_ON_START') && ...
-            ~isempty(C.TOOLBOXES_LOAD_ON_START) )
-        % check if there is a list of dirs to ignore
-        tdi = {};
-        if ( isfield(C,'TOOLBOX_DIR_IGNORE') )
-            tdi = C.TOOLBOX_DIR_IGNORE;
-        end
-        tPaths = C.TOOLBOXES_LOAD_ON_START;
-        for i=1:length(tPaths)
-           disp([' -- Importing toolbox: ' tPaths{i}]);
-           tPath = fullfile(C.TOOLBOX_ROOT,tPaths{i});
-           obj.importToolbox(tPath, tdi);
-           disp('...Done!!!');
-        end
-    else
-        disp('...Nothing to do!!!');
-    end
     
     % run startup functions
     %
