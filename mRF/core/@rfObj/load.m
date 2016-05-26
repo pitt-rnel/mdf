@@ -35,7 +35,7 @@ function outdata = load(indata)
     outdata = [];
     rf_data = [];
 
-    % retrieve handler to db and manage lass
+    % retrieve handler to db and manage class
     odb = rfDB.getInstance();
     om = rfManage.getInstance();
 
@@ -175,7 +175,7 @@ function outdata = load(indata)
             % vuuid
             outdata(end).vuuid = cdata.rf_def.rf_vuuid;
             % file
-            outdata(end).file = cdata.rf_def.rf_files.rf_metadata;
+            %outdata(end).file = cdata.rf_def.rf_files.rf_metadata;
             % type
             outdata(end).type = cdata.rf_def.rf_type;
             % def
@@ -212,7 +212,7 @@ function outdata = load(indata)
             %outdata(i).parents = cdata.rf_def.rf_parents;
 
             % register RF object in memory structures
-            om.insert(outdata(end).uuid,outdata(end).file,outdata(end));
+            om.insert(outdata(end).uuid,outdata(end).getMFN(),outdata(end));
         end %for
 
         % clear rf data from memory
