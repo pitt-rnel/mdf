@@ -72,6 +72,9 @@ function res = save(obj)
             obj.status.changed.data.(field) = 0;
         end %if
     end %for
+    % dimiss matfile object
+    delete(mfData);
+    clear mfData;
     
     % register object with objMenage
     om = rfManage.getInstance();

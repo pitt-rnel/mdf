@@ -8,9 +8,9 @@ function start(obj)
     C = obj.getC;
         
     % reset matlab path setting
-    disp(' - Restoring default matlab path.');
-    path(pathdef);
-    disp('...Done!!!');
+    %disp(' - Restoring default matlab path.');
+    %path(pathdef);
+    %disp('...Done!!!');
     
     % add path for RNEL db functions
     %

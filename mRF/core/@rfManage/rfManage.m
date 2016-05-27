@@ -154,9 +154,10 @@ classdef (Sealed) rfManage < handle
           % loop on all objects in memory
           for i = 1: length(obj.object)
               % remove object from matlab memory
-              delete(obj.object(i));
+              rfobj = obj.object(1);
+              delete(rfobj);
               % removed from memory arrays
-              res = obj.removeByIndex(i);             
+              res = obj.removeByIndex(1);
           end %for
       end %function
    end
