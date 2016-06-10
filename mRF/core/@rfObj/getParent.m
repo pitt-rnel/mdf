@@ -17,7 +17,12 @@ function parents = getParent(obj, selector)
     
     % initialize output value
     parents = [];
-      
+    
+    % check if user did not provide any selector
+    if nargin < 2
+        selector = 1;
+    end %if
+    
     % initialize index child object
     indexes = [];
     % find which parent needs to be returned
@@ -65,12 +70,12 @@ function parents = getParent(obj, selector)
         % check if it is a valide index
         if ~isempty(index) && index>=1 && index <=length(obj.def.rf_parents)
             % get child uuid 
-            uuid = obj.def.rf_parents(index).uuid;
+            uuid = obj.def.rf_parents(index).rf_uuid;
             % get object from memory
             parent = rfObj.load(uuid);
             % if valid object, insert it in output values
             if ~isempty(parent)
-                parent = [parents parent];
+                parents = [parents parent];
             end %if
         end %if
     end %for

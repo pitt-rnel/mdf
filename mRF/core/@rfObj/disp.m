@@ -60,9 +60,9 @@ function disp(obj,type)
         % print object vuuid
         printKeyValue('vuuid',obj.vuuid,ill1);
         % print object created timestamp
-        printKeyValue('Created',obj.created,ill1);
+        printKeyValue('created',obj.created,ill1);
         % print object modified timestamp
-        printKeyValue('Modified',obj.modified,ill1);
+        printKeyValue('modified',obj.modified,ill1);
 
         % print object file
         %printKeyValue('file',obj.file,ill1);

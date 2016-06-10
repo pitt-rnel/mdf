@@ -185,9 +185,9 @@ function outdata = load(indata)
             % create place marks for data properties
             for i = 1:length(cdata.rf_def.rf_data.rf_fields)
                 field = cdata.rf_def.rf_data.rf_fields{i};
-                outdata(i).data.(field) = [];
-                outdata(i).status.loaded.data.(field) = 0;
-                outdata(i).status.size.data.(field) = 0;
+                outdata(end).data.(field) = [];
+                outdata(end).status.loaded.data.(field) = 0;
+                outdata(end).status.size.data.(field) = 0;
             end %if
             % convert rf_parent if needed
             outdata(end).def.rf_parents = rf.c2s(outdata(end).def.rf_parents);
