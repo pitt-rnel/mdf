@@ -26,7 +26,7 @@ function outQuery = prepQuery(inquery)
     % list fields in inquery
     lf = fields(inquery);
     % initialize internal query
-    iq = inquery;
+    iq1 = inquery;
     % structure with rf fields
     rff = {};
     % remove rf_fields
@@ -38,13 +38,13 @@ function outQuery = prepQuery(inquery)
              % transfer to dedicated structure
              rff{end+1} = lf{i};
              % remove it
-             iq = rmfield(iq,lf{i});
+             iq1 = rmfield(iq1,lf{i});
          end %if
     end %for
     % we assume that we are doing a query on metadata
-    iq = struct();
-    if ~isempty(fields(iq))
-        iq.rf_metadata = iq;
+    iq2 = struct();
+    if ~isempty(fields(iq1))
+        iq2.rf_metadata = iq1;
     end %if
     % check if there is any rf fields that needs to be added
     rff = intersect(rff,{'rf_type','rf_uuid','rf_vuuid'});
@@ -53,15 +53,15 @@ function outQuery = prepQuery(inquery)
         rf_def.(rff{i}) = inquery.(rff{i});
     end %if
     if ~isempty(fields(rf_def))
-        iq.rf_def = rf_def;
+        iq2.rf_def = rf_def;
     end %if
         
     if exact
         % user asked to transform query as it is
-        outQuery = savejson('',iq);
+        outQuery = savejson('',iq2);
     else
         % let's do conversion with aggregation and all that jazz
-        outQuery = ['{ ' recPrepQuery(iq) ' }'];
+        outQuery = ['{ ' recPrepQuery(iq2) ' }'];
     end %if
 end %function
 
