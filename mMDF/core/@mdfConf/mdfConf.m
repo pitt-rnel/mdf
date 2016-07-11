@@ -113,9 +113,20 @@ classdef mdfConf < handle
             % check if user would like to automaticallyt search for conf file
             if strcmp(lower(obj.fileName),'auto') || ...
                     strcmp(lower(obj.fileName),'<auto>')
-                % add path to libraries that we need to use to
-                % start
-                addpath(fullfile(mfilename('fullpath'),'../../../libs/matlab'));
+                % add path to libraries that we need to use to start
+                % r2015 and on changed how fullfile behaves
+                % get current script name without extension
+                filename = mfilename('fullpath');
+                % get folder
+                dirname = fileparts(filename);
+                % saves current folder
+                cfolder = pwd;
+                % change current folder to matlab libs folder
+                cd(fullfile(dirname,'../../libs/matlab'));
+                % add path to patlab
+                addpath(pwd);
+                % cd back
+                cd(cfolder);
                 % user folder
                 uhf = getuserdir();
                 % possible path to local configuration file
