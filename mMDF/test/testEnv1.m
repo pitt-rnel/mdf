@@ -160,7 +160,12 @@ function res = testEnv1(path)
         otr1.md.started = ['2016-05-2' num2str(j) ' 10:00'];
         otr1.md.ended = ['2016-05-2' num2str(j) ' 12:00'];
         otr1.md.notes = 'Electrodes placing difficult';
-        otr1.md.dataQuality = 'medium';
+        switch j
+            case {1, 3}
+                otr1.md.dataQuality = 'medium';
+            case 2
+                otr1.md.dataQuality = 'high';
+        end %switch
         otr1.md.successful = 'yes';
         % set location
         otr1.setFiles(fullfile(path,'sbj-1','trials',['sbj-1.tr-' num2str(j)]));
@@ -172,9 +177,9 @@ function res = testEnv1(path)
         disp('...Done!!!');
     
         % add data
-        disp(['Creating Emgs container for trial ' num2str(j) '...']);
+        disp(['Creating Muscle Activity container for trial ' num2str(j) '...']);
         oemg = mdfObj;
-        oemg.type = 'emgs';
+        oemg.type = 'muscle-activity';
         oemg.uuid = mdf.UUID();
         % populate object
         oemg.md.id = 1;
@@ -185,9 +190,9 @@ function res = testEnv1(path)
         % add time
         oemg.d.time = [1:1000]/100;
         % set location
-        oemg.setFiles(fullfile(path,'sbj-1','trials',['tr-' num2str(j)],['sbj-1.tr-' num2str(j) '.emgs']));
+        oemg.setFiles(fullfile(path,'sbj-1','trials',['tr-' num2str(j)],['sbj-1.tr-' num2str(j) '.ma']));
         % append trial under experiment
-        mdf.apcr(otr1,oemg,'emgs');
+        mdf.apcr(otr1,oemg,'mas');
         % add link to electrode used
         if j == 1
             mdf.aul(oemg,oele1,'electrode');
@@ -202,25 +207,25 @@ function res = testEnv1(path)
     
         % add channels
         for i = 1:3;
-            disp(['Creating emg channel ' num2str(i) ' for trial ' num2str(j) '...']);
+            disp(['Creating muscle activity channel ' num2str(i) ' for trial ' num2str(j) '...']);
             och = mdfObj;
-            och.type = 'emg-channel';
+            och.type = 'muscle-activity-channel';
             och.uuid = mdf.UUID();
             % populate object
             och.md.id = i;
             och.md.subjectId = 1;
             och.md.experimentId = 1;
             och.md.trialId = j;
-            och.md.emgsId = 1;
+            och.md.masId = 1;
             och.md.notes = '';
             % add data
             och.d.waveform = rand(1,1000);
             % set location
             och.setFiles( ...
                 fullfile( ...
-                    path,'sbj-1','trials',['tr-' num2str(j)],'emgs',['sbj-1.tr-' num2str(j) '.emg-' num2str(i)]));
+                    path,'sbj-1','trials',['tr-' num2str(j)],'ma',['sbj-1.tr-' num2str(j) '.mac-' num2str(i)]));
             % append trial under experiment
-            mdf.apcr(oemg,och,'waveform');
+            mdf.apcr(oemg,och,'channels');
             % save object
             oemg.save();
             och.save();

@@ -33,11 +33,11 @@ function parents = getParent(obj, selector)
     elseif ischar(selector)
         % selector is a string, we assume it is the parent uuid
         % find index of the object with this uuid
-        uuids = {obj.mdf_def.mdf_parent.mdf_uuid};
+        uuids = {obj.mdf_def.mdf_parents.mdf_uuid};
         indexes = find(strcmp(uuids,selector));
        
     elseif isstruct(selector)
-        % selctor is astruct, we pass it to the query method and see what
+        % selector is astruct, we pass it to the query method and see what
         % we get back
 
         % now we are ready to build the json query
@@ -49,7 +49,7 @@ function parents = getParent(obj, selector)
         clear mdf_data;
 
         % get parents uuid
-        uuids = {obj.mdf_def.mdf_parent.mdf_uuid};
+        uuids = {obj.mdf_def.mdf_parents.mdf_uuid};
         % get index of objects
         for j=1:length(selUuids)
             i2 = find(strcmp(uuids,selUuids{j}));

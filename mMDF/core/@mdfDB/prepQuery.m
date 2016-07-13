@@ -32,7 +32,7 @@ function outQuery = prepQuery(inquery)
     % remove mdf_fields
     for i = 1:length(lf)
          % find mdf_ in field name
-         pos = stmdfind(lf{i},'mdf_');
+         pos = strfind(lf{i},'mdf_');
          if ~isempty(pos) && pos==1
              % configuration field
              % transfer to dedicated structure
@@ -85,7 +85,7 @@ function output = recPrepQuery(input,iprefix)
             % prepare prefix for next level
             nlprefix = [iprefix '.' field];
             % remove . at the beginning if needed
-            nlprefix(find(stmdfind(nlprefix,'.')==1)) = [];
+            nlprefix(find(strfind(nlprefix,'.')==1)) = [];
             % recursively called itself
             tmp1 = recPrepQuery(input.(field),nlprefix);
             % append to output
