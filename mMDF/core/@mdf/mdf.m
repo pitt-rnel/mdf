@@ -45,10 +45,10 @@ classdef (Sealed) mdf < handle
             lf = fullfile(cf,obj.libraries);
             % removes double dots if needed
             tmp1 = lf;
-            tmp2 = regexprep(tmp1,obj.pattern,'/');
+            tmp2 = regexprep(tmp1,obj.pattern,filesep);
             while strcmp(tmp1,tmp2)==0
                 tmp1 = tmp2;
-                tmp2 = regexprep(tmp1,obj.pattern,'/');
+                tmp2 = regexprep(tmp1,obj.pattern,filesep);
             end %while
             lf = tmp2;
             
