@@ -86,7 +86,8 @@ classdef mdfObj < handle
         res = getMetadataFileName(obj,filtered);
         res = getDFN(obj,filtered);
         res = getMFN(obj,filtered);
-      
+        res = getSize(obj);      
+        res = size(obj);
     end %methods
 
     % static methods defined here
