@@ -86,6 +86,7 @@ classdef mdfObj < handle
         res = getMetadataFileName(obj,filtered);
         res = getDFN(obj,filtered);
         res = getMFN(obj,filtered);
+        res = remove(obj);
       
     end %methods
 
