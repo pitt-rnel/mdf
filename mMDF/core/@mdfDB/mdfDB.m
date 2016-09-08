@@ -2,13 +2,19 @@ classdef (Sealed) mdfDB < handle
 
     properties (Constant)
         Jar =  '../../../java/mongo-java-driver-3.2.1.jar';
-        Host = 'localhost';
-        Port = 27017;
-        Database = 'mdf';
-        Collection = 'mdf';
+        DEFAULT_HOST = 'localhost';
+        DEFAULT_PORT = 27017;
+        DEFAULT_DATABASE = 'mdf';
+        DEFAULT_COLLECTION = 'mdf';
     end  
 
     properties
+        % connection info
+        host = '';
+        port = [];
+        database = [];
+        collection = [];
+        % connection objects
         m = [];
         db = [];
         coll = [];
@@ -19,7 +25,7 @@ classdef (Sealed) mdfDB < handle
         end
     end
     methods (Static)
-        function singleObj = getInstance(connect)
+        function singleObj = getInstance(conf)
             mlock;
             % use a persistent variable to mantain the instance
             persistent localObj
@@ -32,8 +38,9 @@ classdef (Sealed) mdfDB < handle
             
             % check input argument
             if nargin < 1
-            	connect = false;
+                connect = false;
             end %if
+                            
             % check if we need to connect
             if connect || ...
                     ~isa(localObj.m,'com.mongodb.Mongo') || ...
@@ -42,6 +49,7 @@ classdef (Sealed) mdfDB < handle
 %                    ( ~isobject(localObj.m) || ~isvalid(localObj.m) ) || ...
 %                    ( ~isobject(localObj.db) || ~isvalid(localObj.db) ) || ...
 %                    ( ~isobject(localObj.coll) || ~isvalid(localObj.coll) ) 
+                % connect to database
                 localObj.connect();
             end %if
             % return object

@@ -27,28 +27,67 @@ classdef (Sealed) mdf < handle
             singleObj = localObj;
         end %function
 
-        function res = init()
-            % function obj = mdf.init()
+        function res = init(varargin)
+            % function obj = mdf.init(arg1...)
             %
             % initialize the environment for mdf system to run
             % includes loading all the libraries
             %
+            % possible inputs
+            % - (string) configuration file for mdfConf
+            % - (numeric) active configuration to be selected
+            % or
+            % - (struct) structure with the following fields
+            %   * confFile = configuration file for mdfConf
+            %   * confSel = active configuration to be selected
+            %
             
-            res = 1;
+            % initialize output
+            res = 0;
+            
+            % check input
+            confFile = 'auto';
+            confSel = [];
+            if nargin == 1
+                if ischar(varargin{1})
+                    % if it is a string, we use it as file name of the
+                    % configuration
+                    confFile = varargin{1};
+                elseif isnumeric(varargin{1})
+                    confSel = varargin{1};
+                    % if it is numeric, we use it as selection wanted
+                elseif isstruct(varargin{1})
+                    % if it is a struct, we assume that the user passed
+                    % everything in a structure
+                    if isfield(varargin{1},'confFile')
+                        confFile = varargin{1}.confFile;
+                    end %if
+                    if isfield(varargin{1},'confSel')
+                        confSel = varargin{1}.confSel;
+                    end %if
+                end %if
+            else nargin > 1
+                % we got 2 or more arguments
+                % we assume that first one is the file namefor the
+                % configuration file and the second is the configuration
+                % selected
+                confFile = varargin{1};
+                confSel = varargin{2};
+            end %if
             
             % get singleton
-            obj = mdf.getInstance();
+            omdf = mdf.getInstance();
             
             % get current folder
             [cf,~,~] = fileparts(mfilename('fullpath'));
             % define libraries folder
-            lf = fullfile(cf,obj.libraries);
+            lf = fullfile(cf,mdf.libraries);
             % removes double dots if needed
             tmp1 = lf;
-            tmp2 = regexprep(tmp1,obj.pattern,filesep);
+            tmp2 = regexprep(tmp1,mdf.pattern,filesep);
             while strcmp(tmp1,tmp2)==0
                 tmp1 = tmp2;
-                tmp2 = regexprep(tmp1,obj.pattern,filesep);
+                tmp2 = regexprep(tmp1,mdf.pattern,filesep);
             end %while
             lf = tmp2;
             
@@ -64,10 +103,76 @@ classdef (Sealed) mdf < handle
             % load yaml java library
             LoadLibYaml();
             
-            % instantiate database and memory manage objects
+            % instantiate configuration class
+            oconf = mdfConf.getInstance( ...
+                struct( ...
+                    'fileName', confFile, ...
+                    'automation', 1));
+            % load configuration file
+            oconf.load();
+            % extract configuration info from configuration file content
+            oconf.extract();
+            % select the configuration
+            oconf.select(confSel);
+            % run statr function, in case there are some start function
+            % configured
+            oconf.start();
+
+            % get complete configuration structure
+            C = oconf.getC();
+            % check if I have all the basic constants defined and if they
+            % are valid
+            %
+            % check if we have mdf code base
+            if ( ~isfield(C,'CODE_BASE') || ...
+                    ~exist(C.CODE_BASE,'dir') )
+                % we cannot proceed
+                throw(MException('mdfConf:start',...
+                    '1: Configuration missing RF code folder!!!'));
+            end %if
+            % check if we have mdf core code base
+            if ( ~isfield(C,'CORE_BASE') || ...
+                    ~exist(C.CORE_BASE,'dir') )
+                % we cannot proceed
+                throw(MException('mdfConf:start',...
+                    '2: Configuration missing RF core code folder!!!'));
+            end %if
+            % check if we have mdf data base
+            if ( ~isfield(C,'DATA_BASE') || ...
+                    ~exist(C.DATA_BASE,'dir') )
+                % we cannot proceed
+                throw(MException('mdfConf:start',...
+                    '3: Configuration missing RF data folder!!!'));
+            end %if
+
+            % first of all needs to add functions root
+            % so we can use the function addpath_recurse
+            pathCell = regexp(path, pathsep, 'split');
+            if ispc  
+                % Windows is not case-sensitive
+                onPath = any(strcmpi(C.CORE_BASE, pathCell));
+            else
+                onPath = any(strcmp(C.CORE_BASE, pathCell));
+            end %if
+            if ~onPath
+                disp([' - adding core code path: ' C.CORE_BASE]);
+                addpath(C.CORE_BASE);
+                disp('...Done!!!');
+            else
+                disp('Core folder already in matlab path');
+            end %if
+        
+            % instantiate database object
             odb = mdfDB.getInstance();
+            % memory manage objects
             om = mdfManage.getInstance();
            
+            % prepare output
+            res = struct( ...
+                'mdf', omdf, ...
+                'conf', oconf, ...
+                'db', odb, ...
+                'manage', om);
         end %function
     end %methods
 

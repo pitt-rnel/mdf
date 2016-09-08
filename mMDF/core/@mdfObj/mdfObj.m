@@ -87,8 +87,9 @@ classdef mdfObj < handle
         res = getDFN(obj,filtered);
         res = getMFN(obj,filtered);
         res = remove(obj);
-        res = getSize(obj);      
+        res = getSize(obj,details);      
         res = size(obj);
+        outdata = getUuids(obj,group,property,format);
     end %methods
 
     % static methods defined here

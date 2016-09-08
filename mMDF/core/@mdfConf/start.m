@@ -6,46 +6,6 @@ function start(obj)
     
     % first get the configuration
     C = obj.getC;
-        
-    % reset matlab path setting
-    %disp(' - Restoring default matlab path.');
-    %path(pathdef);
-    %disp('...Done!!!');
-    
-    % add path for RNEL db functions
-    %
-    % check if we have mdf code base
-    if ( ~isfield(C,'CODE_BASE') || ...
-            ~exist(C.CODE_BASE,'dir') )
-        % we cannot proceed
-        throw(MException('mdfConf:start',...
-                '1: Configuration missing RF code folder!!!'));
-    end
-    % check if we have mdf core code base
-    if ( ~isfield(C,'CORE_BASE') || ...
-            ~exist(C.CORE_BASE,'dir') )
-        % we cannot proceed
-        throw(MException('mdfConf:start',...
-                '2: Configuration missing RF core code folder!!!'));
-    end
-    % check if we have mdf data base
-    if ( ~isfield(C,'DATA_BASE') || ...
-            ~exist(C.DATA_BASE,'dir') )
-        % we cannot proceed
-        throw(MException('mdfConf:start',...
-                '3: Configuration missing RF data folder!!!'));
-    end
-    
-    % first of all needs to add functions root
-    % so we can use the function addpath_recurse
-    disp([' - adding core code path: ' C.CORE_BASE]);
-    addpath(C.CORE_BASE);
-    disp('...Done!!!');
-        
-    % run mdf init to include all the necessary libraries
-    disp([' - running mdf init function: mdf.init']);
-    mdf.init();
-    disp('...Done!!!');
     
     % run startup functions
     %
