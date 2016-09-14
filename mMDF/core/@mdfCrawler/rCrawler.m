@@ -33,8 +33,10 @@ function res = rCrawler(obj,cuuid)
     % load object
     cobj = mdf.load(cuuid);
     
-    % initialize output struct
+    % initialize item struct
     item = struct();
+    % initialize hierarchical item struct
+    hitem = struct();
     
     % populate output with current object
     item.name = [cobj.type ' ' cuuid];
@@ -134,6 +136,14 @@ function res = rCrawler(obj,cuuid)
     % insert item in full list
     obj.objList.(muuid) = item;
     
+    % populate hierarchical item
+    hitem.uuid = cuuid;
+    hitem.name = [cobj.type ' ' cuuid];
+    hitem.relation = '';
+    hitem.parent = '';
+    hitem.size = item.memory.total;
+    hitem.children = {};    
+
     % remove it from memory
     if ~inmem
         om.clear(cuuid);
@@ -160,7 +170,14 @@ function res = rCrawler(obj,cuuid)
         cmuuid = ['uuid_' regexprep(item.children(i).uuid,'-','_')];
         % call itself recursively on this child
         if ~isfield(obj.objList,cmuuid)
-            obj.rCrawler(item.children(i).uuid);
+            chitem = obj.rCrawler(item.children(i).uuid);
+            if isstruct(chitem)
+                % update parent and relation
+                chitem.relation = 'parent-child';
+                chitem.parent = cuuid;
+                % insert child hierarchical item as child
+                hitem.children{length(hitem.children)+1} = chitem;
+            end %if
         end %if
     end %for
     
@@ -176,7 +193,14 @@ function res = rCrawler(obj,cuuid)
         ulmuuid = ['uuid_' regexprep(item.uniLinks(i).uuid,'-','_')];
         % call itself recursively on this child
         if ~isfield(obj.objList,ulmuuid)
-            obj.rCrawler(item.uniLinks(i).uuid);
+            chitem = obj.rCrawler(item.uniLinks(i).uuid);
+            if isstruct(chitem)
+                % update parent and relation
+                chitem.relation = 'unidirectional-link';
+                chitem.parent = cuuid;
+                % insert child hierarchical item as child
+                hitem.children{length(hitem.children)+1} = chitem;
+            end %if
         end %if
     end %for
         
@@ -201,7 +225,14 @@ function res = rCrawler(obj,cuuid)
         blmuuid = ['uuid_' regexprep(item.biLinks(i).uuid,'-','_')];
         % call itself recursively on this child
         if ~isfield(obj.objList,blmuuid)
-            obj.rCrawler(item.biLinks(i).uuid);
+            chitem = obj.rCrawler(item.biLinks(i).uuid);
+            if isstruct(chitem)
+                % update parent and relation
+                chitem.relation = 'bidirectional-link';
+                chitem.parent = cuuid;
+                % insert child hierarchical item as child
+                hitem.children{length(hitem.children)+1} = chitem;
+            end %if
         end %if
     end %for
     
@@ -222,9 +253,21 @@ function res = rCrawler(obj,cuuid)
         pmuuid = ['uuid_' regexprep(item.parents{i},'-','_')];
         % call itself recursively on this child
         if ~isfield(obj.objList,pmuuid)
-            obj.rCrawler(item.parents{i});
+            chitem = obj.rCrawler(item.parents{i});
+            if isstruct(chitem)
+                % update parent and relation
+                chitem.relation = 'child-parent';
+                chitem.parent = cuuid;
+                % insert child hierarchical item as child
+                hitem.children{length(hitem.children)+1} = chitem;
+            end %if
         end %if
     end %for
     
-    res = 1;
+    % remove children key if empty
+    if isempty(hitem.children)
+        res = rmfield(hitem,'children');
+    else
+        res = hitem;
+    end %if
 end %function

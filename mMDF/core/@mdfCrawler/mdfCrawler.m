@@ -9,6 +9,9 @@ classdef mdfCrawler < handle
         
         % relation list
         relList = struct();
+        
+        % hierarchical structure from start object
+        hList = {};
     end
         
     methods (Access = private)

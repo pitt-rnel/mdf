@@ -22,7 +22,8 @@ function res = crawler(obj,startObj)
         'dest', [], ...
         'sProp', [], ...
         'dProp', [] );
-
+    obj.hList = {};
+    
     
     % get object
     if ischar(startObj)
@@ -47,6 +48,6 @@ function res = crawler(obj,startObj)
     end %if
     
     % build the new lists outdata
-    res = obj.rCrawler(obj.sobj);
+    obj.hList = obj.rCrawler(obj.sobj);
     
 end %function
