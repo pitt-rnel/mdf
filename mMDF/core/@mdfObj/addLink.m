@@ -99,33 +99,36 @@ function res = addLink(obj,prop,link,dir,pos)
         end %if
     end %if
     
-    if isa(link,'mdfObj')
-        % input link is an object
-        % get uuid and check if it needs to be inserted in memory
-        uuid = link.uuid;
-        % check if link exists
-        olink = mdfObj.load(uuid);
-        % check if already exists
-        if isempty(olink)
-            % it's not in memory and not already defined
-            % insert new object
-            mdfm = mdfManage.getInstance();
-            mdfm.insert(link.uuid,link.file,link);
-            olink = link;
-        else
-            % object already present 
-            % TO DO: define a object level copy
-        end %if
-    else
-        % just use uuid
-        uuid = link;
-        % check if link object exist
-        olink = mdfObj.load(uuid);
-        % check if we found the object with the provided uuid
-        if isemty(olink)
-            throw(MException('mdfObj:addLink',['Invalid uuid(' uuid ')']));
-        end %if
-    end %if
+%     if isa(link,'mdfObj')
+%         % input link is an object
+%         % get uuid and check if it needs to be inserted in memory
+%         uuid = link.uuid;
+%         % check if link exists
+%         olink = mdfObj.load(uuid);
+%         % check if already exists
+%         if isempty(olink)
+%             % it's not in memory and not already defined
+%             % insert new object
+%             mdfm = mdfManage.getInstance();
+%             mdfm.insert(link.uuid,link.file,link);
+%             olink = link;
+%         else
+%             % object already present 
+%             % TO DO: define a object level copy
+%         end %if
+%     else
+%         % just use uuid
+%         uuid = link;
+%         % check if link object exist
+%         olink = mdfObj.load(uuid);
+%         % check if we found the object with the provided uuid
+%         if isemty(olink)
+%             throw(MException('mdfObj:addLink',['Invalid uuid(' uuid ')']));
+%         end %if
+%     end %if
+
+    % get link uuid and object
+    [uLink, oLink] = mdf.getUAO(link);
     
     % check if it is the first element
     if ~isfield(obj.mdf_def.mdf_links,prop) || ...
@@ -133,25 +136,25 @@ function res = addLink(obj,prop,link,dir,pos)
             isempty(obj.mdf_def.mdf_links.mdf_directions{ip}) || ...
             length(obj.mdf_def.mdf_links.(prop)) == 0
         % insert type of new link
-        obj.mdf_def.mdf_links.mdf_types{ip} = olink.type;
+        obj.mdf_def.mdf_links.mdf_types{ip} = oLink.type;
         % insert direction of new link
         obj.mdf_def.mdf_links.mdf_directions{ip} = dir;
         % insert new link in new property
         obj.mdf_def.mdf_links.(prop) = struct( ...
-            'mdf_uuid', olink.uuid, ...
-            'mdf_type', olink.type, ...
+            'mdf_uuid', oLink.uuid, ...
+            'mdf_type', oLink.type, ...
             'mdf_direction', dir, ...
-            'mdf_file', olink.getMFN(false) );
+            'mdf_file', oLink.getMFN(false) );
     else
         % check if uuid is already in list
         uuids = {obj.mdf_def.mdf_links.(prop).mdf_uuid};
-        i = find(strcmp(uuids,uuid));
+        i = find(strcmp(uuids,uLink));
         if ~isempty(i)
             throw(MException('mdfObj:addLink',['Object with uuid ' uuid ' already inserted']));
         end %if
         % check if type matches the one already present
-        if ~strcmp(obj.mdf_def.mdf_links.mdf_types{ip},olink.type)
-            throw(MException('mdfObj:addLink',['Invalid type ' olink.type '. Link under ' prop ' are of type ' obj.mdf_def.mdf_links.mdf_types{i}]));
+        if ~strcmp(obj.mdf_def.mdf_links.mdf_types{ip},oLink.type)
+            throw(MException('mdfObj:addLink',['Invalid type ' oLink.type '. Link under ' prop ' are of type ' obj.mdf_def.mdf_links.mdf_types{i}]));
         end %if
         % check if type matches the one already present
         if ~strcmp(obj.mdf_def.mdf_links.mdf_directions{ip},dir)
@@ -162,10 +165,10 @@ function res = addLink(obj,prop,link,dir,pos)
         obj.mdf_def.mdf_links.(prop) = [ ...
             obj.mdf_def.mdf_links.(prop)(1:pos-1), ...
             struct( ...
-                'mdf_uuid', olink.uuid, ...
-                'mdf_type', olink.type, ...
+                'mdf_uuid', oLink.uuid, ...
+                'mdf_type', oLink.type, ...
                 'mdf_direction', dir, ...
-                'mdf_file', olink.getMFN(false) ), ...
+                'mdf_file', oLink.getMFN(false) ), ...
             obj.mdf_def.mdf_links.(prop)(pos:end)];
     end %if
     % add this object as parent

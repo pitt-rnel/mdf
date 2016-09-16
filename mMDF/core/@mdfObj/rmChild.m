@@ -27,24 +27,29 @@ function res = rmChild(obj, prop, child)
         % single child to be removed
         %
         % get uuid from child
-        if isa(child,'mdfObj')
-            uuid = child.uuid;
-            ochild = child;
-        elseif isa(child,'char')
-            uuid = child;
-            ochild = mdfObj.load(uuid);
-        else
-           throw(MException('mdfObj:rmChild','Invalid children property type.')); 
-        end %if
+        [uuid, ochild] = mdf.getUAO(child);
+%         if isa(child,'mdfObj')
+%             uuid = child.uuid;
+%             ochild = child;
+%         elseif isa(child,'char')
+%             uuid = child;
+%             ochild = mdfObj.load(uuid);
+%         else
+%            throw(MException('mdfObj:rmChild','Invalid children property type.')); 
+%         end %if
         % find child in list
         pos = find(strcmp(obj.mdf_def.mdf_children.(prop).mdf_uuid,uuid));
         if isempty(pos)
            throw(MException('mdfObj:rmChild','Child uuid not found in children property.')); 
         end %if
         % remove child from all the lists
+        % remove requested child from property list
         obj.mdf_def.mdf_children.(prop)(pos) = [];
+        % check if the list is now empty
         if length(obj.mdf_def.mdf_children.(prop)) == 0
+            % reset property type
             obj.mdf_def.mdf_children.mdf_types{ip} = [];
+            % reset property type, remove structure
             obj.mdf_def.mdf_children.(prop) = [];
         end %if
         % make sure that child has parent link removed
@@ -52,15 +57,17 @@ function res = rmChild(obj, prop, child)
         %ochild.rmParent(obj.uuid);
     else
         % all children under prop need to be removed
-        for i = 1:length(obj.mdf_def.mdf_children.(prop))
+        %for i = 1:length(obj.mdf_def.mdf_children.(prop))
             % get child object and remove parent link
-            ochild = mdfObj.load(obj.mdf_def.mdf_children.(prop)(i).uuid);
+        %    ochild = mdfObj.load(obj.mdf_def.mdf_children.(prop)(i).uuid);
             % mutual relationship is removed by static property of the mdf
             % class
             %ochild.rmParent(obj.uuid);
-        end %for
+        %end %for
         % reset property
+        % remove all the links and leave property empty
         obj.mdf_def.mdf_children.(prop) = [];
+        % reset property type
         obj.mdf_def.mdf_children.mdf_type{ip} = [];
     end %if
 end %function

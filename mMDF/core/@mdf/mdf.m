@@ -202,6 +202,8 @@ classdef (Sealed) mdf < handle
         outdata = load(indata);
         % convert cell to struct
         outdata = c2s(indata);
-        
+        % given uuid or object, returns both
+        [uuid, object] = getUuidAndObject(indata);
+        [uuid, object] = getUAO(indata);
     end %methods
 end %function

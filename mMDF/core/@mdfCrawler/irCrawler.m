@@ -1,10 +1,12 @@
-function res = rCrawler(obj,cuuid)
-    % function res = obj.rCrawler(cobj)
+function res = irCrawler(obj,cuuid,recursive)
+    % function res = obj.irCrawler(cobj,recursive)
     %
     % internal mdfCrawler recursive crawler
     %
     % Input
-    %  cobj = (mdfObj) current object analyzed
+    %  cobj      = (mdfObj) current object analyzed
+    %  recursive = (logical) if true, continue to lower level
+    %              if false, stop at this object
     %
     % Output
     %  res = return status
@@ -13,8 +15,12 @@ function res = rCrawler(obj,cuuid)
     % output status
     res = 0;
     
+    if nargin < 3
+        recursive = true;
+    end %if
+    
     % debug only
-    disp(['mdfCrawler:rCrawler ' cuuid]);
+    disp(['mdfCrawler:irCrawler ' cuuid]);
     
     % convert current uuid to matlab accaptable form
     muuid = ['uuid_' regexprep(cuuid,'-','_')];
@@ -33,7 +39,7 @@ function res = rCrawler(obj,cuuid)
     % load object
     cobj = mdf.load(cuuid);
     
-    % initialize output struct
+    % initialize item struct
     item = struct();
     
     % populate output with current object
@@ -47,18 +53,19 @@ function res = rCrawler(obj,cuuid)
     % data
     % initialize data entry
     item.data = struct();
-    % initialize data memory count
-    dataMem = 0;
     % get list of data fields
-    fl = cobj.mndf_def.mdf_data.mdf_fields;
+    fl = cobj.mdf_def.mdf_data.mdf_fields;
     % loop on each field and insert references
     for i = 1:length(fl)
         % get data field name
         name = fl{i};
         % insert size type and memory footprint
         item.data.(name) = ...
-            sprintf('[%dx%d %s %s]', ...
-                cobj
+            sprintf('[%dx%d %s %d]', ...
+                cobj.mdf_def.mdf_data.(name).mdf_size(1), ...
+                cobj.mdf_def.mdf_data.(name).mdf_size(2), ...
+                cobj.mdf_def.mdf_data.(name).mdf_class, ...
+                cobj.mdf_def.mdf_data.(name).mdf_mem);
     end %for
     % MN : 2016/09/02
     % changed from preinting the all structure
@@ -126,6 +133,9 @@ function res = rCrawler(obj,cuuid)
     item.biLinks = cobj.getUuids(struct('group','bl','format','UuidWithPropNameNoEmpty'));
     % get parents uuids. just uuid list.
     item.parents = cobj.getUuids('parents');
+    
+    % insert memory consumption
+    item.memory = cobj.getSize(true);
 
     % insert item in full list
     obj.objList.(muuid) = item;
@@ -156,7 +166,7 @@ function res = rCrawler(obj,cuuid)
         cmuuid = ['uuid_' regexprep(item.children(i).uuid,'-','_')];
         % call itself recursively on this child
         if ~isfield(obj.objList,cmuuid)
-            obj.rCrawler(item.children(i).uuid);
+            obj.irCrawler(item.children(i).uuid);
         end %if
     end %for
     
@@ -172,7 +182,7 @@ function res = rCrawler(obj,cuuid)
         ulmuuid = ['uuid_' regexprep(item.uniLinks(i).uuid,'-','_')];
         % call itself recursively on this child
         if ~isfield(obj.objList,ulmuuid)
-            obj.rCrawler(item.uniLinks(i).uuid);
+            obj.irCrawler(item.uniLinks(i).uuid);
         end %if
     end %for
         
@@ -197,7 +207,7 @@ function res = rCrawler(obj,cuuid)
         blmuuid = ['uuid_' regexprep(item.biLinks(i).uuid,'-','_')];
         % call itself recursively on this child
         if ~isfield(obj.objList,blmuuid)
-            obj.rCrawler(item.biLinks(i).uuid);
+            obj.irCrawler(item.biLinks(i).uuid);
         end %if
     end %for
     
@@ -218,9 +228,10 @@ function res = rCrawler(obj,cuuid)
         pmuuid = ['uuid_' regexprep(item.parents{i},'-','_')];
         % call itself recursively on this child
         if ~isfield(obj.objList,pmuuid)
-            obj.rCrawler(item.parents{i});
+            obj.irCrawler(item.parents{i});
         end %if
     end %for
     
+    % remove children key if empty
     res = 1;
 end %function

@@ -64,9 +64,11 @@ classdef mdfCrawler < handle
     end %methods
     
     methods
-        % methods defined in thoer files
-        res = crawler(obj,startObj);
-        
+        % methods defined in other files
+        res = hcrawler(obj,startObj);
+        res = ihCreawler(obj,cuuid,recursive,puuid);        
+        res = rcrawler(obj,startObj);
+        res = irCreawler(obj,cuuid);
     end %methods
     
 end %classdef 

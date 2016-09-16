@@ -26,18 +26,20 @@ function res = rmLink(obj, prop, link)
     if nargin >= 3
         % single link to be removed
         %
-        % get uuid from link
-        if isa(link,'mdfObj')
-            uuid = link.uuid;
-            olink = link;
-        elseif isa(link,'char')
-            uuid = link;
-            olink = mdfObj.load(uuid);
-        else
-           throw(MException('mdfObj:rmLink','Invalid links property type.')); 
-        end %if
+        % get link uuid an dobject
+        [uLink, oLink] = mdf.getUAO(link);
+%         % get uuid from link
+%         if isa(link,'mdfObj')
+%             uuid = link.uuid;
+%             olink = link;
+%         elseif isa(link,'char')
+%             uuid = link;
+%             olink = mdfObj.load(uuid);
+%         else
+%            throw(MException('mdfObj:rmLink','Invalid links property type.')); 
+%         end %if
         % find link in list
-        pos = find(strcmp(obj.mdf_def.mdf_links.(prop).mdf_uuid,uuid));
+        pos = find(strcmp(obj.mdf_def.mdf_links.(prop).mdf_uuid,uLink));
         if isempty(pos)
            throw(MException('mdfObj:rmLink','Link uuid not found in links property.')); 
         end %if
