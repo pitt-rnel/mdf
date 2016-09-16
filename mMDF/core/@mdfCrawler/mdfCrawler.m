@@ -9,6 +9,9 @@ classdef mdfCrawler < handle
         
         % relation list
         relList = struct();
+        
+        % hierarchical structure from start object
+        hList = {};
     end
         
     methods (Access = private)
@@ -61,9 +64,11 @@ classdef mdfCrawler < handle
     end %methods
     
     methods
-        % methods defined in thoer files
-        res = crawler(obj,startObj);
-        
+        % methods defined in other files
+        res = hcrawler(obj,startObj);
+        res = ihCreawler(obj,cuuid,recursive,puuid);        
+        res = rcrawler(obj,startObj);
+        res = irCreawler(obj,cuuid);
     end %methods
     
 end %classdef 

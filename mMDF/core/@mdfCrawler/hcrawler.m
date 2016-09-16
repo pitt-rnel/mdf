@@ -1,8 +1,8 @@
-function res = crawler(obj,startObj)
-    % function res = obj.crawler(startObj)
+function res = hcrawler(obj,startObj)
+    % function res = obj.hcrawler(startObj)
     %
-    % crawls from the start object and build the list of objects and the
-    % relation between them
+    % crawls from the start object and hierarchical structure with athe
+    % reachable objects
     %
     % Input
     %   startObj = (string) UUID of the mdfObj to start from
@@ -22,7 +22,8 @@ function res = crawler(obj,startObj)
         'dest', [], ...
         'sProp', [], ...
         'dProp', [] );
-
+    obj.hList = {};
+    
     
     % get object
     if ischar(startObj)
@@ -34,7 +35,7 @@ function res = crawler(obj,startObj)
     else
         raise( ...
             MException( ...
-                'mdfCrawler:crawl', ...
+                'mdfCrawler:hcrawl', ...
                 '10: Invalid type for input argument.'));
     end %if
     
@@ -42,11 +43,11 @@ function res = crawler(obj,startObj)
     if ~ischar(obj.sobj) && length(obj.sobj) ~= 1
         raise( ...
             MException( ...
-                'mdfCrawler:crawl', ...
+                'mdfCrawler:hcrawl', ...
                 '20: No object or more than one object found.'));
     end %if
     
     % build the new lists outdata
-    res = obj.rCrawler(obj.sobj);
+    obj.hList = obj.ihCrawler(obj.sobj,true);
     
 end %function

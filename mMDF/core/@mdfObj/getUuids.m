@@ -136,12 +136,12 @@ function outdata = getUuids(obj,group,property,format)
                     % cycle on all the properties
                     for i = 1:length(obj.mdf_def.mdf_links.mdf_fields)
                         % get field names
-                        pn = obj.mdf_def_mdf_links.mdf_fields{i};
+                        pn = obj.mdf_def.mdf_links.mdf_fields{i};
                         % extract array of references
                         temp = obj.mdf_def.mdf_links.(pn);
                         % set lists
                         ult = {temp.mdf_uuid};
-                        plt = cell(size(ul));
+                        plt = cell(size(ult));
                         plt(:) = {pn};
                         dlt = {temp.mdf_direction};
                         % append values in complete list
@@ -160,8 +160,8 @@ function outdata = getUuids(obj,group,property,format)
                         % retains only bidirectional links
                         mask = strcmp('b',dl);
                 end %switch
-                ul(mask) = [];
-                pl(mask) = [];
+                ul(~mask) = [];
+                pl(~mask) = [];
             end %if
 
         case {'parents', 'p'}
