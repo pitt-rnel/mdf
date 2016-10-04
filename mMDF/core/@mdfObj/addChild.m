@@ -60,34 +60,6 @@ function res = addChild(obj,prop,child,pos)
         end %if
     end %if
     
-%     if isa(child,'mdfObj')
-%         % input child is an object
-%         % get uuid and check if it needs to be inserted in memory
-%         uuid = child.uuid;
-%         % check if child exists
-%         ochild = mdfObj.load(uuid);
-%         % check if already exists
-%         if isempty(ochild)
-%             % it's not in memory and not already defined
-%             % insert new object
-%             mdfm = mdfManage.getInstance();
-%             mdfm.insert(child.uuid,child.getMFN(),child);
-%             ochild = child;
-%         else
-%             % object already present 
-%             % TO DO: define a object level copy
-%         end %if
-%     else
-%         % just use uuid
-%         uuid = child;
-%         % check if child object exist
-%         ochild = mdfObj.load(uuid);
-%         % check if we found the object with the provided uuid
-%         if isemty(ochild)
-%             throw(MException('mdfObj:addChild',['Invalid uuid(' uuid ')']));
-%         end %if
-%     end %if
-
     % get child uuid and object
     [uChild, oChild] = mdf.getUAO(child);
     
@@ -110,7 +82,7 @@ function res = addChild(obj,prop,child,pos)
             throw(MException('mdfObj:addChild',['Object with uuid ' uChild ' already inserted']));
         end %if
         % check if type matches the one already present
-        if ~strcmp(obj.mdf_def.mdf_children.mdf_types{ip},ochild.type)
+        if ~strcmp(obj.mdf_def.mdf_children.mdf_types{ip},oChild.type)
             throw(MException('mdfObj:addChild',['Invalid type ' oChild.type '. Children under ' prop ' are of type ' obj.mdf_def.mdf_children.mdf_types{i}]));
         end %if
         % we are cleared to insert in position
@@ -123,11 +95,5 @@ function res = addChild(obj,prop,child,pos)
                 'mdf_file', oChild.getMFN(false) ), ...
             obj.mdf_def.mdf_children.(prop)(pos:end)];
     end %if
-    % add this object as parent
-    % the mutual relationship is set up by a static property of the mdf
-    % class.
-    %ochild.addParent(obj);
     
-    % makes sure that the mdf_def structure is in sync
-    %obj.mdf_def.mdf_children.mdf_fields = 
 end %function

@@ -47,7 +47,7 @@ function res = addParent(obj,parent)
     % check if parent is already present
     % get parents uuid
     alreadyParent = 0;
-    if ~isempty(fields(obj.mdf_def.mdf_parents))
+    if isstruct(obj.mdf_def.mdf_parents) && ~isempty(fields(obj.mdf_def.mdf_parents))
         pUuids = {obj.mdf_def.mdf_parents.mdf_uuid};
         % search for uuid
         alreadyParent = any(strcmp(pUuids,uuid));
@@ -55,7 +55,7 @@ function res = addParent(obj,parent)
     
     % insert parent if needed
     if ~alreadyParent
-        if isempty(fields(obj.mdf_def.mdf_parents))
+        if ~isstruct(obj.mdf_def.mdf_parents) || isempty(fields(obj.mdf_def.mdf_parents))
             obj.mdf_def.mdf_parents = struct( ...
                 'mdf_uuid', uuid, ...
                 'mdf_file', oParent.getMFN(false), ...

@@ -18,7 +18,7 @@ function res = getSize(obj,details)
     %
     
     % check input
-    if nargin < 1
+    if nargin < 2
         details = false;
     end %if
     if ~islogical(details)
@@ -64,7 +64,7 @@ function res = getSize(obj,details)
             % get data property info
             cdpi = whos('cdpv');
             % add memory size to overall object memory
-            dsize = dzise + cdpi.bytes;
+            dsize = dsize + cdpi.bytes;
        end %if
     end %for
     % update total
