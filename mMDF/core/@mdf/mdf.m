@@ -83,13 +83,23 @@ classdef (Sealed) mdf < handle
             % define libraries folder
             lf = fullfile(cf,mdf.libraries);
             % removes double dots if needed
+            % if we are on windows, makes sure to transform file separator
+            % to unix like
             tmp1 = lf;
+            if ispc
+                tmp1 = regexprep(lf,'\\','/');
+            end %if
             tmp2 = regexprep(tmp1,mdf.pattern,filesep);
             while strcmp(tmp1,tmp2)==0
                 tmp1 = tmp2;
                 tmp2 = regexprep(tmp1,mdf.pattern,filesep);
             end %while
-            lf = tmp2;
+            % takes into account winodws pathing
+            if ispc
+                lf = regexprep(tmp2,'/','\');
+            else
+                lf = tmp2;
+            end %if
             
             % list everything in libraries
             list = dir(lf);
