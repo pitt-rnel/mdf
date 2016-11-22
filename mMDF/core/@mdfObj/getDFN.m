@@ -8,5 +8,5 @@ function dfn = getDFN(obj,filtered)
         filtered = true;
     end
 
-    dfn = obj.getDataFileName(filtered)
+    dfn = obj.getDataFileName(filtered);
 end %function

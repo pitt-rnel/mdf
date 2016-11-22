@@ -138,21 +138,21 @@ classdef (Sealed) mdf < handle
                     ~exist(C.CODE_BASE,'dir') )
                 % we cannot proceed
                 throw(MException('mdfConf:start',...
-                    '1: Configuration missing RF code folder!!!'));
+                    '1: Configuration missing MDF code folder!!!'));
             end %if
             % check if we have mdf core code base
             if ( ~isfield(C,'CORE_BASE') || ...
                     ~exist(C.CORE_BASE,'dir') )
                 % we cannot proceed
                 throw(MException('mdfConf:start',...
-                    '2: Configuration missing RF core code folder!!!'));
+                    '2: Configuration missing MDF core code folder!!!'));
             end %if
             % check if we have mdf data base
             if ( ~isfield(C,'DATA_BASE') || ...
                     ~exist(C.DATA_BASE,'dir') )
                 % we cannot proceed
                 throw(MException('mdfConf:start',...
-                    '3: Configuration missing RF data folder!!!'));
+                    '3: Configuration missing MDF data folder!!!'));
             end %if
 
             % first of all needs to add functions root
