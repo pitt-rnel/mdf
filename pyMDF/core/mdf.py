@@ -32,8 +32,9 @@ class mdf(object):
         # return mdf object matching request
         return dataout
 
+
     #
-    #
+    @staticmethod
     def getUuidAndObject(indata):
         # given the input(uuid or mdfObj), it returns both uuid and object
         #
