@@ -63,7 +63,7 @@ classdef (Sealed) mdfDB < handle
         res = isValidConnection(obj)
         res = isValidDatabase(obj)
         res = isValid.m(obj)
-        res = find(obj,query)
+        res = find(obj,query,projection,sort)
         res = delete(obj,query)
         res = insert(obj,query)
         res = update(obj,query,values)
