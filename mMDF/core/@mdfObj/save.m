@@ -1,10 +1,33 @@
-function res = save(obj)
-    % function res = obj.save()
+function res = save(obj, tf)
+    % function res = obj.save(tf)
     %
     % save data, metadata and internal info as necessary
-    
-    % initialize output value
-    res = 0;
+    %
+    % input
+    % - tf : boolean indicating if we want timing info
+    %
+    % output:
+    % - res : result of the operation, if timing is false
+    %       : struct containing results of the operation and 
+    %         timing of the different operations
+
+    % check if we need to keep track of the time
+    collect = false;
+    if ( nargin > 1 )
+        collect = (tf == true );
+        res = 0;
+    end %if
+    if collect
+        res = struct( ...
+            'res', 0, ...
+            'timing' , struct( ...
+                'begin', datestr(now,'yyyy-mm-dd HH:MM:SS.FFF') ...
+            ) ...
+        );
+    else
+        % initialize output value
+        res = 0;
+    end %if
     
     % get db and manage singleton
     odb = mdfDB.getInstance();
@@ -21,8 +44,14 @@ function res = save(obj)
     
     % first updates database
     % check if we need to insert new or if we need to update
+    if collect
+        res.timing.dbquery = datestr(now,'yyyy-mm-dd HH:MM:SS.FFF');
+    end %if
     query = ['{ "mdf_def.mdf_uuid" : "' uuid '" }'];
     res1 = odb.find(query);
+    if collect
+        res.timing.dbsave = datestr(now,'yyyy-mm-dd HH:MM:SS.FFF');
+    end %if
     switch length(res1)
         case 1
             % we are updating
@@ -35,6 +64,9 @@ function res = save(obj)
             throw(MException('mdfDObj:save','Multiple DB object with same UUID')); 
     end %if
     
+    if collect
+        res.timing.yamlsave = datestr(now,'yyyy-mm-dd HH:MM:SS.FFF');
+    end %if
     % get metadata file
     mdFile = obj.getMetadataFileName(true);
     % make sure that folder where metadata file lives exists
@@ -45,6 +77,9 @@ function res = save(obj)
     % updates metadata yaml file
     WriteYaml(mdFile,mdData);
     
+    if collect
+        res.timing.matsave = datestr(now,'yyyy-mm-dd HH:MM:SS.FFF');
+    end %if
     % than update data file(s)
     dFile = obj.getDataFileName(true);
     % make sure that folder where data file lives exists
@@ -75,9 +110,18 @@ function res = save(obj)
     % dimiss matfile object
     delete(mfData);
     clear mfData;
+    if collect
+        res.timing.endsave = datestr(now,'yyyy-mm-dd HH:MM:SS.FFF');
+    end %if
     
     % register object with objMenage
     om = mdfManage.getInstance();
     om.insert(uuid,mdFile,obj);
+    if collect
+        res.timing.exit = datestr(now,'yyyy-mm-dd HH:MM:SS.FFF');
+        res.res = 1;
+    else
+        res = 1;
+    end %if
 
 end %function

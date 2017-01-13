@@ -77,7 +77,7 @@ classdef mdfObj < handle
     methods
         res = subsref(obj,S);
         varargout = subsasgn(obj,S,V);
-        res = save(obj);
+        res = save(obj,timing);
         disp(obj,type);
         setDataInfo(obj,field, value);
         res = setFiles(obj,indata);

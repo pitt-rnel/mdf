@@ -30,7 +30,7 @@ function res = setFiles(obj,indata)
             obj.mdf_def.mdf_files.mdf_metadata = indata.metadata;
 
             % set output
-            res = getFiles();
+            res = obj.getFiles();
 
     end %switch
     
