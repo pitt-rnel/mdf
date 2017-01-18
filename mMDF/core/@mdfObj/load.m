@@ -9,6 +9,8 @@ function outdata = load(indata)
     %              uuid takes precedence over any other field
     %   - file   : if this field is defined, loads the object defined in the file itself
     %              file takes precedence over everything other field, after uuid
+    %   - json   : if this field is defiend, loads the object directly
+    %              converting the json string associated to object
     %   - <type> : object type. users can specify a condition for a specific metadata fields
     %              each condition will be applied in AND with the others.
     %              if there are multiple values for each conditions, each value with be applied in OR
@@ -23,7 +25,8 @@ function outdata = load(indata)
     if isa(indata,'char')
          indata = struct( ...
              'uuid', indata, ...
-             'file', indata);
+             'file', indata, ...
+             'json', indata);
     end %if
 
     % let's check if indata is a struct
@@ -50,14 +53,19 @@ function outdata = load(indata)
             return;
         end %if
 
-        % object is not loaded yet
-        % try the db next
-        mdf_data = odb.find(['{ "mdf_def.mdf_uuid" : "' indata.uuid '" }']);
-        if isempty(mdf_data)
-            % no luck through the db
-            % trys file
-            mdf_data = mdfObj.fileLoadInfo([indata.uuid '_md.yml']);
-        end %if
+        % use try/catch
+        try
+            % object is not loaded yet
+            % try the db next
+            mdf_data = odb.find(['{ "mdf_def.mdf_uuid" : "' indata.uuid '" }']);
+            if isempty(mdf_data)
+                % no luck through the db
+                % trys file
+                mdf_data = mdfObj.fileLoadInfo([indata.uuid '_md.yml']);
+            end %if
+        catch
+            mdf_data = [];
+        end %try/catch
     end %if
 
     % if mdf_data does not contains anything, next check if we have a file name
@@ -86,6 +94,23 @@ function outdata = load(indata)
             end %if
         end %if
     end %if
+    
+    % if mdf_data is still empty, next we check for json string
+    if isempty(mdf_data) && isfield(indata,'json')
+        % convert everything to a cell array
+        if isa(indata.json,'char')
+            indata.json = {indata.json};
+        end %if
+        % tries to convert json string to matlab structure
+        % also checks if ther are all the fields needed
+        try
+            mdf_data = cellfun(@(x) loadjson(x), indata.json,'UniformOutput', 0);
+        catch
+            % an error occured. returning empty handed
+            return;
+        end %try/catch
+    end %if
+    
 
     % if mdf_data still does not contains any info, 
     % we check if there is a field named mdf_query, that contains a json
@@ -163,6 +188,22 @@ function outdata = load(indata)
             % get object data
             cdata = mdf_data{i};
 
+            % check if the object has been already loaded
+            otemp1 = om.get(cdata.mdf_def.mdf_uuid);
+            if ~isempty(otemp1)
+                % object already loaded in memory
+                % use the one already loaded
+                if length(outdata) < 1
+                    outdata = otemp1;
+                else
+                    outdata(end+1) = otemp1;
+                end %if
+                % skip to next object
+                continue;
+            end %if
+            
+            % object not loaded, goes ahead and loads it
+            %
             % create new object
             if length(outdata)<1
                 outdata = mdfObj();
