@@ -69,6 +69,8 @@ classdef mdfCrawler < handle
         res = ihCreawler(obj,cuuid,recursive,puuid);        
         res = rcrawler(obj,startObj);
         res = irCreawler(obj,cuuid);
+        % methods to inspect db and collections
+        outdata = getCollectionStats(obj,collection);
     end %methods
     
 end %classdef 
