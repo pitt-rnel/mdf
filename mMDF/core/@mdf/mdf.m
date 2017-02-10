@@ -215,5 +215,8 @@ classdef (Sealed) mdf < handle
         % given uuid or object, returns both
         [uuid, object] = getUuidAndObject(indata);
         [uuid, object] = getUAO(indata);
+        % memory usage
+        [total,used,free] = memoryUsage();
+        [total,used,free] = mu();
     end %methods
 end %function
