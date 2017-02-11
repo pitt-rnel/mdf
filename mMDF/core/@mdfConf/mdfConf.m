@@ -31,6 +31,13 @@ classdef mdfConf < handle
         menuType = 'auto';
         menuTypeList = {'text', 'gui', 'auto'};
         
+        % folder to search for the configuration file
+        confFileFolders =  { ...
+            '.rnel', 'rnel', '.RNEL', 'RNEL', ...
+            '.mdf', 'mdf', '.MDF', 'MDF', ...
+            'MATLAB', 'Documents/MATLAB'}
+
+        
         % list of paths addedd when started database
         listPaths = {};
     end
@@ -130,14 +137,10 @@ classdef mdfConf < handle
                 % user folder
                 uhf = getuserdir();
                 % possible path to local configuration file
-                lcp = { ...
-                    fullfile(uhf,'.rnel'), ...
-                    fullfile(uhf,'rnel'), ...
-                    fullfile(uhf,'.RNEL'), ...
-                    fullfile(uhf,'RNEL'), ...
-                    fullfile(uhf,'MATLAB'), ...
-                    fullfile(uhf,'Documents','MATLAB'), ...
-                    };
+                lcp = cellfun( ...
+                    @(x) fullfile(uhf,x), ...
+                    obj.confFileFolders, ...
+                    'UniformOutput', 0);
                 % found flag
                 found = false;
                 % check if at least one path contains a configuration file
@@ -202,10 +205,14 @@ classdef mdfConf < handle
             %
             % Input:
             %   conf: configuration parameters. Can be two different format
-            %         1) (string): it contains the file name where the configuration is saved.
+            %         1) (string) 'release' : it will release the current singleton
+            %                                 Used for teating and to clear
+            %                                 the mdf environment
+            %
+            %         2) (string): it contains the file name where the configuration is saved.
             %                      The file can be in xml or json format or the legacy format as the userInfo file
             %
-            %         2) (struct): the struct contains the configuration
+            %         3) (struct): the struct contains the configuration
             %                      file name and also additional parameters to configure
             %                      which type of menu the user would like to have, if a
             %                      selection as to be made automatically or if the
@@ -232,6 +239,19 @@ classdef mdfConf < handle
             % persistent variable holding the reference to the singleton instance
             persistent uniqueInstance;
             
+            % check if we need to release the current singleton
+            if isa(varargin{1},'char') && strcmp('release',lower(varargin{1}))
+                % we need to clear the current unique instance 
+                % (aka singleton)
+                if isa(uniqueInstance,'mdfConf')
+                    % delete isntance
+                    delete(uniqueInstance);
+                    uniqueInstance = [];
+                    % we are done
+                    return
+                end %if
+            end %if
+                    
             % check if the singleton is already instantiated or not
             if isempty(uniqueInstance) && nargin > 0
                 conf = varargin{1};

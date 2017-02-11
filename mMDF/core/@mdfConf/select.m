@@ -20,10 +20,10 @@ function obj = select(obj,selection)
                 case 'char'
                     % check if it is a valid choice
                     % first check in user names
-                    sel = find(cellfun(@(s)any(strcmp(s,selection)), obj.confData.configurations.names));
+                    sel = find(cellfun(@(s)any(strcmp(s,selection)), obj.confData.universe.names));
                     if isempty(sel)
                         % tries with machine names
-                        sel = find(cellfun(@(s)any(strcmp(s,selection)), obj.confData.configurations.machines));
+                        sel = find(cellfun(@(s)any(strcmp(s,selection)), obj.confData.universe.machines));
                     end
                     if isempty(sel)
                         % no valid selection
@@ -36,7 +36,7 @@ function obj = select(obj,selection)
                     % check if it is a valid choice
                     try
                         % extract machine names from array
-                        sel = obj.confData.configurations.machines{selection}; 
+                        sel = obj.confData.universe.machines{selection}; 
                     catch
                         % selection provided was wrong
                         selection = '';
@@ -52,7 +52,7 @@ function obj = select(obj,selection)
         if isempty(selection)
             % check if we have only one configuration
             % if so, select that one automatically
-            if ( length(obj.confData.configurations.names) == 1 )
+            if ( length(obj.confData.universe.names) == 1 )
                 selection = 1;
             else
                 % present the right menu
@@ -64,8 +64,8 @@ function obj = select(obj,selection)
                         % type: text
                         % build message text
                         message = '\nPlease select which configuration you would like to start RNEL db with:\n';
-                        for i = 1:length(obj.confData.configurations.names)
-                            message =[ message, '\n', int2str(i), ' - ', obj.confData.configurations.names{i}];
+                        for i = 1:length(obj.confData.universe.names)
+                            message =[ message, '\n', int2str(i), ' - ', obj.confData.universe.names{i}];
                         end
                         message = [ message, '\n\n Choice:'];
                         % present text base menu
@@ -73,7 +73,7 @@ function obj = select(obj,selection)
                         % check if it is a valid choice
                         try
                             % extract machine names from array
-                            sel = obj.confData.configurations.machines{selection}; 
+                            sel = obj.confData.universe.machines{selection}; 
                         catch
                             % selection provided was wrong
                             selection = '';

@@ -29,6 +29,10 @@ function S = extractXmlHelper(obj,items)
         % decide if it is a text value
         text = strcmp(name,'#text');
         
+        disp(['Name : ' name])
+        disp(['Value : ' value])
+        disp('---------');
+        
         % check if it is a valid node or not
         % conditions:
         %  - name is different than #text and we have child nodes
@@ -43,9 +47,10 @@ function S = extractXmlHelper(obj,items)
                 % insert branch and descend in the dom tree
                 value = obj.extractXmlHelper(children);
                
-                % check if value is a string/char and pemdform allowed
+                % check if value is a string/char and perform allowed
                 % operations on it
                 if isa(value,'char')
+                    disp('DI QUA');
                     % check if we have attributes that modify string value
                     
                     % relative_to attribute
@@ -81,6 +86,9 @@ function S = extractXmlHelper(obj,items)
                         % field already exists
                         % check if is a string and needs to be converted to
                         % cell array
+                        disp('-----');
+                        S
+                        disp('-----');
                         if ( isa(S.(name),'char') )
                             S.(name) = {S.(name)};
                         end
@@ -90,6 +98,29 @@ function S = extractXmlHelper(obj,items)
                         % new field
                         S.(name) = value;
                     end
+                elseif isa(value,'struct')
+                    % check if field already exists
+                    if isfield(S,name)
+                        % the field already exist,
+                        % we need to convert the field to an array of
+                        % struct or a cell array of struct
+                        if isa(S.(name),'cell')
+                            % it is already a cell array
+                            S.(name){end+1} = value;
+                        else
+                            % it tries to append as an array of struct
+                            % if it fails it converts to a cell array
+                            try
+                                S.(name)(end+1) = value;
+                            catch
+                                S.(name) = num2cell(S.(name));
+                                S.(name){end+1} = value;
+                            end %try/catch
+                        end %if
+                    else
+                        % insert new struct under field named name
+                        S.(name) = value;
+                    end %if
                 else
                     % the value is not a string
                     % insert value in structure

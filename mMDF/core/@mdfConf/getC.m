@@ -21,7 +21,7 @@ function C = getC(obj,selection)
     C = struct;
     % check if we have the constants field
     if ( isa(tC,'struct') && ...
-            isfield(tC,'constants') )
-        C = tC.constants;
+            isfield(tC,'environment') )
+        C = tC.environment;
     end
 end

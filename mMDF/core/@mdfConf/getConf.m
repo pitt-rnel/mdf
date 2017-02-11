@@ -21,6 +21,6 @@ function C = getConf(obj,selection)
     % check if we have a selection defined
     if ~isempty(obj.selection)
         % extract selected configuration
-        C = obj.confData.configurations.configuration{obj.selection};
+        C = obj.confData.universe.ecosystem{obj.selection};
     end
 end

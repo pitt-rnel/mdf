@@ -90,6 +90,7 @@ classdef mdfObj < handle
         res = getSize(obj,details);      
         res = size(obj);
         outdata = getUuids(obj,group,property,format);
+        res = populate(obj,indata);
     end %methods
 
     % static methods defined here
