@@ -72,7 +72,7 @@ function children = getChild(obj, prop, selector)
         % check if it is a valide index
         if ~isempty(index) && index>=1 && index <=length(obj.mdf_def.mdf_children.(prop))
             % get child uuid 
-            uuid = obj.mdf_def.mdf_children.(prop)(index).uuid;
+            uuid = obj.mdf_def.mdf_children.(prop)(index).mdf_uuid;
             % get object from memory
             child = mdfObj.load(uuid);
             % if valid object, insert it in output values
