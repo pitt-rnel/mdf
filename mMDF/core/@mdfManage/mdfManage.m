@@ -28,6 +28,8 @@ classdef (Sealed) mdfManage < handle
           res = [];
           % check if input is a struct or a string
           switch class(query)
+              case {'mdfObj'}
+                  res = obj.indexByUuid(query.uuid);
               case {'struct'}
                   % check if we need to search by uuid or by file
                   if isfield(query,'uuid')
@@ -43,6 +45,11 @@ classdef (Sealed) mdfManage < handle
                   if isempty(res)
                       res = obj.indexByFile(query);
                   end %if
+              otherwise
+                  throw( ...
+                      MException( ...
+                        'mdfManage:index' ,...
+                        'input class not recognized'));
           end %switch
       end
       
