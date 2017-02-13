@@ -152,7 +152,7 @@ classdef (Sealed) mdfManage < handle
            % initialize output
           res = false;
           % loop on all objects in memory
-          for i = 1: length(obj.object)
+          for i = length(obj.object):-1:1
               % remove object from matlab memory
               mdfobj = obj.object(i);
               delete(mdfobj);
