@@ -1,13 +1,13 @@
-function D = getData(obj)
-    % D = mdfConf.getData(obj)
+function U = getUniv(obj)
+    % U = mdfConf.getUniv(obj)
     %
-    % returns the complete configuration structure
+    % returns the complete configuration structure, called universe
     %
     % output
-    %   D = (struct) complete configuration tree extracted from
-    %               configuration file
+    %   U = (struct) complete configuration tree extracted from
+    %               configuration file, aka universe
     %
     
-    D = obj.confData.configurations.configuration;
+    U = obj.confData.universe.ecosystem{:};
     
 end

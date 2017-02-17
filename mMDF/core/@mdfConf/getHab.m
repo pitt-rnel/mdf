@@ -18,18 +18,18 @@ function H = getHab(obj,uuid,selection)
     end %if
 
     % use getEco
-    eco = obj.getEco(selection);
+    eco = obj.getEco(s);
     
     H = struct();
     % check if we have the constants field
     if ( isa(eco,'struct') && ...
-            isfield(eco,'environment') )
+            isfield(eco,'habitats') )
         % find index of the element that we are looking for
         ui = find( ...
             strcmp( ...
                 cellfun( ...
                     @(x) x.uuid, ...
-                    omdfc.confData.universe.ecosystem{1}.habitats.habitat, ...
+                    eco.habitats.habitat, ...
                     'UniformOutput',0), ...
                 uuid));
         % check if we found more than one
@@ -40,7 +40,7 @@ function H = getHab(obj,uuid,selection)
                     ['Habitat error: more than one habitat found with uuid ' uuid]));
         end %if
         if length(ui) == 1
-            H = eco.habitats.habitat(ui);
+            H = eco.habitats.habitat{ui};
         end %if
     end %if
 end %function

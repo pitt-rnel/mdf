@@ -8,6 +8,8 @@ classdef mdfConfTest < matlab.unittest.TestCase
     % properties
     properties
         xmlConfFile = '';
+        testFolder = '';
+        indata = struct();
     end %properties
     
     methods (TestClassSetup)
@@ -38,7 +40,7 @@ classdef mdfConfTest < matlab.unittest.TestCase
             testCase.xmlConfFile = fullfile(testCase.testFolder,'..','conf','mdf.xml.conf');
             % 
             % set up input data to instantiate the object and have it ready for use
-            testCase.indata - struct( ...
+            testCase.indata = struct( ...
                 'fileName', testCase.xmlConfFile, ...
                 'automation', 'start', ...
                 'menuType', 'text', ...
@@ -67,7 +69,7 @@ classdef mdfConfTest < matlab.unittest.TestCase
             %
             obj.load();
             % test that file has been loaded
-            testCase.verifyClass(obj.fileData,'char');
+            testCase.verifyClass(obj.fileData,'org.apache.xerces.dom.DeferredDocumentImpl');
             % delete singleton)
             mdfConf.getInstance('release');
         end % function
@@ -104,7 +106,7 @@ classdef mdfConfTest < matlab.unittest.TestCase
         function testAutomation(testCase)
             % test instantiating the singleton with a struct and the full automation
             % instantiate class
-            obj = mdfConf.getInstance(indata);
+            obj = mdfConf.getInstance(testCase.indata);
             % check that the conf has been read
             testCase.verifyClass(obj.confData,'struct');
             % check that selection is correct
@@ -131,7 +133,7 @@ classdef mdfConfTest < matlab.unittest.TestCase
             % test that some of the fields matches
             testCase.verifyEqual( ...
                 uni, ...
-                obj.confData.universe);
+                obj.confData.universe.ecosystem{:});
 
             % delete singleton)
             mdfConf.getInstance('release');
@@ -147,7 +149,7 @@ classdef mdfConfTest < matlab.unittest.TestCase
             eco = obj.getEco();
             %
             % test that env is a struct
-            testCase.verifyClass(env,'struct');
+            testCase.verifyClass(eco,'struct');
             %
             % test that some of the fields matches
             testCase.verifyEqual( ...
@@ -187,12 +189,12 @@ classdef mdfConfTest < matlab.unittest.TestCase
             habs = obj.getHabitats();
             %
             % test that env is a struct
-            testCase.verifyClass(habs,'struct');
+            testCase.verifyClass(habs,'cell');
             %
             % test that some of the fields matches
             testCase.verifyEqual( ...
                 habs,  ...
-                obj.confData.universe.ecosystem{obj.selection}.environment.habitats.habitat)
+                obj.confData.universe.ecosystem{obj.selection}.habitats.habitat)
 
             % delete singleton)
             mdfConf.getInstance('release');
@@ -204,7 +206,7 @@ classdef mdfConfTest < matlab.unittest.TestCase
             obj = mdfConf.getInstance(testCase.indata);
             %
             % get uuid of the first habitat inthe configuration
-            hab1 = obj.universe.ecosystem{obj.selection}.habitats.habitat{1};
+            hab1 = obj.confData.universe.ecosystem{obj.selection}.habitats.habitat{1};
             %
             % request the full environemnt
             hab2 = obj.getHabitat(hab1.uuid);
@@ -228,13 +230,13 @@ classdef mdfConfTest < matlab.unittest.TestCase
             obj = mdfConf.getInstance(testCase.indata);
             %
             % get uuid of the first habitat inthe configuration
-            env1 = obj.universe.ecosystem{obj.selection}.environment;
+            env1 = obj.confData.universe.ecosystem{obj.selection}.environment;
             %
             % request first constant
             c1 = obj.getConstant('DATA_BASE');
             %
             % test that habitat is a struct
-            testCase.verifyClass(env1.DATA_BASE,c1);
+            testCase.verifyEqual(env1.DATA_BASE,c1);
             %
             % request second constant
             c2 = obj.getConstant('CORE_BASE');

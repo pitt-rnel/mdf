@@ -1,29 +1,29 @@
 function start(obj)
     % mdfConf.start(obj)
     %
-    % start selected RNEL db configuration
+    % start selected MDF ecosystem
     %
     
-    % first get the configuration
-    C = obj.getC;
+    % first get the environment for the selected ecosystem
+    E = obj.getEnv();
     
     % run startup functions
     %
     % check if we have a user defined start up function
     disp(' - Checking if we need to run user-defined start up function');
-    if ( isfield(C,'STARTUP_FUNCTION') && ...
-            ~isempty(C.STARTUP_FUNCTION) )
+    if ( isfield(E,'STARTUP_FUNCTION') && ...
+            ~isempty(E.STARTUP_FUNCTION) )
         % try to execute start up function
         try
-            if ischar(C.STARTUP_FUNCTION)
+            if ischar(E.STARTUP_FUNCTION)
                 % we got a string defining the function
-                funcName = C.STARTUP_FUNCTION;
+                funcName = E.STARTUP_FUNCTION;
                 % transform it in a function handle
                 funcHandle = str2func(funcName);
-            elseif isa(C.STARTUP_FUNCTION,'function_handle');
+            elseif isa(E.STARTUP_FUNCTION,'function_handle');
                 % we got a function handler
-                funcName = func2str(C.STARTUP_FUNCTION);
-                funcHandle = C.STARTUP_FUNCTION;
+                funcName = func2str(E.STARTUP_FUNCTION);
+                funcHandle = E.STARTUP_FUNCTION;
             end
             % run startup function
             funcHandle(obj);

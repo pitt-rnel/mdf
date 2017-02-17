@@ -29,10 +29,6 @@ function S = extractXmlHelper(obj,items)
         % decide if it is a text value
         text = strcmp(name,'#text');
         
-        disp(['Name : ' name])
-        disp(['Value : ' value])
-        disp('---------');
-        
         % check if it is a valid node or not
         % conditions:
         %  - name is different than #text and we have child nodes
@@ -50,7 +46,6 @@ function S = extractXmlHelper(obj,items)
                 % check if value is a string/char and perform allowed
                 % operations on it
                 if isa(value,'char')
-                    disp('DI QUA');
                     % check if we have attributes that modify string value
                     
                     % relative_to attribute

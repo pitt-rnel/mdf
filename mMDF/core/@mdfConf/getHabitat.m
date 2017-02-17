@@ -9,5 +9,5 @@ function H = getHabitat(obj,uuid,selection)
     if nargin>2
         s = selection;
     end %if
-    H = getHab(obj,s);
+    H = getHab(obj,uuid,s);
 end %function

@@ -12,12 +12,12 @@ function E = getEnv(obj,selection)
 
     % get selection
     s = obj.selection;
-    if ( nargin < 2 )
+    if ( nargin > 1 )
         s = selection;
     end %if    
 
     % use getEco
-    eco = obj.getEco(selection);
+    eco = obj.getEco(s);
     
     E = struct;
     % check if we have the constants field
