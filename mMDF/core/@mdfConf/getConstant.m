@@ -29,9 +29,9 @@ function C = getConstant(obj,constant, error, value)
     
     try 
         % get current configuration
-        cC = obj.getConf();
+        cC = obj.getEnv();
         % get constant
-        C = eval(['cC.constants.' constant]);
+        C = eval(['cC.' constant]);
     catch e
         switch error
             case 'exception'
