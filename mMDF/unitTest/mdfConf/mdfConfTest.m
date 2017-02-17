@@ -244,6 +244,8 @@ classdef mdfConfTest < matlab.unittest.TestCase
 
             % delete singleton)
             mdfConf.getInstance('release');
+        end %function
+        
     end % methods
     
 end % class
