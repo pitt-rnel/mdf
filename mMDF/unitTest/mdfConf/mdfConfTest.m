@@ -196,6 +196,17 @@ classdef mdfConfTest < matlab.unittest.TestCase
                 habs,  ...
                 obj.confData.universe.ecosystem{obj.selection}.habitats.habitat)
 
+            %
+            % test get habitats by type
+            h1 = habs;
+            h1(~strcmp(cellfun(@(x) x.type, h1,'UniformOutput',0),'db')) = [];
+            h2 = obj.getHabsByType('db');
+            %
+            % test that some of the fields matches
+            testCase.verifyEqual( ...
+                h1,  ...
+                h2);
+
             % delete singleton)
             mdfConf.getInstance('release');
         end %function

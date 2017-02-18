@@ -239,8 +239,13 @@ classdef mdfConf < handle
             % persistent variable holding the reference to the singleton instance
             persistent uniqueInstance;
             
+            conf = '';
+            if nargin > 0
+                conf = varargin{1};
+            end %if
+            
             % check if we need to release the current singleton
-            if isa(varargin{1},'char') && strcmp('release',lower(varargin{1}))
+            if isa(conf,'char') && strcmp('release',lower(conf))
                 % we need to clear the current unique instance 
                 % (aka singleton)
                 if isa(uniqueInstance,'mdfConf')
@@ -250,10 +255,8 @@ classdef mdfConf < handle
                     % we are done
                     return
                 end %if
-            end %if
-                    
             % check if the singleton is already instantiated or not
-            if isempty(uniqueInstance) && nargin > 0
+            elseif isempty(uniqueInstance) && nargin > 0
                 conf = varargin{1};
                 % singleton needs to be instantiated
                 obj = mdfConf(conf);
@@ -262,7 +265,7 @@ classdef mdfConf < handle
             else
                 % returned singleton object
                 obj = uniqueInstance;
-            end
+            end %if
             mlock;
         end
         
