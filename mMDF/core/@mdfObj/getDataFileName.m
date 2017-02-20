@@ -22,8 +22,14 @@ function dfn = getDataFileName(obj,filtered)
             ~isempty(obj.mdf_def.mdf_files.mdf_data)
         % exists a file name for data
         dfn = obj.mdf_def.mdf_files.mdf_data;
-    elseif isfield(obj.mdf_def.mdf_files,'mdf_base') && ...
-            ~isempty(obj.mdf_def.mdf_files.mdf_base)
+    else
+        % file name for data does not exists yet
+        if ~isfield(obj.mdf_def.mdf_files,'mdf_base') || ...
+                isempty(obj.mdf_def.mdf_files.mdf_base)
+            % base file path does not exists yet either
+            % assign default one
+            obj.mdf_def.mdf_files.mdf_base = fullfile('<DATA_BASE>',['mdfobj.' obj.uuid]);
+        end %if
         % use basename to build data file name
         dfn = [obj.mdf_def.mdf_files.mdf_base '.data.mat'];
         obj.mdf_def.mdf_files.mdf_data = dfn;

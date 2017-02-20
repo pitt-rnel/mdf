@@ -22,8 +22,14 @@ function mfn = getMetadataFileName(obj,filtered)
             ~isempty(obj.mdf_def.mdf_files.mdf_metadata)
         % exists a file name for metadata
         mfn = obj.mdf_def.mdf_files.mdf_metadata;
-    elseif isfield(obj.mdf_def.mdf_files,'mdf_base') && ...
-            ~isempty(obj.mdf_def.mdf_files.mdf_base)
+    else
+        % file name for metadata does not exists yet
+        if ~isfield(obj.mdf_def.mdf_files,'mdf_base') || ...
+                isempty(obj.mdf_def.mdf_files.mdf_base)
+            % base file path does not exists yet either
+            % assign default one
+            obj.mdf_def.mdf_files.mdf_base = fullfile('<DATA_BASE>',['mdfobj.' obj.uuid]);
+        end %if
         % use basename to build data file name
         mfn = [obj.mdf_def.mdf_files.mdf_base '.md.yml'];
         obj.mdf_def.mdf_files.mdf_metadata = mfn;

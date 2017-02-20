@@ -11,6 +11,10 @@ function res = dataLoad(obj,dp)
         % check if we have a file name for the data file
         % if so, load just the property requested
         dfn = obj.getDataFileName();
+        % fixes the issues with the file separator
+        % given that we pay a license but matlab  engineers are not able to
+        % write software that is platform independent
+        dfn = strjoin(strsplit(dfn, {'/','\'}),filesep);
         if ~isempty(dfn) && exist(dfn)
             % ok we got a data file name
             % open it with matfile class
