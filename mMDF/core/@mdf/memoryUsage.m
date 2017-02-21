@@ -46,7 +46,7 @@ function [total,used,free] = memoryUsage()
         % save values in oputput variables
         total = temp2(1);
         used = temp2(2);
-        free = temp(3);
+        free = temp2(3);
         
     else
         throw( ...
