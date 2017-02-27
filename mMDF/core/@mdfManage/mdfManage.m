@@ -134,6 +134,17 @@ classdef (Sealed) mdfManage < handle
       end %function
       
       function res = remove(obj, query)
+          % function res = obj.remove(query)
+          %
+          % remove object from the memory management
+          % IMPORTANT: it does not delete the object
+          %
+          % Input:
+          % - query: mdfObj, object uuid, object file
+          %
+          % Output:
+          % - res: true if successful, false if not
+          %
           % find the index of the object required
           index = obj.index(query);
           % remove object if it was found
@@ -141,6 +152,18 @@ classdef (Sealed) mdfManage < handle
       end %function
       
       function res = clear(obj,query)
+          % function res = obj.clear(query)
+          %
+          % unload object from memory and memory management.
+          % This routine delete the object from memory, 
+          % afterward is not longer accessible
+          %
+          % Input:
+          % - query: mdfObj, object uuid, object file
+          %
+          % Output:
+          % - res: true if successful, false if not
+          %
           % find the index of the object required
           index = obj.index(query);
           % initialize output
@@ -149,14 +172,27 @@ classdef (Sealed) mdfManage < handle
           if ~isempty(index)
               % object found, 
               % remove object from matlab memory
-              delete(obj.object(index(1)));
+              mdfObj = obj.object(index(1))
+              delete(mdfObj);
               % removed from memory arrays
               res = obj.removeByIndex(index(1));
           end %if 
       end %function
       
       function res = clearAll(obj)
-           % initialize output
+          % function res = obj.clearAll(query)
+          %
+          % unload all objects from memory and memory management.
+          % This routine delete the objects from memory, 
+          % afterward they are no longer accessible
+          %
+          % Input:
+          % - NONE
+          %
+          % Output:
+          % - res: true if successful, false if not
+          %
+          % initialize output
           res = false;
           % loop on all objects in memory
           for i = length(obj.object):-1:1

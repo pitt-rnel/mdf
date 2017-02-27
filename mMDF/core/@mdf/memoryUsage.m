@@ -40,13 +40,19 @@ function [total,used,free] = memoryUsage()
         %
         % we use the physical memory, fields 1 to 3
         %
-        [~, temp1] = system('free -b | grep Mem | sed "s/  */,/g" | cut -d, -f2,3,4');
-        % split string at comma
-        temp2 = cellfun(@(x) str2num(x),strsplit(temp1,','));
-        % save values in oputput variables
-        total = temp2(1);
-        used = temp2(2);
-        free = temp2(3);
+        try
+            [~, temp1] = system('free -b | grep Mem | sed "s/  */,/g" | cut -d, -f2,3,4');
+            % split string at comma
+            temp2 = cellfun(@(x) str2num(x),strsplit(temp1,','));
+            % save values in oputput variables
+            total = temp2(1);
+            used = temp2(2);
+            free = temp2(3);
+        catch
+            total = 0;
+            used = 0;
+            free = 0;
+        end %try/catch
         
     else
         throw( ...
