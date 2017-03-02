@@ -28,15 +28,7 @@ function res = rmChild(obj, prop, child)
         %
         % get uuid from child
         [uuid, ochild] = mdf.getUAO(child);
-%         if isa(child,'mdfObj')
-%             uuid = child.uuid;
-%             ochild = child;
-%         elseif isa(child,'char')
-%             uuid = child;
-%             ochild = mdfObj.load(uuid);
-%         else
-%            throw(MException('mdfObj:rmChild','Invalid children property type.')); 
-%         end %if
+        %
         % find child in list
         pos = find(strcmp(obj.mdf_def.mdf_children.(prop).mdf_uuid,uuid));
         if isempty(pos)
@@ -52,22 +44,23 @@ function res = rmChild(obj, prop, child)
             % reset property type, remove structure
             obj.mdf_def.mdf_children.(prop) = [];
         end %if
-        % make sure that child has parent link removed
-        % mutual relationship is removed by static property of the mdf class
-        %ochild.rmParent(obj.uuid);
     else
-        % all children under prop need to be removed
-        %for i = 1:length(obj.mdf_def.mdf_children.(prop))
-            % get child object and remove parent link
-        %    ochild = mdfObj.load(obj.mdf_def.mdf_children.(prop)(i).uuid);
-            % mutual relationship is removed by static property of the mdf
-            % class
-            %ochild.rmParent(obj.uuid);
-        %end %for
         % reset property
         % remove all the links and leave property empty
         obj.mdf_def.mdf_children.(prop) = [];
         % reset property type
         obj.mdf_def.mdf_children.mdf_type{ip} = [];
+    end %if
+    
+    % check if we need to remove the children 
+    % if it is empty, we do
+    if length(obj.mdf_def.mdf_children.(prop)) == 0
+        % remove associated type
+        obj.mdf_def.mdf_children.mdf_types(ip) = [];
+        % remove field name from list
+        obj.mdf_def.mdf_children.mdf_fields(ip) = [];
+        % remove property
+        obj.mdf_def.mdf_children = rmfield(obj.mdf_def.mdf_children,prop);
+        
     end %if
 end %function
