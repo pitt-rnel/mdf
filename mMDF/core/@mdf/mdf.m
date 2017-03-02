@@ -152,7 +152,7 @@ classdef (Sealed) mdf < handle
                     ~exist(C.DATA_BASE,'dir') )
                 % we cannot proceed
                 throw(MException('mdfConf:start',...
-                    '3: Configuration missing MDF data folder!!!'));
+                    ['3: Configuration missing MDF data folder (' C.DATA_BASE ')!!!']));
             end %if
 
             % first of all needs to add functions root
