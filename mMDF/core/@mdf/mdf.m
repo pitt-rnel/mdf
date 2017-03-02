@@ -173,7 +173,7 @@ classdef (Sealed) mdf < handle
             end %if
         
             % instantiate database object
-            odb = mdfDB.getInstance();
+            odb = mdfDB.getInstance(true);
             % memory manage objects
             om = mdfManage.getInstance();
            
