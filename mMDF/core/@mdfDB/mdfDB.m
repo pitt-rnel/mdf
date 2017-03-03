@@ -39,6 +39,8 @@ classdef (Sealed) mdfDB < handle
             % check input argument
             if nargin < 1
                 connect = false;
+            else
+                connect = conf;
             end %if
                             
             % check if we need to connect
