@@ -172,7 +172,7 @@ classdef (Sealed) mdfManage < handle
           if ~isempty(index)
               % object found, 
               % remove object from matlab memory
-              mdfObj = obj.object(index(1))
+              mdfObj = obj.object(index(1));
               delete(mdfObj);
               % removed from memory arrays
               res = obj.removeByIndex(index(1));
