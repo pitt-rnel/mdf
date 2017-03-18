@@ -20,7 +20,7 @@ function E = getEco(obj,selection)
     % initialize output structure
     E = struct;
     % check if we have a selection defined
-    if ~isempty(s) && isnumeric(s)
+    if ~isempty(s) && isnumeric(s) && s > 0
         % extract selected configuration
         E = obj.confData.universe.ecosystem{s};
     end %if

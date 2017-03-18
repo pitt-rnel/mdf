@@ -10,7 +10,7 @@ classdef (Sealed) mdfDB < handle
             'byuuids', struct(), ...
             'bytype', struct(), ...
             'byconnector', struct(), ...
-            'uuids' = {} ...
+            'uuids', {} ...
         );
         %
         % <habitat>
@@ -106,8 +106,8 @@ classdef (Sealed) mdfDB < handle
                 % check if user is asking us to delete the singleton instance
                 if isa(conf,'char') && strcmp(conf,'release')
                     % delete object
-                    delete(localObj)
-                    localObj = []
+                    delete(localObj);
+                    localObj = [];
                 end %if
             end %if
             
@@ -145,7 +145,10 @@ classdef (Sealed) mdfDB < handle
         % return an array with the handles to the habitats
         res = getHabitats(obj,habuuid)
         % return which habitat accepts what piece of data
+        res = assH(obj,indata)
         res = assignHabitats(obj,indata)
+        % returns the operations allowed by the habitat requested
+        res = getOps(obj,habuuid)
         res = getOperations(obj,habuuid)
     end
     

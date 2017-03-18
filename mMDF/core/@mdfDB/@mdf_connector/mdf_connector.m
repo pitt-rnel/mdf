@@ -22,7 +22,16 @@ classdef (Sealed) mdf_connector < handle
             % for a blind query run
             % this function is place mark for getsqrtw
             res = obj.getsqrw();
-        end
+        end %function
+        %
+        % 
+        function res = getOperations(obj)
+            % function res = obj.getOperations()
+            %
+            % return the operations that this connector allows
+            % this function is place mark for getsqrtw
+            res = obj.getOps();
+        end %function
     end
 
     methods (Abstract)
@@ -31,6 +40,7 @@ classdef (Sealed) mdf_connector < handle
         res = save(obj,indata);
         res = find(obj,indata);
         res = delete(obj,indata);
+        res = getOps(obj);
     end
     
 end
