@@ -36,87 +36,44 @@ function res = save(obj, tf)
     obj.vuuid = mdf.UUID();
     obj.modified = datestr(now,'yyyy-mm-dd HH:MM:SS');
      
-    % prepare variables
-    mdData = struct( ...
+    % prepare temporary struct to be saved to db
+    dbStruct = struct( ...
         'mdf_def', obj.mdf_def, ...
         'mdf_metadata', obj.metadata );
     uuid = obj.uuid;
-    
-    % first updates database
-    % check if we need to insert new or if we need to update
-    if collect
-        res.timing.dbquery = datestr(now,'yyyy-mm-dd HH:MM:SS.FFF');
-    end %if
+    % prepare query for selcting the correct object
     query = ['{ "mdf_def.mdf_uuid" : "' uuid '" }'];
-    res1 = odb.find(query);
-    if collect
-        res.timing.dbsave = datestr(now,'yyyy-mm-dd HH:MM:SS.FFF');
-    end %if
-    switch length(res1)
-        case 1
-            % we are updating
-            res2 = odb.update(query,mdData);
-        case 0
-            % we are inserting new
-            res2 = odb.insert(mdData);
-        otherwise
-            % error: there should only 1 or 0 records
-            throw(MException('mdfDObj:save','Multiple DB object with same UUID')); 
-    end %if
-    
-    if collect
-        res.timing.yamlsave = datestr(now,'yyyy-mm-dd HH:MM:SS.FFF');
-    end %if
-    % get metadata file
-    mdFile = obj.getMetadataFileName(true);
-    % make sure that folder where metadata file lives exists
-    [mdDir,~,~] = fileparts(mdFile);
-    if ~exist(mdDir,'dir')
-        mkdir(mdDir);
-    end %if
-    % updates metadata yaml file
-    WriteYaml(mdFile,mdData);
-    
-    if collect
-        res.timing.matsave = datestr(now,'yyyy-mm-dd HH:MM:SS.FFF');
-    end %if
-    % than update data file(s)
-    dFile = obj.getDataFileName(true);
-    % make sure that folder where data file lives exists
-    [dDir,~,~] = fileparts(dFile);
-    if ~exist(dDir,'dir')
-        mkdir(dDir);
-    end %if
-    % open data file for writing
-    mfData = matfile(dFile,'Writable',true);
-    % update mdf_def
-    mfData.mdf_def = mdData.mdf_def;
-    % update metadata
-    mfData.mdf_metadata = mdData.mdf_metadata;
-    % reset changed property
-    obj.status.changed.metadata = 0;
-    % updates only data that have been modified
-    for i = 1:length(mdData.mdf_def.mdf_data.mdf_fields)
+
+    % updates only data that have been
+    for i = 1:length(dbStruct.mdf_def.mdf_data.mdf_fields)
         % get field
-        field = mdData.mdf_def.mdf_data.mdf_fields{i};
+        field = dbStruct.mdf_def.mdf_data.mdf_fields{i};
         % check if data has changed
         if isfield(obj.status.changed.data,field) && obj.status.changed.data.(field)
             % save data property
-            mfData.(field) = obj.data.(field);
+            dbStruct.(field) = obj.data.(field);
             % reset changed
             obj.status.changed.data.(field) = 0;
         end %if
     end %for
-    % dimiss matfile object
-    delete(mfData);
-    clear mfData;
+    
+    % first updates database
+    if collect
+        res.timing.dbsave = datestr(now,'yyyy-mm-dd HH:MM:SS.FFF');
+    end %if
+    % we are updating with upsert option
+    % if document does not exists in db, it creates a new one
+    res2 = odb.update(query,dbStruct,true);
+    
+    % dimiss temporary struct
+    clear dbStruct;
     if collect
         res.timing.endsave = datestr(now,'yyyy-mm-dd HH:MM:SS.FFF');
     end %if
     
-    % register object with objMenage
+    % register object with objManage
     om = mdfManage.getInstance();
-    om.insert(uuid,mdFile,obj);
+    om.insert(uuid,'na',obj);
     if collect
         res.timing.exit = datestr(now,'yyyy-mm-dd HH:MM:SS.FFF');
         res.res = 1;

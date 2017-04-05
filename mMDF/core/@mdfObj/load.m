@@ -57,7 +57,10 @@ function outdata = load(indata)
         try
             % object is not loaded yet
             % try the db next
-            mdf_data = odb.find(['{ "mdf_def.mdf_uuid" : "' indata.uuid '" }']);
+            mdf_data = odb.find( ...
+                ['{ "mdf_def.mdf_uuid" : "' indata.uuid '" }'], ...
+                '{ "mdf_def" : 1, "mdf_metadata" : 1}' ...
+            );
             if isempty(mdf_data)
                 % no luck through the db
                 % trys file
@@ -138,7 +141,10 @@ function outdata = load(indata)
             % now we are ready to build the json query
             tmp2 = mdfDB.prepQuery(tmp1);
             % runs query and hopes for the best
-            mdf_data = odb.find(tmp2);
+            mdf_data = odb.find( ...
+                tmp2, ...
+                '{ "mdf_def" : 1, "mdf_metadata" : 1 }' ...
+            );
         end %if
     end %if
 

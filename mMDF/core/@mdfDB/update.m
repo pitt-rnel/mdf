@@ -1,5 +1,5 @@
-function res = update(obj,query,values)
-    % function res = obj.update(query,values)
+function res = update(obj,query,values,upsert)
+    % function res = obj.update(query,values,upsert)
     %
     % update all the records matching the query with the passed values
     % input
@@ -8,6 +8,7 @@ function res = update(obj,query,values)
     %            if it is a struct, it is the struct representation of the query
     %   values : string or structure conatining the values to be set
     %            same as for query
+    %   upsert : boolean true or false. If set to true, it will create the document, if not found
     %
     % output
     %   res = 1 if the record has been update, 0 if not
@@ -18,6 +19,13 @@ function res = update(obj,query,values)
 
     % import query object
     import com.mongodb.BasicDBObject
+
+    % check if upsert is set or not
+    if nargin > 2 && upsert == true
+	upsert = true;
+    else
+        upsert = false;
+    end %if
 
     try
         % check if query is a struct
@@ -35,9 +43,11 @@ function res = update(obj,query,values)
         values = ['{ "$set": ' values ' }'];
 
         % record is in json format (aka string)
-        wr = obj.coll.findAndModify( ...
+        wr = obj.coll.update( ...
             BasicDBObject.parse(query), ...
-            BasicDBObject.parse(values));
+            BasicDBObject.parse(values), ...
+            upsert, ...
+            false);
         res = 1;
     catch
         % nothing to do
