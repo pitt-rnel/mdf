@@ -3,6 +3,7 @@ classdef (Sealed) mdf < handle
     properties (Constant)
         libraries = '../../libs';
         pattern = '/[@\w]+/\.\./';
+        version = '1.4'
     end %properties
 
     methods (Static)
