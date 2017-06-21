@@ -1,0 +1,19 @@
+<configurations>
+ <configuration>
+  <name>MDF test</name>
+  <description>MDF installation test environment, local data, local database</description>
+  <constants>
+   <BASE><TEST_BASE_FOLDER>/mdf</BASE>
+   <CODE_BASE><TEST_CODE_BASE></CODE_BASE>
+   <DATA_BASE relative_path_to="BASE">data/mdftest</DATA_BASE>
+   <CORE_BASE relative_path_to="CODE_BASE">core</CORE_BASE>
+   <DB>
+    <HOST present_as="DB_HOST" present_in="constants">localhost</HOST>
+    <PORT present_as="DB_PORT" present_in="constants">27017</PORT>
+    <DATABASE present_as="DB_DATABASE" present_in="constants">mdftest</DATABASE>
+    <COLLECTION present_as="DB_COLLECTION" present_in="constants">mdftest</COLLECTION>
+   </DB>
+   <USER present_as="LOCATION">test</USER>
+  </constants>
+ </configuration>
+</configurations>
