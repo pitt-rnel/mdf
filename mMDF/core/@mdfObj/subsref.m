@@ -132,7 +132,7 @@ function [res] = subsref(obj,S)
                         mdfObj.load( ...
                             struct( ...
                                 'uuid', ...
-                                obj.mdf_def.mdf_children.(cp)(i).mdf_uuid))];
+                                obj.mdf_def.mdf_children.(cp)(j).mdf_uuid))];
                 end %for
             end %for
         elseif strcmp(S(2).type,'.') && ( ...
@@ -143,7 +143,7 @@ function [res] = subsref(obj,S)
             %
             % try to get the right child
             try
-                cidl = obj.mdf_def.mdf_children.(S(2).subs).mdf_uuid;
+                cidl = {obj.mdf_def.mdf_children.(S(2).subs).mdf_uuid};
                 if isa(cidl,'char')
                     cidl = {cidl};
                 end %if

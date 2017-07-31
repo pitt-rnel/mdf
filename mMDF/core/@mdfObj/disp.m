@@ -41,7 +41,7 @@ function disp(obj,type)
     end %switch
          
     % check if we have multiple objects in input
-    if length(obj) > 1
+    if builtin('length',obj) > 1
         for i=1:length(obj)
             obj(i).disp(type);
             disp(' ');
@@ -334,7 +334,38 @@ function printStruct(key, value, keySize, delta, valueSize)
         % loop on field list
         for i = 1:length(fieldList)
             field = fieldList{i};
-            printStruct(field,value.(field),keySize+delta,delta,max(-1,valueSize-delta));
+            % check if it is an array of struct
+            if length(value.(field)) > 1 && isstruct(value.(field))
+                % this is an array of struct, I print the dimensionality
+                % and the list of the fields
+                %
+                % get size of value.field
+                dims2 = size(value.(field));
+                % prepare format string for size
+                dformat2 = repmat('%dx',1,length(dims2));
+                dformat2 = dformat2(1:end-1);
+
+                % print property name and size
+                printKeyValue( ...
+                    field, ...
+                    sprintf(['[' dformat2 ' %s]'], dims2, class(value.(field))), ...
+                    keySize+delta, ...
+                    valueSize);
+                % list of fields
+                fieldList2 = fields(value.(field));
+                % print list of fields
+                for j = 1:length(fieldList2)
+                    printKeyValue( ...
+                        '', ...
+                        fieldList2{j}, ...
+                        keySize, ...
+                        valueSize);
+                end %for
+            else
+                % this is just a struct, I can print all the fields
+                printStruct(field,value.(field),keySize+delta,delta,max(-1,valueSize-delta));
+            end %if
+                
         end %for
     elseif isnumeric(value) || islogical(value)
         % check which is the size of the value
