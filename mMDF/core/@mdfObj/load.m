@@ -239,6 +239,7 @@ function outdata = load(indata)
                 % convert the field
                 outdata(end).mdf_def.mdf_children.(field) = mdf.c2s(outdata(end).mdf_def.mdf_children.(field));
             end %for
+
             % convert each link list if needed
             for j = 1:length(outdata(end).mdf_def.mdf_links.mdf_fields)
                 % get the field name
