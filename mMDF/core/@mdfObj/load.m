@@ -182,6 +182,13 @@ function outdata = load(indata)
 
         % initialize outdata
         outdata = [];
+        
+        % check if mdf_data is a cell
+        % if it is not a cell, most likely we loaded data from a single file
+        % converts it to a cell
+        if ~iscell(mdf_data)
+            mdf_data = {mdf_data};
+        end %if
 
         % loop on all the object found
         for i = 1:length(mdf_data)

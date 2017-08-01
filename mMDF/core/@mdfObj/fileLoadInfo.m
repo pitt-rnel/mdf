@@ -31,6 +31,19 @@ function res = fileLoadInfo(file)
             case {'.yml'}
                 % we need to load a yaml file
                 res = ReadYaml(file);
+                % fixes few things
+                % apparently the size of data is loaded as cell of numbers
+                for i1 = 1:length(res.mdf_def.mdf_data.mdf_fields)
+                    % get data properties name
+                    dpname = res.mdf_def.mdf_data.mdf_fields{i1};
+                    % check if size is a cell
+                    if iscell(res.mdf_def.mdf_data.(dpname).mdf_size)
+                        % we need to convert it to a matrix
+                        res.mdf_def.mdf_data.(dpname).mdf_size = ...
+                            cell2mat( ...
+                                res.mdf_def.mdf_data.(dpname).mdf_size);
+                    end %if
+                end %for
             case {'.mat', '.h5'}
                 % we have a mat or an h5 file
                 % load values through matfile function

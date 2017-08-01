@@ -41,7 +41,7 @@ function disp(obj,type)
     end %switch
          
     % check if we have multiple objects in input
-    if length(obj) > 1
+    if builtin('length',obj) > 1
         for i=1:length(obj)
             obj(i).disp(type);
             disp(' ');
@@ -85,10 +85,12 @@ function disp(obj,type)
                 end %if
                 loaded = [' (' loaded];
             end %if
-            disp(sprintf(['%' num2str(ill2) 's : [%dx%d %s]%s'], ...
+            % find how many dimensions this data property has
+            dformat = repmat('%dx',1,length(obj.mdf_def.mdf_data.(name).mdf_size));
+            dformat = dformat(1:end-1);
+            disp(sprintf(['%' num2str(ill2) 's : [' dformat ' %s]%s'], ...
                 name, ...
-                obj.mdf_def.mdf_data.(name).mdf_size(1), ...
-                obj.mdf_def.mdf_data.(name).mdf_size(2), ...
+                obj.mdf_def.mdf_data.(name).mdf_size, ...
                 obj.mdf_def.mdf_data.(name).mdf_class, ...
                 loaded));
         end %for
@@ -118,10 +120,12 @@ function disp(obj,type)
                     printKeyValue(name,tmp1{1},ill2,80);
                 else
                     % print type and size
-                    disp(sprintf(['%' num2str(ill2) 's : [%dx%d %s]'], ...
+                    dims = size(obj.metadata.(name));
+                    dformat = repmat('%dx',1,length(dims));
+                    dformat = dformat(1:end-1);
+                    disp(sprintf(['%' num2str(ill2) 's : [' dformat ' %s]%s'], ...
                         name, ...
-                        size(obj.metadata.(name),1), ...
-                        size(obj.metadata.(name),2), ...
+                        dims, ...
                         class(obj.metadata.(name))));
                 end %if
             end %for
@@ -315,6 +319,12 @@ function printStruct(key, value, keySize, delta, valueSize)
         valueSize = -1;
     end %if
     
+    % get size of value
+    dims = size(value);
+    % prepare format string for size
+	dformat = repmat('%dx',1,length(dims));
+    dformat = dformat(1:end-1);
+    
     % check which type we have
     if isstruct(value)
         % print label
@@ -324,7 +334,38 @@ function printStruct(key, value, keySize, delta, valueSize)
         % loop on field list
         for i = 1:length(fieldList)
             field = fieldList{i};
-            printStruct(field,value.(field),keySize+delta,delta,max(-1,valueSize-delta));
+            % check if it is an array of struct
+            if length(value.(field)) > 1 && isstruct(value.(field))
+                % this is an array of struct, I print the dimensionality
+                % and the list of the fields
+                %
+                % get size of value.field
+                dims2 = size(value.(field));
+                % prepare format string for size
+                dformat2 = repmat('%dx',1,length(dims2));
+                dformat2 = dformat2(1:end-1);
+
+                % print property name and size
+                printKeyValue( ...
+                    field, ...
+                    sprintf(['[' dformat2 ' %s]'], dims2, class(value.(field))), ...
+                    keySize+delta, ...
+                    valueSize);
+                % list of fields
+                fieldList2 = fields(value.(field));
+                % print list of fields
+                for j = 1:length(fieldList2)
+                    printKeyValue( ...
+                        '', ...
+                        fieldList2{j}, ...
+                        keySize, ...
+                        valueSize);
+                end %for
+            else
+                % this is just a struct, I can print all the fields
+                printStruct(field,value.(field),keySize+delta,delta,max(-1,valueSize-delta));
+            end %if
+                
         end %for
     elseif isnumeric(value) || islogical(value)
         % check which is the size of the value
@@ -335,7 +376,7 @@ function printStruct(key, value, keySize, delta, valueSize)
             % print size and type
             printKeyValue( ...
                 key, ...
-                sprintf('[%dx%d %s]', size(value,1), size(value,2), class(value)), ...
+                sprintf(['[' dformat ' %s]'], dims, class(value)), ...
                 keySize, ...
                 valueSize);
         end %if
@@ -343,7 +384,7 @@ function printStruct(key, value, keySize, delta, valueSize)
         % print size and type
         printKeyValue( ...
         	key, ...
-            sprintf('[%dx%d %s]', size(value,1), size(value,2), class(value)), ...
+            sprintf(['[' dformat ' %s]'], dims, class(value)), ...
             keySize, ...
             valueSize);
     elseif ischar(value)
@@ -372,7 +413,7 @@ function printStruct(key, value, keySize, delta, valueSize)
     	% print anything else
         printKeyValue( ...
         	key, ...
-            sprintf('[%dx%d %s]', size(value,1), size(value,2), class(value)), ...
+            sprintf(['[' dformat ' %s]'], dims, class(value)), ...
             keySize, ...
             valueSize);
     end %if

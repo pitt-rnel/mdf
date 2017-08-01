@@ -30,7 +30,7 @@ function res = rmChild(obj, prop, child)
         [uuid, ochild] = mdf.getUAO(child);
         %
         % find child in list
-        pos = find(strcmp(obj.mdf_def.mdf_children.(prop).mdf_uuid,uuid));
+        pos = find(strcmp({obj.mdf_def.mdf_children.(prop).mdf_uuid},uuid));
         if isempty(pos)
            throw(MException('mdfObj:rmChild','Child uuid not found in children property.')); 
         end %if

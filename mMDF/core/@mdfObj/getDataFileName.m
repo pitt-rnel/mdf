@@ -39,4 +39,7 @@ function dfn = getDataFileName(obj,filtered)
     if filtered
         dfn = mdfConf.sfilter(dfn);
     end %if
+    
+    % seth correct file separator
+    dfn = strjoin(strsplit(dfn,{'\','/'}),filesep);
 end %function

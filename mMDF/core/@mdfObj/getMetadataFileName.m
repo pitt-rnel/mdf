@@ -39,4 +39,7 @@ function mfn = getMetadataFileName(obj,filtered)
     if filtered
         mfn = mdfConf.sfilter(mfn);
     end %if
+    
+    % seth correct file separator
+    mfn = strjoin(strsplit(mfn,{'\','/'}),filesep);
 end %function
