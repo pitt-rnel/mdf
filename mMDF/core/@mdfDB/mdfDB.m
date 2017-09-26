@@ -70,6 +70,7 @@ classdef (Sealed) mdfDB < handle
         res = insert(obj,query)
         res = update(obj,query,values)
         res = getCollStats(obj)
+        res = aggregate(obj)
     end
     
     methods (Static)
