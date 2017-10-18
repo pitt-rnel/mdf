@@ -23,12 +23,12 @@ function res = getFiles(obj,filtered)
     
     % prepare output
     res = struct();
+    res.data = strjoin(strsplit(obj.getDataFileName(filtered),{'\','/'}),filesep);
+    res.metadata = strjoin(strsplit(obj.getMetadataFileName(filtered),{'\','/'}),filesep);
     if filtered
         res.base = strjoin(strsplit(mdfConf.sfilter(obj.mdf_def.mdf_files.mdf_base),{'\','/'}),filesep);
     else
         res.base = strjoin(strsplit(obj.mdf_def.mdf_files.mdf_base,{'\','/'}),filesep);
     end %if
-    res.data = strjoin(strsplit(obj.getDataFileName(filtered),{'\','/'}),filesep);
-    res.metadata = strjoin(strsplit(obj.getMetadataFileName(filtered),{'\','/'}),filesep);
 
 end %function

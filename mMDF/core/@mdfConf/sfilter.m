@@ -15,9 +15,9 @@ function outstring = sfilter(instring)
     %
     
     % retrieve mdfconf object
-    omdfc = mdfConf.getInstance();
+    oc = mdfConf.getInstance();
     
     % call filter method on object
-    outstring = omdfc.filter(instring);
+    outstring = oc.filter(instring);
     
 end %function

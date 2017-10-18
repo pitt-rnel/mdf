@@ -5,21 +5,21 @@ function outdata = load(indata)
     %
     % input:
     %   indata = single string or structure with one of the following fields
-    %   - uuid   : if this field is specified, loads the object defined by this uuid
-    %              uuid takes precedence over any other field
-    %   - file   : if this field is defined, loads the object defined in the file itself
-    %              file takes precedence over everything other field, after uuid
-    %   - json   : if this field is defiend, loads the object directly
-    %              converting the json string associated to object
-    %   - <type> : object type. users can specify a condition for a specific metadata fields
-    %              each condition will be applied in AND with the others.
-    %              if there are multiple values for each conditions, each value with be applied in OR
+    %   - uuid    : if this field is specified, loads the object defined by this uuid
+    %               uuid takes precedence over any other field
+    %   - file    : if this field is defined, loads the object defined in the file itself
+    %               file takes precedence over everything other field, after uuid
+    %   - json    : if this field is defiend, loads the object directly
+    %               converting the json string associated to object
+    %   - <field> : field values. Users can specify a condition for a specific metadata fields.
+    %               each condition will be applied in AND with the others.
+    %               if there are multiple values for each conditions, each value with be applied in OR
     %
-    %            If indata is a string, it will be converted to a structure internally and the 
-    %            input value will be assigned to uuid and file
+    %               If indata is a string, it will be converted to a structure internally and the 
+    %              input value will be assigned to uuid and file
     %
     % output 
-    %   outdata = RF object instance fully populated
+    %   outdata = MDF object instance fully populated
 
     % check if we got a string in input
     if isa(indata,'char')
