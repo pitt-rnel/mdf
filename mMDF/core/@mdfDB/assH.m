@@ -10,45 +10,49 @@ function res = assH(obj,indata)
     % output
     % - res : ?
     %
-
-        %
-        % <habitat>
-        %  <uuid>1ec528de-f5ee-4ecd-be3f-3fae08ebf65c</uuid>
-        %  <name>mdf test files repo</name>
-        %  <connector>mdf_yaml</connector>
-        %  <type>files</type>
-        %  <mode>batch</mode>
-        %  <access>rw</access>
-        %  <base relative_path_to="DATA_BASE"></base>
-        %  <group>vmd</group>
-        %  <components>
-        %   <component>mdf_all</component>
-        %  </components>
-        %  <objects>
-        %   <object>mdf_all</object>
-        %  </objects>
-        % </habitat>
-        % <habitat>
-        %  <uuid>1ec528de-f5ee-4ecd-be3f-3fae18ebf65c</uuid>
-        %  <name>mdf test collection 1</name>
-        %  <loadOnInit>true</loadOnInit>
-        %  <connector>mdf_mongodb</connector>
-        %  <type>db</type>
-        %  <mode>live</mode>
-        %  <access>rw</access>
-        %  <host>localhost</host>
-        %  <port>27017</port>
-        %  <database>mdf_test</database>
-        %  <collection>mdf_test_1</collection>
-        %  <group>vmd</group>
-        %  <components>
-        %   <component>mdf_def_metadata</component>
-        %  </components>
-        %  <objects>
-        %   <object>mdf_all</object>
-        %  </objects>
-        % </habitat>
-        %
+    %
+    %
+    % <habitat>
+    %  <uuid>1ec528de-f5ee-4ecd-be3f-3fae08ebf65c</uuid>
+    %  <name>mdf test files repo</name>
+    %  <connector>mdf_yaml</connector>
+    %  <type>files</type> --> defined in the connector itself
+    %  <mode>batch</mode>
+    %  <access>rw</access>
+    %  <base relative_path_to="DATA_BASE"></base>
+    %  <accept>
+    %   <item>
+    %    <group>vmd</group>
+    %    <object>mdf_all</object>
+    %    <component>mdf_all</component>
+    %   </item>
+    %   <item>vmd.mdf_all.mdf_all</item>
+    %  </accept>
+    % </habitat>
+    %
+    %
+    % <habitat>
+    %  <uuid>1ec528de-f5ee-4ecd-be3f-3fae18ebf65c</uuid>
+    %  <name>mdf test collection 1</name>
+    %  <loadOnInit>true</loadOnInit>
+    %  <connector>mdf_mongodb</connector>
+    %  <type>db</type> --> defined in the connector itself
+    %  <mode>live</mode>
+    %  <access>rw</access>
+    %  <host>localhost</host>
+    %  <port>27017</port>
+    %  <database>mdf_test</database>
+    %  <collection>mdf_test_1</collection>
+    %  <accept>
+    %   <item>
+    %    <group>vmd</group>
+    %    <object>mdf_all</object>
+    %    <component>mdf_def_metadata</component>
+    %   </item>
+    %   <item>vmd.mdf_all.mdf_def_metadata</item>
+    %  </accept>
+    % </habitat>
+    %
 
 
     % key
@@ -75,6 +79,15 @@ function res = assH(obj,indata)
     %
     % - save only data property named wf of mdf object type ql_message in the documents
     % > vmd.ql_message.mdf_data.wf -> 1ec528de-f5ee-4ecd-be3f-3fae08ebf65c
+
+
+    %
+    % Input
+    % vmd.ql_message.mdf_mdm 
+    %  -> vmd.mdf_all.mdf_all = vmf\..+\..*
+    %  -> vmd.mdf_all.mdf_dmd = vmf\..+\.[mdf_def|mdf_md|mdf_dmd|mdf_metadata]
+    %  -> vmd.mdf_all.mdf_data = vmf\..*\.[mdf_data|mdf_d]
+    %
 
     res = {};
 

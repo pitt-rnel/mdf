@@ -31,7 +31,7 @@ function res = connect(obj)
     % force re-instantiation flag
     ri = false;
 
-	% update connection info if needed and set reinstantiation flag
+    % update connection info if needed and set reinstantiation flag
     % host
     temp = oc.getConstant('DB_HOST','value',mdfDB.DEFAULT_HOST); 
     if ~strcmp(obj.host,temp)

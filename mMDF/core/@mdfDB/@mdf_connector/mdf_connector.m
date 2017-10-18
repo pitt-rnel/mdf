@@ -5,11 +5,19 @@ classdef (Sealed) mdf_connector < handle
         % it is the number used when you want to order the habitats
         % to run a query on all of them
         sqrw = 0;
+        %
+        % habitat configuration
+        habitat = [];
+        %
+        % selection string
+        selectionString = '';
     end
 
     methods
-        function obj = mdf_connector
+        function obj = mdf_connector(habitat)
             % constructor
+            obj.habitat = habitat;
+            obj.getSS();
         end
     end
 
@@ -32,6 +40,26 @@ classdef (Sealed) mdf_connector < handle
             % this function is place mark for getsqrtw
             res = obj.getOps();
         end %function
+        %
+        % 
+        function ss = getSS(obj)
+            if isempty(obj.selectionString)
+                % prepare selector string and habuuid
+                for i1 = [1:length(obj.habitat.objects.object)]
+                    for i2 = [1:length(obj.habitat.components.component)]
+ 
+                        % connection string:
+                        % group.object.component[:data-prop]
+                        res{end+1} = [ ...
+                            obj.habitat.group ':' ...
+                            obj.habitat.objects.object{i1} ':' ...
+                            obj.habitat.components.component{i2} ];
+                    end %for
+                end %for
+            end %if
+            ss = obj.selectionString;
+        end %function
+
     end
 
     methods (Abstract)

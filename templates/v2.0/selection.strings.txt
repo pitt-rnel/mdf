@@ -1,0 +1,53 @@
+#
+# selection strings example given the habitat configuration
+# <group>:<object>:<component>[:<data>]
+#
+
+   <habitat>
+    <uuid>1ec528de-f5ee-4ecd-be3f-3fae08ebf65c</uuid>
+    <name>mdf test files repo</name>
+    <connector>mdf_yaml</connector>
+    <type>files</type>
+    <mode>batch</mode>
+    <access>rw</access>
+    <base relative_path_to="DATA_BASE"></base>
+    <group>vmd</group>
+    <components>
+     <component>mdf_def_metadata</component>
+     <component>mdf_data</component>
+    </components>
+    <objects>
+     <object>mdf_all</object>
+    </objects>
+
+vmd:mdf_all:mdf_def_metadata -> for every object save def and metadata together
+vmd:mdf_all:mdf_data -> for every object save all the data in their own document
+
+
+
+
+  <habitat>
+    <uuid>1ec528de-f5ee-4ecd-be3f-3fae18ebf65c</uuid>
+    <name>mdf test collection 1</name>
+    <loadOnInit>true</loadOnInit>
+    <connector>mdf_mongodb</connector>
+    <type>db</type>
+    <mode>sync</mode>
+    <access>rw</access>
+    <host>localhost</host>
+    <port>27017</port>
+    <database>mdf_test</database>
+    <collection>mdf_test_1</collection>
+    <group>vmd</group>
+    <components>
+     <component>mdf_def_metadata</component>
+    </components>
+    <objects>
+     <object>mdf_all</object>
+    </objects>
+   </habitat>
+
+
+vmd:mdf_all:mdf_def_metadata -> in this habitat save only def and metadata together in one document
+
+

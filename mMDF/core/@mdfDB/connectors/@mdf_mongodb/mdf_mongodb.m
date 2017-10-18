@@ -39,17 +39,33 @@ classdef (Sealed) mdf_mongodb < mdf_connector
     end
 
     methods
+        % connect to the database 
         res = connect(obj)
+        % check if the collection handle is valid
         res = isValidCollection(obj)
+        % check if the connection to the mongo instance is valid
         res = isValidConnection(obj)
+        % check if the database handle is valid
         res = isValidDatabase(obj)
+        % check if connection, database and collection handles are valid
         res = isValid.m(obj)
+        % search and return onbject founds 
         res = find(obj,query,projection,sort)
+        % delete objects according to query. placemark for remove
         res = delete(obj,query)
+        % remove objects according to query
+        res = remove(obj,query)
+        % ??
         res = save(obj,query)
+        % we should combine the next two with an upsert
+        % insert records in database
         res = insert(obj,query)
+        % update record in database
         res = update(obj,query,values)
+        % return object types in this ecosystem and how many of them
         res = getCollStats(obj)
+        % return list of methods available
+        % MN: find if we can place it in the abstract class
         res = getMethods(obj)
     end
     

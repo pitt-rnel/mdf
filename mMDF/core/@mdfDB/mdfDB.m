@@ -65,7 +65,7 @@ classdef (Sealed) mdfDB < handle
             % return singleton object
             % input
             % - conf: (string) "release". Delete singleton object
-            %         none or (string) "mdf". use mdfConf habitats
+            %         none or (string) "mdf" or "auto". use mdfConf habitats
             %         (struct) local configuration (mostly for debug/testing)
             %
             mlock;

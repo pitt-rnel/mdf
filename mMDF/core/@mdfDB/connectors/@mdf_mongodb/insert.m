@@ -27,6 +27,7 @@ function res = insert(obj,records)
     wc = com.mongodb.WriteConcern(1);
 
     % loop on all the records to be inserted
+    % MN: can we insert them all tegether
     for i = 1:length(records)
         % extract record to be inserted in db
         record = records{i};
