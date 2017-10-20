@@ -9,7 +9,10 @@ function len = getLen(obj,property,type)
     % - property: (string) name of the property which we on the length of
     % - type: (string) type of the property
     %         allowed values: 
-
+    %         * children
+    %         * links
+    %
+    
     % initialize output an dinternal variables
     len = nan;
     pv = nan;

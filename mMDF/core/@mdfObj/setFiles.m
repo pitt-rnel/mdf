@@ -1,18 +1,33 @@
-function res = setFiles(obj,indata)
-    % function res = obj.setFiles(indata)
+function res = setFiles(obj,indata,reset)
+    % function res = obj.setFiles(indata,reset)
     %
     % set files where data is going to be saved
-    % if indata is a string, it is assumed that it is the base path used to
-    % build data and metadata file names
-    % if it is a structure, it has to contain the following fields:
-    %  base, data, metadata
-    % In this case base is not used. Data is the file name for the .mat
-    % data file, whgile metadata is the file name of the yaml metadata file
+    %
+    % INPUT
+    % - indata : (string) user has specified the base path used to
+    %            build data and metadata file names
+    %            (struct) user has passed a structure in input. 
+    %            It has to contain the following fields:
+    %            * base, 
+    %            * data, 
+    %            * metadata
+    %            In this case base is not used, but saved anyway. 
+    %            Data is the file name for the .mat data file, 
+    %            while metadata is the file name of the yaml metadata file
+    %
+    % - reset : (boolean) is indata is a string, indicate that the file
+    %           names should be cleared before performing the assignment.
+    %           it is ignored owtherwise
     
     res = false;
     
     switch class(indata)
         case 'char'
+        	% check if we need to reset
+            if nargin > 2 && reset
+                obj.resetFiles();
+            end %if
+
             % we got base path
             obj.mdf_def.mdf_files.mdf_base = indata;
             

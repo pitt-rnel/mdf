@@ -13,7 +13,7 @@ function outstring = filter(obj,instring)
     %
     
     % define constants pattern
-    cp = '<[A-Z][A-Z_]+>';
+    cp = '<[A-Z][A-Z_\.]+>';
     
     % find all the instances of constants
     [ib,ie] = regexp(instring,cp);
@@ -30,12 +30,16 @@ function outstring = filter(obj,instring)
         pf = instring(ib(i):ie(i));
         cn = instring(ib(i)+1:ie(i)-1);
         
-        % check if constant exists
-        if isfield(C,cn)
+        try
+            % try to get the value for the constant
+            sv = eval(['C.' cn]);
             % constant found
-            
+            %
             % substitute in output string
-            outstring = regexprep(outstring,pf,C.(cn));
+            outstring = regexprep(outstring,pf,sv);
+        catch
+            % nothing to do
+            % constant not found, no substitution done
         end %if
         
     end %for

@@ -37,7 +37,42 @@ classdef mdfObj < handle
     % methods defined here 
     methods
         % class constructor
-        function obj = mdfObj()
+        function obj = mdfObj(argin1,argin2)
+            
+            if nargin > 0
+                % we got some input
+                if ischar(argin1)
+                	% we assume that we got 
+                    obj.type = argin1;
+                    if nargin > 1
+                        % we got the uuid from the user
+                        obj.uuid = argin2;
+                    else
+                        obj.uuid = mdf.UUID();
+                    end %if
+                    
+                elseif isstruct(argin1)
+                    if isfield(argin1,'type')
+                        obj.type = argin1.type;
+                    else
+                        obj.type = 'Standard';
+                    end %if
+                    if isfield(argin1,'uuid')
+                        obj.uuid = argin.uuid;
+                    else
+                        obj.uuid = mdf.UUID();
+                    end %if
+                else
+                    % nothing to do
+                    % do not set anything
+                    % we leave the object empty
+                end %if
+            else
+                % no input arguments
+                obj.type = 'Standard';
+                obj.uuid = mdf.UUID();
+            end %if
+            
             % add listners for data and metadata, children and parents
             addlistener(obj,'type','PostSet',@mdfObj.handlePropChanges);
             addlistener(obj,'uuid','PreSet',@mdfObj.handlePropChanges);
@@ -80,7 +115,7 @@ classdef mdfObj < handle
         res = save(obj,timing);
         disp(obj,type);
         setDataInfo(obj,field, value);
-        res = setFiles(obj,indata);
+        res = setFiles(obj,indata,reset);
         res = getFiles(obj,filtered);
         res = getDataFileName(obj,filtered);
         res = getMetadataFileName(obj,filtered);
@@ -91,6 +126,8 @@ classdef mdfObj < handle
         res = size(obj);
         outdata = getUuids(obj,group,property,format);
         len = getLen(obj,property);
+        res = listDataProperties();
+        res = ldp();
     end %methods
 
     % static methods defined here

@@ -210,7 +210,7 @@ classdef (Sealed) mdf < handle
         % unload/remove object from memory
         res = unload(indata);
         % load object in memory
-        outdata = load(indata);
+        outdata = load(varargin);
         % convert cell to struct
         outdata = c2s(indata);
         % given uuid or object, returns both
