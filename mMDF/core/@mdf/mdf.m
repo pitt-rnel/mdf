@@ -67,7 +67,7 @@ classdef (Sealed) mdf < handle
                         confSel = varargin{1}.confSel;
                     end %if
                 end %if
-            else nargin > 1
+            elseif nargin > 1
                 % we got 2 or more arguments
                 % we assume that first one is the file namefor the
                 % configuration file and the second is the configuration
