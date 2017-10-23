@@ -12,6 +12,11 @@ function len = getLen(obj,property,type)
     %         * children
     %         * links
     %
+    % Output:
+    % - len: (integer) number of items present under the property requested
+    %        it will return NaN if the property does not exists, 0 if the
+    %        property is empty
+    %
     
     % initialize output an dinternal variables
     len = nan;

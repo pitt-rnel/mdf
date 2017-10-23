@@ -38,7 +38,39 @@ classdef mdfObj < handle
     methods
         % class constructor
         function obj = mdfObj(argin1,argin2)
+                        
+            % add listners for data and metadata, children and parents
+            addlistener(obj,'type','PostSet',@mdfObj.handlePropChanges);
+            addlistener(obj,'uuid','PreSet',@mdfObj.handlePropChanges);
+            addlistener(obj,'uuid','PostSet',@mdfObj.handlePropChanges);
+            addlistener(obj,'vuuid','PostSet',@mdfObj.handlePropChanges);
+            addlistener(obj,'created','PostSet',@mdfObj.handlePropChanges);
+            addlistener(obj,'modified','PostSet',@mdfObj.handlePropChanges);
+            %addlistener(obj,'file','PostSet',@mdfObj.handlePropChanges);
+            %addlistener(obj,'data','PostSet',@mdfObj.handlePropChanges);
+            %addlistener(obj,'metadata','PostSet',@mdfObj.handlePropChanges);
+            %addlistener(obj,'children','PostSet',@mdfObj.handlePropChanges);
+            %addlistener(obj,'parents','PostSet',@mdfObj.handlePropChanges);
+            %addlistener(obj,'def','PostSet',@mdfObj.handlePropChanges);
+            % set properties that cannot be set above
+            % not sure why
+            obj.mdf_def.mdf_files.mdf_base = '';
+            obj.mdf_def.mdf_files.mdf_data = '';
+            obj.mdf_def.mdf_files.mdf_metadata = '';
+            obj.mdf_def.mdf_data.mdf_fields = {};
+            obj.mdf_def.mdf_children.mdf_fields = {};
+            obj.mdf_def.mdf_children.mdf_types = {};
+            obj.mdf_def.mdf_links.mdf_fields = {};
+            obj.mdf_def.mdf_links.mdf_types = {};
+            obj.mdf_def.mdf_links.mdf_directions = {};
+            obj.status.loaded.data = struct();
+            obj.status.changed.data = struct();
+            obj.status.changed.metadata = 0;
+            obj.status.changed.type = 0;
+            obj.status.changed.uuid = 0;
+            obj.status.p_uuids = {};
             
+            % process input arguments
             if nargin > 0
                 % we got some input
                 if ischar(argin1)
@@ -72,37 +104,8 @@ classdef mdfObj < handle
                 obj.type = 'Standard';
                 obj.uuid = mdf.UUID();
             end %if
+
             
-            % add listners for data and metadata, children and parents
-            addlistener(obj,'type','PostSet',@mdfObj.handlePropChanges);
-            addlistener(obj,'uuid','PreSet',@mdfObj.handlePropChanges);
-            addlistener(obj,'uuid','PostSet',@mdfObj.handlePropChanges);
-            addlistener(obj,'vuuid','PostSet',@mdfObj.handlePropChanges);
-            addlistener(obj,'created','PostSet',@mdfObj.handlePropChanges);
-            addlistener(obj,'modified','PostSet',@mdfObj.handlePropChanges);
-            %addlistener(obj,'file','PostSet',@mdfObj.handlePropChanges);
-            %addlistener(obj,'data','PostSet',@mdfObj.handlePropChanges);
-            %addlistener(obj,'metadata','PostSet',@mdfObj.handlePropChanges);
-            %addlistener(obj,'children','PostSet',@mdfObj.handlePropChanges);
-            %addlistener(obj,'parents','PostSet',@mdfObj.handlePropChanges);
-            %addlistener(obj,'def','PostSet',@mdfObj.handlePropChanges);
-            % set properties that cannot be set above
-            % not sure why
-            obj.mdf_def.mdf_files.mdf_base = '';
-            obj.mdf_def.mdf_files.mdf_data = '';
-            obj.mdf_def.mdf_files.mdf_metadata = '';
-            obj.mdf_def.mdf_data.mdf_fields = {};
-            obj.mdf_def.mdf_children.mdf_fields = {};
-            obj.mdf_def.mdf_children.mdf_types = {};
-            obj.mdf_def.mdf_links.mdf_fields = {};
-            obj.mdf_def.mdf_links.mdf_types = {};
-            obj.mdf_def.mdf_links.mdf_directions = {};
-            obj.status.loaded.data = struct();
-            obj.status.changed.data = struct();
-            obj.status.changed.metadata = 0;
-            obj.status.changed.type = 0;
-            obj.status.changed.uuid = 0;
-            obj.status.p_uuids = {};
             % set creation
             obj.created = datestr(now,'yyyy-mm-dd HH:MM:SS');
         end %function
@@ -122,12 +125,12 @@ classdef mdfObj < handle
         res = getDFN(obj,filtered);
         res = getMFN(obj,filtered);
         res = remove(obj);
-        res = getSize(obj,details);      
+        res = getSize(obj,details);   
         res = size(obj);
         outdata = getUuids(obj,group,property,format);
-        len = getLen(obj,property);
-        res = listDataProperties();
-        res = ldp();
+        len = getLen(obj,property,type);
+        res = listDataProperties(obj);
+        res = ldp(obj);
     end %methods
 
     % static methods defined here

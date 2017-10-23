@@ -1,4 +1,4 @@
-function res = resFiles(obj)
+function res = resetFiles(obj)
     % function res = obj.resetFiles(indata)
     %
     % reset file names.
