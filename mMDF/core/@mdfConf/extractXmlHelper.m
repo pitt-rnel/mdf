@@ -54,13 +54,14 @@ function S = extractXmlHelper(obj,items)
                     % prepended to current value
                     % also checks if we have a corresponding value to
                     % prepend
-                    if ( isfield(attributes,'relative_path_to') && ...
-                            ~isempty(attributes.relative_path_to) && ...
-                            isfield(obj.temp.tokens,attributes.relative_path_to) && ...
-                            ~isempty(obj.temp.tokens.(attributes.relative_path_to)) && ...
-                            isa(obj.temp.tokens.(attributes.relative_path_to),'char') )
-                        % concatenate relative path and current value
-                        value = fullfile(obj.temp.tokens.(attributes.relative_path_to), value);
+                     if ( isfield(attributes,'relative_path_to') && ...
+                             ~isempty(attributes.relative_path_to) )
+                         try
+                            % concatenate relative path and current value
+                            eval(['value = fullfile(obj.temp.tokens.' attributes.relative_path_to ', value);']);
+                         catch
+                             % noop
+                         end %try/catch
                     elseif ( isfield(attributes,'type')  && ...
                                 ~isempty(attributes.type) && ...
                                 strcmp(attributes.type,'numeric') )
@@ -70,10 +71,7 @@ function S = extractXmlHelper(obj,items)
                             value = str2num(value);
                         end     
                     end
-                    
-                    % insert value in values for future substitutions
-                    obj.temp.tokens.(name) = value;
-                    
+                                        
                     % give that is a string
                     % check if there is already another value in the
                     % structure, convert to array and uppend
@@ -93,6 +91,10 @@ function S = extractXmlHelper(obj,items)
                         % new field
                         S.(name) = value;
                     end
+                
+                    % insert last available value in values for future substitutions
+                    obj.temp.tokens.(name) = S.(name);;
+
                 elseif isa(value,'struct')
                     % check if field already exists
                     if isfield(S,name)
@@ -122,6 +124,15 @@ function S = extractXmlHelper(obj,items)
                     % over-write old values
                     S.(name) = value;
                 end
+                
+                % check if we need to make it available as a token
+                % it over writes the standard token for single values
+                if ( isfield(attributes,'available_as') && ...
+                    ~isempty(attributes.available_as) )
+                    % save it in the proper properties
+                    obj.temp.tokens.(attributes.available_as) = S.(name);
+                end %if
+                
                 
                 % check if we have attribute 'present_as'
                 if ( isfield(attributes,'present_as') && ...

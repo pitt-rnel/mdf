@@ -20,6 +20,12 @@ classdef mdfConf < handle
         % temporary structure used when building configuration structure
         temp;
         
+        % list of available containers ad collections for menu purpose
+        menu;
+        
+        % list of available values specified with the attribute available
+        availables;
+        
         % configuration selected
         selection = 0;
         
@@ -101,19 +107,19 @@ classdef mdfConf < handle
     
                     % check if we have menutype in input and if it has
                     % a valid value
-                    if ( isfield(conf,'menuType') && ...
-                            ~isempty(find(cellfun(@(s)any(strcmp(s,conf.menuType)),obj.menuTypeList))) )
-                        % save menu type
-                        obj.menuType = conf.menuType;
-                    end %if
+                    %if ( isfield(conf,'menuType') && ...
+                    %        ~isempty(find(cellfun(@(s)any(strcmp(s,conf.menuType)),obj.menuTypeList))) )
+                    %    % save menu type
+                    %    obj.menuType = conf.menuType;
+                    %end %if
                         
                     % check if we have a selection in input and if it
                     % has a valid value
-                    if ( isfield(conf,'selection') && ...
-                            isnumeric(conf.selection) )
-                        % save menu type
-                        obj.selection = conf.selection;
-                    end %if
+                    %if ( isfield(conf,'selection') && ...
+                    %        isnumeric(conf.selection) )
+                    %    % save menu type
+                    %    obj.selection = conf.selection;
+                    %end %if
                 end %if
             end %if
     
@@ -176,7 +182,11 @@ classdef mdfConf < handle
                     obj.extract();
                     if ( step > 3 )
                         % select configuration
-                        obj.select();
+                        if isfield(conf,'selection')
+                            obj.select(conf.selection);
+                        else
+                            obj.select();
+                        end %if
                         if ( step > 4 )
                             % start database
                             obj.start();
@@ -382,14 +392,37 @@ classdef mdfConf < handle
         % if no selection is given, it will present a menu at console
         select(obj,selection);
 
-        % if name is provided, it return data for that specific configuration,
-        % otherwise returns current selected configuration if any
-        C = getConf(obj,selection);
+        % if human or machine name or index is provided, it return data for that specific collection,
+        % otherwise returns complete configuration
+        C = getConf(obj,varargin);
         
-        % returns just the constants tree of the selected configuration
-        % if a selection name is provided, it will return that
-        % configuration
-        C = getC(obj,selection);
+        % returns constants tree of the selected collection
+        % if a collection name is provided, it will return constants for
+        % the selected collection, otherwise it will return the global
+        % constants
+        % if all is specified, all the constants will be returned
+        C = getEnv(obj,selection);
+
+        %
+        % return a single constant from a spacific constant space
+        C = getC(obj,constant,selection);
+
+        %
+        % return all collections or just the one selected
+        C = getColls(obj);
+        C = getColl(obj,selection);
+        
+        % return all containers configured within a collection
+        C = getCollConts(obj,collid);
+        C = getCollCont(obj,collid,contid);
+        
+        % return containers included in configuration
+        C = getConts(obj);
+        C = getCont(obj,contid);
+
+        %
+        % return the configuration version
+        V = getVersion(obj);
         
         % get all data
         D = getData(obj);

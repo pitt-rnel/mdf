@@ -25,9 +25,9 @@ function [n, varargout]  = getSelection(obj)
         if nargout > 1
             % prepare additional output
             varargout = cell(1,min(nargout,3));
-            varargout{1} = {obj.menu.collections(obj.selection).machine_name};
+            varargout{1} = {obj.menu.collections(obj.selection).human_name};
             if (nargout > 2 )
-                 varargout{2} = obj.selection;
+                 varargout{2} = obj.selection;         
             end 
         end
     end    
