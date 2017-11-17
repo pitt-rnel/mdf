@@ -423,7 +423,11 @@ classdef mdfConf < handle
         %
         % return the configuration version
         V = getVersion(obj);
-        
+       
+        %
+        % set which container is selected
+        setContSel(obj);
+ 
         % get all data
         D = getData(obj);
         

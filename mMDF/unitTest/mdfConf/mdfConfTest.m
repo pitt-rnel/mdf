@@ -99,22 +99,32 @@ classdef mdfConfTest < matlab.unittest.TestCase
             % set by struct
             obj.select( ...
                 struct( ...
-                	'collection', {obj.menu.collections.human_name}, ...
+                    'collection', {obj.menu.collections.human_name}, ...
                     'selected', 0));
+            % get selection
+            sel = obj.getSelection();
             % test if all of them has been unselected
-            testCase.verifyEqual(obj.selection,logical([0 0]));
+            testCase.verifyEqual(isempty(sel),true);
             %
             % select by index
             collId = 1;
             obj.select(collId);
-            % test that file has been loaded
-            testCase.verifyEqual(obj.selection(collId),true);
+            % get selection
+            sel = obj.getSelection();
+            % test that we have 1 collection selected
+            testCase.verifyEqual(length(sel),1);
+            % test that the collection selected is the right one
+            testCase.verifyEqual(sel(collId).uuid,obj.menu.collections(collId).uuid);
             %
             % select by machine name
             collId = 2;
             obj.select(obj.menu.collections(collId).machine_name);
+            % get selection
+            sel = obj.getSelection();
+            % test that we have 2 collections selected
+            testCase.verifyEqual(length(sel),2);
             % test that file has been loaded
-            testCase.verifyEqual(obj.selection(collId),true);
+            testCase.verifyEqual(sel(collId).uuid,obj.menu.collections(collId).uuid);
             
             % delete singleton)
             mdfConf.getInstance('release');
@@ -128,7 +138,8 @@ classdef mdfConfTest < matlab.unittest.TestCase
             % check that the conf has been read
             testCase.verifyClass(obj.confData,'struct');
             % check that selection is correct
-            testCase.verifyEqual(obj.selection,logical([1 1]));
+            sel = obj.getSelection();
+            testCase.verifyEqual(length(sel),2);
             % check that we get the configuration back 
             testCase.verifyClass(obj.confData,'struct');
 

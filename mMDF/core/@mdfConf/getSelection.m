@@ -1,35 +1,36 @@
-function [n, varargout]  = getSelection(obj)
-    % [n, m, i] = mdfConf.getSelection(obj)
+function outdata   = getSelection(obj)
+    % outdata = mdfConf.getSelection(obj)
     %
     % return which collections are set to be open at startup
     %
     % output
-    %   n = configuration human name
-    %   m = (optional) configuration machine name
-    %   i = (optional) configuration index in names array
+    %   uuid = selected configuration uuid
+    %   human_name = selected configuration human name
+    %   machine_name = selected configuration machine name
+    %   index = selected configuration index in names array
     %
     
-    % check if
-    % - we already loaded the configuration
-    % - select one configuration
-    if ( ~isempty(obj.selection) && ...
-            ~isempty(obj.confData) && ...
-            isa(obj.confData,'struct') && ...
-            isfield(obj.confData,'collections') && ...
-            isa(obj.confData.collections,'struct') && ...
-            isfield(obj.confData.collections,'collection') && ...
-            isa(obj.confData.collections.collection,'cell') )
-        % assign name
-        n = {obj.menu.collections(obj.selection).human_name};
-        % check if we need to prepare additional output
-        if nargout > 1
-            % prepare additional output
-            varargout = cell(1,min(nargout,3));
-            varargout{1} = {obj.menu.collections(obj.selection).machine_name};
-            if (nargout > 2 )
-                 varargout{2} = obj.selection;
-            end 
-        end
-    end    
-end
+    % we assume that the configuration is loaded
+    %
+    % initialize output
+    outdata = struct( ...
+        'uuid', [], ...
+        'human_name', [], ...
+        'machine_name', [], ...
+        'index', [] ...
+    );
+    outdata(end) = [];
+       
+    % loop on all the collections and return the ones that are selected
+    for i = 1:length(obj.menu.collections)
+        if obj.menu.collections(i).selected
+            outdata(end+1) = struct( ...
+                'uuid', obj.menu.collections(i).uuid, ...
+                'human_name', obj.menu.collections(i).human_name, ...
+                'machine_name',obj.menu.collections(i).machine_name, ...
+                'index', i ...
+            );
+        end %if
+    end %for
+end %function
 

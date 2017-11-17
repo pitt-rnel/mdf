@@ -85,8 +85,8 @@ function obj = select(obj,selection)
             end %if
         end %if
     
-        % set selection
-        obj.selection = logical([obj.menu.collections.selected]);
+        % set container selection
+        obj.setContSel();
     catch
         % configuration has not been loaded or is invalid
         throw(MException('mdfConf:select',...
