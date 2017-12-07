@@ -231,8 +231,11 @@ function outdata = load(indata)
             % metadata
             outdata(end).metadata = cdata.mdf_metadata;
             % create place marks for data properties
-            for i = 1:length(cdata.mdf_def.mdf_data.mdf_fields)
-                field = cdata.mdf_def.mdf_data.mdf_fields{i};
+            for q = 1:length(cdata.mdf_def.mdf_data.mdf_fields)
+                field = cdata.mdf_def.mdf_data.mdf_fields{q};
+                if isstruct(cdata.mdf_def.mdf_data.(field).mdf_mem)
+                    outdata(end).mdf_def.mdf_data.(field).mdf_mem = str2double(cdata.mdf_def.mdf_data.(field).mdf_mem.x0x24_numberLong);
+                end
                 outdata(end).data.(field) = [];
                 outdata(end).status.loaded.data.(field) = 0;
                 outdata(end).status.size.data.(field) = 0;
