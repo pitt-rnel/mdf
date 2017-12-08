@@ -69,7 +69,7 @@ classdef (Sealed) mdfDB < handle
         res = delete(obj,query)
         res = insert(obj,query)
         res = update(obj,query,values)
-        res = getCollStats(obj)
+        res = getCollStats(obj,varargin)
         res = aggregate(obj)
     end
     
