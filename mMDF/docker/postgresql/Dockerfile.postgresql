@@ -1,0 +1,90 @@
+# Dockerizing MongoDB: Dockerfile for building MongoDB images
+# Based on ubuntu:16.04, installs MongoDB following the instructions from:
+# http://docs.mongodb.org/manual/tutorial/install-mongodb-on-ubuntu/
+
+FROM ubuntu:16.04
+
+# File Author / Maintainer
+LABEL maintainer="Max Novelli"
+LABEL mantainer_email="man8@pitt.edu"
+LABEL organization="RNEL, Physical Medicine and Rehabilitation, University of Pittsburgh"
+LABEL organization_website="http://rnel.pitt.edu"
+LABEL image_name="rnel_posgresql:1.0"
+LABEL image_version="v1.0.alpha.1"
+LABEL service="postgresql"
+LABEL service_version="10.1"
+
+# postgres version to be installed
+ENV PG_MAJOR 10
+
+# Installation:
+# create rnel docker group and add mongodb user to the group
+RUN groupadd -g 15213 postgres
+RUN useradd -u 15213 -g 15213 postgres
+#RUN usermod -a -G ssl-cert postgres
+
+#
+# Add the PostgreSQL PGP key to verify their Debian packages.
+# It should be the same key as https://www.postgresql.org/media/keys/ACCC4CF8.asc
+RUN apt-key adv --keyserver hkp://p80.pool.sks-keyservers.net:80 --recv-keys B97B0AFCAA1A47F044F244A07FCC7D46ACCC4CF8
+
+# Add PostgreSQL's repository. It contains the most recent stable release
+#     of PostgreSQL, ``9.3``.
+RUN echo "deb http://apt.postgresql.org/pub/repos/apt/ xenial-pgdg main" | tee /etc/apt/sources.list.d/pgdg.list
+
+# Install ``python-software-properties``, ``software-properties-common`` and PostgreSQL 10.1
+#  There are some warnings (in red) that show up during the build. You can hide
+#  them by prefixing each apt-get statement with DEBIAN_FRONTEND=noninteractive
+RUN apt-get update
+RUN apt-get install -y python-software-properties software-properties-common postgresql-${PG_MAJOR} postgresql-client-${PG_MAJOR} postgresql-contrib-${PG_MAJOR}
+
+# Note: The official Debian and Ubuntu images automatically ``apt-get clean``
+# after each ``apt-get``
+
+
+# Create the MongoDB data directory
+RUN mkdir -p /mdf/postgresql/conf
+RUN mkdir -p /mdf/postgresql/db
+RUN mkdir -p /mdf/postgresql/log
+RUN chown -R postgres:postgres /mdf/postgresql
+RUN chmod -R ug+w /mdf/postgresql
+
+RUN mkdir -p /var/run/postgresql 
+RUN chown -R postgres:postgres /var/run/postgresql 
+RUN chmod 2777 /var/run/postgresql
+
+# Run the rest of the commands as the ``postgres`` user created by the ``postgres-9.3`` package when it was ``apt-get installed``
+USER postgres
+
+# environmental variables
+ENV PGDATA /rnel/postgresl/db
+#ENV POSTGRES_INITDB_ARGS
+#ENV POSTGRES_INITDB_WALLDIR
+ENV POSTGRES_PASSWORD docker
+ENV POSTGRES_USER docker
+ENV POSTGRES_DB docker
+ENV PATH /usr/lib/postgresql/$PG_MAJOR/bin:${PATH}
+
+# copy start up script
+COPY postgres_docker_entrypoint.sh /usr/local/bin
+
+# Create a PostgreSQL role named ``docker`` with ``docker`` as the password and
+# then create a database `docker` owned by the ``docker`` role.
+# Note: here we use ``&&\`` to run commands one after the other - the ``\``
+#       allows the RUN command to span multiple lines.
+#RUN    /etc/init.d/postgresql start &&\
+#    psql --command "CREATE USER docker WITH SUPERUSER PASSWORD 'docker';" &&\
+#    createdb -O docker docker
+
+# Expose the PostgreSQL port
+EXPOSE 5432
+
+# Set the default command to run when starting the container
+ENTRYPOINT ["postgres_docker_entrypoitn.sh"]
+CMD ["postgres"]
+
+# volumes
+VOLUME /mdf/postgresql/conf
+VOLUME /mdf/postgresql/db
+VOLUME /mdf/postgresql/log
+

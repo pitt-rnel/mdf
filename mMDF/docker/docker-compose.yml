@@ -1,0 +1,27 @@
+version: '3'
+services:
+  mdf_mongodb_dev:
+    container_name: mdf_mongodb_dev
+    image: rnel_mongodb:1.0
+    command:
+        - '--noauth'
+        - '-f'
+        - '/rnel/mongodb/conf/mongod.conf'
+    volumes:
+        - './mongodb/conf/mongod.conf:/rnel/mongodb/conf/mongod.conf'
+        - './mongodb/db:/rnel/mongodb/db'
+        - './mongodb/log:/rnel/mongodb/log'
+    ports:
+        - '15213:27017'
+  mdf_postgresql_dev:
+    container_name: mdf_postgresql_dev
+    image: rnel_postgresql:1.0
+    command:
+        - '--config-file=/rnel/postgresql/conf/postgresql.conf'
+    volumes:
+        - './postgresql/conf:/rnel/postgresql/conf'
+        - './postgresql/db:/rnel/postgresql/db'
+        - './postgresql/log:/rnel/postgresql/log'
+    ports:
+        - '15214:5432'
+
