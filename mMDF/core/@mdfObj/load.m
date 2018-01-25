@@ -5,21 +5,21 @@ function outdata = load(indata)
     %
     % input:
     %   indata = single string or structure with one of the following fields
-    %   - uuid   : if this field is specified, loads the object defined by this uuid
-    %              uuid takes precedence over any other field
-    %   - file   : if this field is defined, loads the object defined in the file itself
-    %              file takes precedence over everything other field, after uuid
-    %   - json   : if this field is defiend, loads the object directly
-    %              converting the json string associated to object
-    %   - <type> : object type. users can specify a condition for a specific metadata fields
-    %              each condition will be applied in AND with the others.
-    %              if there are multiple values for each conditions, each value with be applied in OR
+    %   - uuid    : if this field is specified, loads the object defined by this uuid
+    %               uuid takes precedence over any other field
+    %   - file    : if this field is defined, loads the object defined in the file itself
+    %               file takes precedence over everything other field, after uuid
+    %   - json    : if this field is defiend, loads the object directly
+    %               converting the json string associated to object
+    %   - <field> : field values. Users can specify a condition for a specific metadata fields.
+    %               each condition will be applied in AND with the others.
+    %               if there are multiple values for each conditions, each value with be applied in OR
     %
-    %            If indata is a string, it will be converted to a structure internally and the 
-    %            input value will be assigned to uuid and file
+    %               If indata is a string, it will be converted to a structure internally and the 
+    %              input value will be assigned to uuid and file
     %
     % output 
-    %   outdata = RF object instance fully populated
+    %   outdata = MDF object instance fully populated
 
     % check if we got a string in input
     if isa(indata,'char')
@@ -188,6 +188,13 @@ function outdata = load(indata)
 
         % initialize outdata
         outdata = [];
+        
+        % check if mdf_data is a cell
+        % if it is not a cell, most likely we loaded data from a single file
+        % converts it to a cell
+        if ~iscell(mdf_data)
+            mdf_data = {mdf_data};
+        end %if
 
         % loop on all the object found
         for i = 1:length(mdf_data)
@@ -230,8 +237,11 @@ function outdata = load(indata)
             % metadata
             outdata(end).metadata = cdata.mdf_metadata;
             % create place marks for data properties
-            for i = 1:length(cdata.mdf_def.mdf_data.mdf_fields)
-                field = cdata.mdf_def.mdf_data.mdf_fields{i};
+            for q = 1:length(cdata.mdf_def.mdf_data.mdf_fields)
+                field = cdata.mdf_def.mdf_data.mdf_fields{q};
+                if isstruct(cdata.mdf_def.mdf_data.(field).mdf_mem)
+                    outdata(end).mdf_def.mdf_data.(field).mdf_mem = str2double(cdata.mdf_def.mdf_data.(field).mdf_mem.x0x24_numberLong);
+                end
                 outdata(end).data.(field) = [];
                 outdata(end).status.loaded.data.(field) = 0;
                 outdata(end).status.size.data.(field) = 0;
@@ -245,6 +255,7 @@ function outdata = load(indata)
                 % convert the field
                 outdata(end).mdf_def.mdf_children.(field) = mdf.c2s(outdata(end).mdf_def.mdf_children.(field));
             end %for
+
             % convert each link list if needed
             for j = 1:length(outdata(end).mdf_def.mdf_links.mdf_fields)
                 % get the field name

@@ -55,12 +55,16 @@ function S = extractXmlHelper(obj,items)
                     % also checks if we have a corresponding value to
                     % prepend
                     if ( isfield(attributes,'relative_path_to') && ...
-                            ~isempty(attributes.relative_path_to) && ...
-                            isfield(obj.temp.tokens,attributes.relative_path_to) && ...
-                            ~isempty(obj.temp.tokens.(attributes.relative_path_to)) && ...
-                            isa(obj.temp.tokens.(attributes.relative_path_to),'char') )
-                        % concatenate relative path and current value
-                        value = fullfile(obj.temp.tokens.(attributes.relative_path_to), value);
+                            ~isempty(attributes.relative_path_to) )
+                        % make sure that relative_path_to does not have .
+                        relative_path_to = regexprep(attributes.relative_path_to,'\.','__');
+                        % now check if we have the token
+                        if ( isfield(obj.temp.tokens,relative_path_to) && ...
+                                ~isempty(obj.temp.tokens.(relative_path_to)) && ...
+                                isa(obj.temp.tokens.(relative_path_to),'char') )
+                            % concatenate relative path and current value
+                            value = fullfile(obj.temp.tokens.(relative_path_to), value);
+                        end %if
                     elseif ( isfield(attributes,'type')  && ...
                                 ~isempty(attributes.type) && ...
                                 strcmp(attributes.type,'numeric') )
@@ -71,8 +75,17 @@ function S = extractXmlHelper(obj,items)
                         end     
                     end
                     
+                    % check if user has specified token
+                    token_name = name;
+                    if ( isfield(attributes,'token_name') && ...
+                            ~isempty(attributes.token_name) )
+                        % make sure that relative_path_to does not have .
+                        token_name = attributes.token_name;
+                    end %if
+                    token_name = regexprep(token_name,'\.','__');
+                    
                     % insert value in values for future substitutions
-                    obj.temp.tokens.(name) = value;
+                    obj.temp.tokens.(token_name) = value;
                     
                     % give that is a string
                     % check if there is already another value in the

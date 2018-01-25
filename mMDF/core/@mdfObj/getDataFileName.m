@@ -28,7 +28,13 @@ function dfn = getDataFileName(obj,filtered)
                 isempty(obj.mdf_def.mdf_files.mdf_base)
             % base file path does not exists yet either
             % assign default one
-            obj.mdf_def.mdf_files.mdf_base = fullfile('<DATA_BASE>',['mdfobj.' obj.uuid]);
+            %obj.mdf_def.mdf_files.mdf_base = fullfile('<DATA_BASE>',['mdfobj.' obj.uuid]);
+            obj.mdf_def.mdf_files.mdf_base = ...
+                fullfile( ...
+                    '<DATA_BASE>', ...
+                    lower(obj.type), ...
+                    [obj.type '_' obj.uuid]);
+ 
         end %if
         % use basename to build data file name
         dfn = [obj.mdf_def.mdf_files.mdf_base '.data.mat'];
@@ -39,4 +45,7 @@ function dfn = getDataFileName(obj,filtered)
     if filtered
         dfn = mdfConf.sfilter(dfn);
     end %if
+    
+    % seth correct file separator
+    dfn = strjoin(strsplit(dfn,{'\','/'}),filesep);
 end %function

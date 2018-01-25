@@ -16,7 +16,7 @@ function object  = getByUUID(uuid)
 
     if ~empty(index)
         if max(size(index)) == 1
-            object = RF.objects[index];
+            object = RF.objects(index);
         else
             % we throw and error, there should not be multiple object with the same uuid
             throw MException('RL:getByUUID',['Error: multiple object found with same uuid ' uuid])

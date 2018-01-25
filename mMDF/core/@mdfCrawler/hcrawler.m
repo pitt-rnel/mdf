@@ -50,4 +50,6 @@ function res = hcrawler(obj,startObj)
     % build the new lists outdata
     obj.hList = obj.ihCrawler(obj.sobj,true);
     
+    res = 1;
+    
 end %function

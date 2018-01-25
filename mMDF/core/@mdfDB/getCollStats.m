@@ -1,14 +1,24 @@
-function outdata = getCollStats(obj)
+function outdata = getCollStats(obj,varargin)
     % function outdata = obj.getCollStats
     %
     % return which mdf type are present in the collection that we are
     % connected to and how many of each
+    %
+    % input
+    % - table  (boolean): should the results be printed in tabular form
+    %                     Default: false
     %
     % output
     % - outdata (struct): objects type and how many. It is a struct where
     %                     the keys are the type of objects and the value is 
     %                     how many of each type are present in the collection 
     %
+    
+    % check if user specified table argument
+    table = false;
+    if nargin >= 2
+        table = varargin{1};
+    end %if
     
     % improt correct java object
     import com.mongodb.BasicDBObject
@@ -43,4 +53,15 @@ function outdata = getCollStats(obj)
         outdata(i).mdf_type = row.get('_id');
         outdata(i).quantity = row.get('value');
     end %for
+    
+    % drop temp collection
+    tempcoll = obj.db.getCollection("obj_num");
+    tempcoll.drop();
+    
+    if table
+        format = "%20s %10";
+        disp(sprintf([format + "s"],"MDF object type","Quantity"));
+        disp(sprintf([format + "s"],"--------------------","----------"));
+        arrayfun(@(item) disp(sprintf([format + 'd'],item.mdf_type,item.quantity)),outdata);
+    end %if
 end %function

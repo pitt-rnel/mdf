@@ -1,7 +1,32 @@
-function outdata = load(indata)
-    % function outdata = mdf.load(indata)
+function outdata = load(varargin)
+    % function outdata = mdf.load(indata...)
     %
-    % please see mdfObj.load for help
+    % this function is a wrapper for mdfObj.load.
+    %
+    % Input:
+    %   - (string): uuid of the object that we would like to load
+    %   - (struct): structure with query fields and associated values
+    %               please see mdfObj.load for additional help
+    %   - list of pairs field,values to be translated in a struct, like in
+    %               the previous input. lengh of the list needs to be even
+    %
+    % please see mdfObj.load for additional help
+    
+    outdata = [];
+    indata = [];
+    
+    if nargin == 1
+        indata = varargin{1};
+    elseif mod(nargin,2) ~= 0
+        disp('Number of input arguments should be 1 or an even number of elements');
+        return
+    else
+        % convert input cell to struct
+        indata = struct();
+        for i=1:2:nargin
+            indata.(varargin{i}) = varargin{i+1};
+        end %for
+    end %if
     
     outdata = mdfObj.load(indata);
 end

@@ -39,11 +39,13 @@ function children = getChild(obj, prop, selector)
         indexes = find(strcmp(uuids,selector));
        
     elseif isstruct(selector)
-        % selctor is astruct, we pass it to the query method and see what
+        % selector is a struct, we pass it to the query method and see what
         % we get back
 
         % now we are ready to build the json query
         query = mdfDB.prepQuery(selector);
+        % retrieve database object
+        odb = mdfDB.getInstance();
         % runs query and hopes for the best
         mdf_data = odb.find(query);
         % extract uuids

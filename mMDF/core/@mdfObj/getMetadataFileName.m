@@ -28,7 +28,12 @@ function mfn = getMetadataFileName(obj,filtered)
                 isempty(obj.mdf_def.mdf_files.mdf_base)
             % base file path does not exists yet either
             % assign default one
-            obj.mdf_def.mdf_files.mdf_base = fullfile('<DATA_BASE>',['mdfobj.' obj.uuid]);
+            %obj.mdf_def.mdf_files.mdf_base = fullfile('<DATA_BASE>',['mdfobj.' obj.uuid]);
+            obj.mdf_def.mdf_files.mdf_base = ...
+                fullfile( ...
+                    '<DATA_BASE>', ...
+                    lower(obj.type), ...
+                    [obj.type '_' obj.uuid]);
         end %if
         % use basename to build data file name
         mfn = [obj.mdf_def.mdf_files.mdf_base '.md.yml'];
@@ -39,4 +44,7 @@ function mfn = getMetadataFileName(obj,filtered)
     if filtered
         mfn = mdfConf.sfilter(mfn);
     end %if
+    
+    % seth correct file separator
+    mfn = strjoin(strsplit(mfn,{'\','/'}),filesep);
 end %function

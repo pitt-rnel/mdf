@@ -83,7 +83,7 @@ function res = addChild(obj,prop,child,pos)
         end %if
         % check if type matches the one already present
         if ~strcmp(obj.mdf_def.mdf_children.mdf_types{ip},oChild.type)
-            throw(MException('mdfObj:addChild',['Invalid type ' oChild.type '. Children under ' prop ' are of type ' obj.mdf_def.mdf_children.mdf_types{i}]));
+            throw(MException('mdfObj:addChild',['Invalid type ' oChild.type '. Children under ' prop ' are of type ' obj.mdf_def.mdf_children.mdf_types{ip}]));
         end %if
         % we are cleared to insert in position
         

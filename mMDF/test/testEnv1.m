@@ -1,5 +1,5 @@
-function res = testEnv1(path)
-    % function res = testEnv1(path)
+function res = testEnv1()
+    % function res = testEnv1()
     %
     % creates a test environment that can be used to test the system or
     % learning environment
@@ -27,37 +27,53 @@ function res = testEnv1(path)
     % - people
     %
     % Input
-    % - path: folder where to save files. Optional. If not provides,
-    %         defaults to <DATA_BASE>/env1
+    %   none
     %
     
-    if nargin<1
-        path = '<DATA_BASE>/env1';
+    % set output to 0
+    res = 0;
+
+    % get mdf path
+    % get all the paths
+    allpaths = strsplit(path,':');
+    % extract mdf path
+    corepath = allpaths{cellfun(@(path) ~isempty(strfind(path,'mMDF/core')),allpaths)};
+    temp1 = strsplit(corepath,filesep);
+    mdfpath = strjoin(temp1(1:end-1),filesep);
+    clear temp1
+    
+    % user folder
+    if ispc
+        userdir= getenv('USERPROFILE');
+    else
+        userdir= getenv('HOME');
     end %if
     
-    % load data framework if not available
-    try
-        % check if mdfConf is available
-        omdfc = mdfConf.getInstance();
-    catch
-        % no luck
-        throw( ...
-            MException('mdf:testEnv1','mdf environment non properly set up'));
-        %% get current fullpath
-        %fi = mfilename('fullpath');
-        %% build path to core classes and add it
-        %rfpath = fullfile(fi,'../../core');
-        %addpath(rfpath);
-        %% uses the rfConf class to set up the environment
-        %% prepares configuration
-        %srfc = struct();
-        %srfc.fileName = 'Auto';
-        %srfc.automation = 'start';
-        %srfc.menuType = 'text';
-        %% load everything that we need
-        %orfc = rfConf.getInstance(srfc);
-    end %try/catch
+    % template test conf file
+    tpltestfile = fullfile(mdfpath,'templates','mdf.conf.test.xml');
+    % configuration test file
+    testconffile = fullfile(userdir,'mdf','conf','mdf.conf.test.env1.xml');
     
+    % load template file
+    fid = fopen(tpltestfile,'r');
+    conf = char(fread(fid,'char')');
+    fclose(fid);
+    % replace mdf test folder
+    conf = strrep(conf,'<TEST_BASE_FOLDER>',userdir);
+    % replace mdf code folder
+    conf = strrep(conf,'<TEST_CODE_BASE>',mdfpath);
+    
+    % save test environment configuration
+    fid = fopen(testconffile,'w');
+    fwrite(fid,conf);
+    fclose(fid);
+    
+    % create data folder
+    mkdir(fullfile(userdir,'mdf','data','mdftest'));
+    
+    % instantiate mdf environment
+    omdfc = mdf.init(testconffile);
+        
     % insert 2 type of electrodes
     disp('Creating electrodes...');
     % electrode 1
@@ -75,7 +91,7 @@ function res = testEnv1(path)
     oele1.md.specs.units = ['um', 'um', 'um'];
     oele1.md.notes = '';
     % set location where to save
-    oele1.setFiles(fullfile(path,'electrodes','ele-1'));
+    oele1.setFiles(fullfile('<DATA_BASE>','electrodes','ele-1'));
     % save file
     oele1.save();
     %
@@ -97,7 +113,7 @@ function res = testEnv1(path)
     oele2.md.visFunction = 'pe3d.m';
     oele2.md.notes = '';
     % set location where to save
-    oele2.setFiles(fullfile(path,'electrodes','ele-2'));
+    oele2.setFiles(fullfile('<DATA_BASE>','electrodes','ele-2'));
     % save file
     oele2.save();
     disp('...Done!!!');
@@ -114,7 +130,7 @@ function res = testEnv1(path)
     osbj.md.species = 'human';
     osbj.md.notes = ['High energy' char(13) 'Difficult subject'];
     % set location where to save
-    osbj.setFiles(fullfile(path,'sbj-1','sbj-1'));
+    osbj.setFiles(fullfile('<DATA_BASE>','sbj-1','sbj-1'));
     % save file
     osbj.save();
     disp('...Done!!!');
@@ -132,7 +148,7 @@ function res = testEnv1(path)
     oexp.md.ended = '';
     oexp.md.notes = 'Check electrodes. There were some trouble placing electrodes in few trials';
     % set location
-    oexp.setFiles(fullfile(path,'sbj-1','experiments','sbj-1.exp-1'));
+    oexp.setFiles(fullfile('<DATA_BASE>','sbj-1','experiments','sbj-1.exp-1'));
     % append experiment under subject
     mdf.apcr(osbj,oexp,'experiments');
     % save object
@@ -168,7 +184,7 @@ function res = testEnv1(path)
         end %switch
         otr1.md.successful = 'yes';
         % set location
-        otr1.setFiles(fullfile(path,'sbj-1','trials',['sbj-1.tr-' num2str(j)]));
+        otr1.setFiles(fullfile('<DATA_BASE>','sbj-1','trials',['sbj-1.tr-' num2str(j)]));
         % append trial under experiment
         mdf.apcr(oexp,otr1,'trials');
         % save object
@@ -190,7 +206,7 @@ function res = testEnv1(path)
         % add time
         oemg.d.time = [1:1000]/100;
         % set location
-        oemg.setFiles(fullfile(path,'sbj-1','trials',['tr-' num2str(j)],['sbj-1.tr-' num2str(j) '.ma']));
+        oemg.setFiles(fullfile('<DATA_BASE>','sbj-1','trials',['tr-' num2str(j)],['sbj-1.tr-' num2str(j) '.ma']));
         % append trial under experiment
         mdf.apcr(otr1,oemg,'mas');
         % add link to electrode used
@@ -223,7 +239,7 @@ function res = testEnv1(path)
             % set location
             och.setFiles( ...
                 fullfile( ...
-                    path,'sbj-1','trials',['tr-' num2str(j)],'ma',['sbj-1.tr-' num2str(j) '.mac-' num2str(i)]));
+                    '<DATA_BASE>','sbj-1','trials',['tr-' num2str(j)],'ma',['sbj-1.tr-' num2str(j) '.mac-' num2str(i)]));
             % append trial under experiment
             mdf.apcr(oemg,och,'channels');
             % save object
@@ -241,11 +257,11 @@ function res = testEnv1(path)
     oses1.md.started = '2016-05-21 09:30';
     oses1.md.ended = '2016-05-22 12:30';
     oses1.md.notes = 'Long session';
-    oses1.md.people = {'Rob Gaunt','Max Novelli'};
+    oses1.md.people = {'RG','MN'};
     % set files
     oses1.setFiles( ...
         fullfile( ...
-        	path,'sbj-1','sessions','sbj-1.ses-1'));
+        	'<DATA_BASE>','sbj-1','sessions','sbj-1.ses-1'));
     % start saving the object as is
     oses1.save();
     
@@ -272,11 +288,11 @@ function res = testEnv1(path)
     oses2.md.started = '2016-05-23 09:30';
     oses2.md.ended = '2016-05-23 12:30';
     oses2.md.notes = 'Short session';
-    oses2.md.people = {'Lee Fisher','Max Novelli', 'Ameya Nanivadekar' };
+    oses2.md.people = {'LF','MN', 'AN' };
     % set files
     oses2.setFiles( ...
         fullfile( ...
-        	path,'sbj-1','sessions','sbj-1.ses-2'));
+        	'<DATA_BASE>','sbj-1','sessions','sbj-1.ses-2'));
     % start saving the object as is
     oses2.save();
     
@@ -292,7 +308,6 @@ function res = testEnv1(path)
     otr.save();
     disp('...Done!!!');
 
-    res = 1;
+    res = omdfc;
     
-
 end %function

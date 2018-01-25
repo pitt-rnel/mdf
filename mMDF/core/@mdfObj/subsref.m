@@ -6,15 +6,28 @@ function [res] = subsref(obj,S)
 
     % check if we get an array in input,
     % loop on each one of them
-%     if length(obj) > 1
-%         % prepare output
-%         res = {};
-%         % loops on all the elements
-%         for i = 1:length(obj)
-%             res{end+1} = obj(1).subsref(S);
-%         end %for
-%         return 
-%     end %if
+    if length(obj) > 1
+        % check if we just want to extract one element of the array
+        if strcmp(S(1).type,'()')
+            res = obj(S(1).subs{1});
+            % remove requested operation from S
+            S(1) = [];
+            if length(S) > 0 
+                res = res.subsref(S);
+            end %if
+        else
+            % we assume that we should apply the operation requested to
+            % every single object in the array
+            % prepare output
+            res = {};
+            % loops on all the elements
+            for i = 1:length(obj)
+                res{end+1} = obj(i).subsref(S);
+            end %for
+        end %if
+        % we are done
+        return
+    end %if
     % manage the different cases
     %
 	% obj(<string>)
@@ -132,7 +145,7 @@ function [res] = subsref(obj,S)
                         mdfObj.load( ...
                             struct( ...
                                 'uuid', ...
-                                obj.mdf_def.mdf_children.(cp)(i).mdf_uuid))];
+                                obj.mdf_def.mdf_children.(cp)(j).mdf_uuid))];
                 end %for
             end %for
         elseif strcmp(S(2).type,'.') && ( ...
@@ -143,7 +156,7 @@ function [res] = subsref(obj,S)
             %
             % try to get the right child
             try
-                cidl = obj.mdf_def.mdf_children.(S(2).subs).mdf_uuid;
+                cidl = {obj.mdf_def.mdf_children.(S(2).subs).mdf_uuid};
                 if isa(cidl,'char')
                     cidl = {cidl};
                 end %if

@@ -42,6 +42,8 @@ function parents = getParent(obj, selector)
 
         % now we are ready to build the json query
         query = mdfDB.prepQuery(selector);
+        % retrieve handle to database object
+        odb = mdfDB.getInstance();
         % runs query and hopes for the best
         mdf_data = odb.find(query);
         % extract uuids
