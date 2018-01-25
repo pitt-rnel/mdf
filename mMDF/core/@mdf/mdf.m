@@ -67,7 +67,7 @@ classdef (Sealed) mdf < handle
                         confSel = varargin{1}.confSel;
                     end %if
                 end %if
-            else nargin > 1
+            elseif nargin > 1
                 % we got 2 or more arguments
                 % we assume that first one is the file namefor the
                 % configuration file and the second is the configuration
@@ -149,12 +149,12 @@ classdef (Sealed) mdf < handle
                     '2: Configuration missing MDF core code folder!!!'));
             end %if
             % check if we have mdf data base
-            if ( ~isfield(C,'DATA_BASE') || ...
-                    ~exist(C.DATA_BASE,'dir') )
-                % we cannot proceed
-                throw(MException('mdfConf:start',...
-                    ['3: Configuration missing MDF data folder (' C.DATA_BASE ')!!!']));
-            end %if
+            %if ( ~isfield(C,'DATA_BASE') || ...
+            %        ~exist(C.DATA_BASE,'dir') )
+            %    % we cannot proceed
+            %    throw(MException('mdfConf:start',...
+            %        ['3: Configuration missing MDF data folder (' C.DATA_BASE ')!!!']));
+            %end %if
 
             % first of all needs to add functions root
             % so we can use the function addpath_recurse
