@@ -154,16 +154,37 @@ classdef (Sealed) mdfManage < handle
       function res = clear(obj,query)
           % function res = obj.clear(query)
           %
-          % unload object from memory and memory management.
+          % unload objects from memory and memory management.
           % This routine delete the object from memory, 
-          % afterward is not longer accessible
+          % afterward is not longer accessible.
+          % to be able to access the cleared objects, they would need to be
+          % reloaded.
           %
           % Input:
           % - query: mdfObj, object uuid, object file
+          %          if an array of the above is passed in, 
+          %          it will remove from memory all the objects in the array
+          %          It can be an array of handles to mdfObj,
+          %          or a cell array with a mix of the three items
+          %          specified above
           %
           % Output:
           % - res: true if successful, false if not
           %
+          
+          % check if we got a cell array
+          if iscell(query)
+              %
+              % loop on all the items 
+              res = cell2mat(cellfun(@(item) obj.clear(item),query,'UniformOutput',0));
+              return
+          elseif isa(query,'mdfObj') && length(query)>1
+              %
+              % loop on all the items
+              res = arrayfun(@(item) obj.clear(item),query);
+              return
+          end %if
+
           % find the index of the object required
           index = obj.index(query);
           % initialize output
