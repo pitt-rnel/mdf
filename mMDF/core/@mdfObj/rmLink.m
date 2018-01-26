@@ -10,7 +10,7 @@ function res = rmLink(obj, prop, link)
     %           be removed
     %
     
-    res = obj;
+    res = false;
     
     if nargin < 2
         throw(MException('mdfObj:rmLink','Invalid number of arguments'));
@@ -28,16 +28,6 @@ function res = rmLink(obj, prop, link)
         %
         % get link uuid an dobject
         [uLink, oLink] = mdf.getUAO(link);
-%         % get uuid from link
-%         if isa(link,'mdfObj')
-%             uuid = link.uuid;
-%             olink = link;
-%         elseif isa(link,'char')
-%             uuid = link;
-%             olink = mdfObj.load(uuid);
-%         else
-%            throw(MException('mdfObj:rmLink','Invalid links property type.')); 
-%         end %if
         % find link in list
         pos = find(strcmp(obj.mdf_def.mdf_links.(prop).mdf_uuid,uLink));
         if isempty(pos)
@@ -55,4 +45,6 @@ function res = rmLink(obj, prop, link)
         obj.mdf_def.mdf_links.mdf_directions{ip} = [];
         obj.mdf_def.mdf_links.(prop) = [];
     end %if
+    
+    res = true;
 end %function

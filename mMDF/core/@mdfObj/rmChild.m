@@ -10,7 +10,7 @@ function res = rmChild(obj, prop, child)
     %           be removed
     %
     
-    res = obj;
+    res = false;
     
     if nargin < 2
         throw(MException('mdfObj:rmChild','Invalid number of arguments'));
@@ -61,6 +61,7 @@ function res = rmChild(obj, prop, child)
         obj.mdf_def.mdf_children.mdf_fields(ip) = [];
         % remove property
         obj.mdf_def.mdf_children = rmfield(obj.mdf_def.mdf_children,prop);
-        
     end %if
+    
+    res = true;
 end %function

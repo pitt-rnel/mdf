@@ -19,7 +19,7 @@ function res = addLink(obj,prop,link,dir,pos)
     %           of the current length
 
     % return object 
-    res = obj;
+    res = false;
     
     % check input arguments
     if nargin < 2 
@@ -99,34 +99,6 @@ function res = addLink(obj,prop,link,dir,pos)
         end %if
     end %if
     
-%     if isa(link,'mdfObj')
-%         % input link is an object
-%         % get uuid and check if it needs to be inserted in memory
-%         uuid = link.uuid;
-%         % check if link exists
-%         olink = mdfObj.load(uuid);
-%         % check if already exists
-%         if isempty(olink)
-%             % it's not in memory and not already defined
-%             % insert new object
-%             mdfm = mdfManage.getInstance();
-%             mdfm.insert(link.uuid,link.file,link);
-%             olink = link;
-%         else
-%             % object already present 
-%             % TO DO: define a object level copy
-%         end %if
-%     else
-%         % just use uuid
-%         uuid = link;
-%         % check if link object exist
-%         olink = mdfObj.load(uuid);
-%         % check if we found the object with the provided uuid
-%         if isemty(olink)
-%             throw(MException('mdfObj:addLink',['Invalid uuid(' uuid ')']));
-%         end %if
-%     end %if
-
     % get link uuid and object
     [uLink, oLink] = mdf.getUAO(link);
     
@@ -171,11 +143,6 @@ function res = addLink(obj,prop,link,dir,pos)
                 'mdf_file', oLink.getMFN(false) ), ...
             obj.mdf_def.mdf_links.(prop)(pos:end)];
     end %if
-    % add this object as parent
-    % the mutual relationship is set up by a static property of the mdf
-    % class.
-    %olink.addParent(obj);
     
-    % makes sure that the mdf_def structure is in sync
-    %obj.mdf_def.mdf_links.mdf_fields = 
+    res = true;
 end %function
