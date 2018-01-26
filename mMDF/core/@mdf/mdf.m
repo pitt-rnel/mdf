@@ -190,21 +190,21 @@ classdef (Sealed) mdf < handle
     % static methods defined in external files
     methods (Static)
         % add parent child relationship
-        res = addParentChildRelation(parent,child,prop);
-        res = apcr(parent,child,prop);
+        [res, outparent, outchild] = addParentChildRelation(inparent,inchild,prop);
+        [res, outparent, outchild] = apcr(inparent,inchild,prop);
         % remove parent child relationship
-        res = rmParentChildRelation(parent,child,prop);
-        res = rpcr(parent,child,prop);
+        [res, outparent, outchild] = rmParentChildRelation(inparent,inchild,prop);
+        [res, outparent, outchild] = rpcr(inparent,inchild,prop);
         % add links
-        res = addUnidirectionalLink(source,dest,sProp);
-        res = aul(source,dest,sProp);
-        res = addBidirectionalLink(source,dest,sProp,dProp);
-        res = abl(source,dest,sProp,dProp);
+        [res, outsource, outdest] = addUnidirectionalLink(insource,indest,sProp);
+        [res, outsource, outdest] = aul(insource,indest,sProp);
+        [res, outsource, outdest] = addBidirectionalLink(insource,indest,sProp,dProp);
+        [res, outsource, outdest] = abl(insource,indest,sProp,dProp);
         % rm links
-        res = rmUnidirectionalLink(source,dest,sProp);
-        res = rul(source,dest,sProp);
-        res = rmBidirectionalLink(source,dest,sProp,dProp);
-        res = rbl(source,dest,sProp,dProp);
+        [res, outsource, outdest] = rmUnidirectionalLink(insource,indest,sProp);
+        [res, outsource, outdest] = rul(insource,indest,sProp);
+        [res, outsource, outdest] = rmBidirectionalLink(insource,indest,sProp,dProp);
+        [res, outsource, outdest] = rbl(insource,indest,sProp,dProp);
         % generate uuid 
         uuid = UUID();
         % unload/remove object from memory

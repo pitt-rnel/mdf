@@ -1,10 +1,15 @@
-function res = abl(source,dest,sProp,dProp)
-    % function res = abl(source,dest,sProp,dProp)
+function [res, outsource, outdest] = abl(insource,indest,sProp,dProp)
+    % function [res, outsource, outdest] = abl(insource,indest,sProp,dProp)
     %
     % short cut to function addBidirectionalLink
     % check addBidirectionalLink help for more info
     %
     
-    res = mdf.addBidirectionalLink(source,dest,sProp,dProp);
+    [res, oSource, oDest] = mdf.addBidirectionalLink(insource,indest,sProp,dProp);
+
+    if nargout > 1
+        outsource = oSource;
+        outdest = oDest;
+    end %if
     
 end %function

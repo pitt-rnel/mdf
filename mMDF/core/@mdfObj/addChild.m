@@ -17,7 +17,7 @@ function res = addChild(obj,prop,child,pos)
     %           of the current length
 
     % return object 
-    res = obj;
+    res = false;
     
     % check input arguments
     if nargin < 2 
@@ -95,5 +95,7 @@ function res = addChild(obj,prop,child,pos)
                 'mdf_file', oChild.getMFN(false) ), ...
             obj.mdf_def.mdf_children.(prop)(pos:end)];
     end %if
+    
+    res = true;
     
 end %function

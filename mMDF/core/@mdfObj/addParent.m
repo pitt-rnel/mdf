@@ -9,7 +9,7 @@ function res = addParent(obj,parent)
     %
     %
     
-    res = 1;
+    res = false;
     
     if isa(parent,'mdfObj')
         % input parent is an object
@@ -67,5 +67,5 @@ function res = addParent(obj,parent)
                 'mdf_type', oParent.type );
     end %if
     
-    res = 1;
+    res = true;
 end %function

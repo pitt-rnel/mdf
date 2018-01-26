@@ -9,7 +9,7 @@ function res = rmParent(obj,parent)
     %
     %
     
-    res = 0;
+    res = false;
     
     % get uuid and object from argument passed
     [uParent, oParent] = mdf.getUuidAndObject(parent);
@@ -40,5 +40,6 @@ function res = rmParent(obj,parent)
         obj.mdf_def.mdf_parents = [];
     end %if
     
-    res = 1;
+    res = true;
+    
 end %function
