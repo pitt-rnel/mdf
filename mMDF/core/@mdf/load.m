@@ -24,7 +24,14 @@ function outdata = load(varargin)
         % convert input cell to struct
         indata = struct();
         for i=1:2:nargin
-            indata.(varargin{i}) = varargin{i+1};
+            % makes sure we are not dealing with strings but just with
+            % array of chars
+            key = char(varargin{i});
+            value = varargin{i+1};
+            if isstring(value)
+                value = char(value);
+            end %if
+            indata.(key) = value;
         end %for
     end %if
     
