@@ -55,13 +55,13 @@ function outdata = getCollStats(obj,varargin)
     end %for
     
     % drop temp collection
-    tempcoll = obj.db.getCollection("obj_num");
+    tempcoll = obj.db.getCollection('obj_num');
     tempcoll.drop();
     
     if table
-        format = "%20s %10";
-        disp(sprintf([format + "s"],"MDF object type","Quantity"));
-        disp(sprintf([format + "s"],"--------------------","----------"));
-        arrayfun(@(item) disp(sprintf([format + 'd'],item.mdf_type,item.quantity)),outdata);
+        format = '%20s %10';
+        disp(sprintf([format,'s'],'MDF object type','Quantity'));
+        disp(sprintf([format,'s'],'--------------------','----------'));
+        arrayfun(@(item) disp(sprintf([format, 'd'],item.mdf_type,item.quantity)),outdata);
     end %if
 end %function
