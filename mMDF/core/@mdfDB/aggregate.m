@@ -40,19 +40,19 @@ function res = aggregate(obj,pipeline)
         % insert step in list
         aggrlist.add(ostep); 
     end %for
-    
+
+    % prepare options (for future version of the API)
+    % options = BasicDBObject.parse('{ cursor: {} }');
     
     % runs the aggregation
+    % object returned is a container object with all the results
     oaggr = obj.coll.aggregate(aggrlist);
     
-    % if we got results, we transform them in structure and we pass it back as a cell array
-    res = {};
-    % loop until we have items in the collection
-    while ires.hasNext()
-        % get next element in list
-        ele = ires.next();
-        % convert it to structure throught json
-        res{length(res)+1} = loadjson(char(ele.toJson()));
-    end %while
+    % prepare output array
+    % oaggr.results is a java json string with all the results
+    % first we convert it to a matlab char,
+    % than from json to cell array 
+    % and finally we go from cell to matrix
+    res = cell2mat(loadjson(char(oaggr.results)));
 
 end %function
