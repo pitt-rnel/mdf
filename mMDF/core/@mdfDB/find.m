@@ -108,9 +108,19 @@ function res = find(obj,query,projection,sort)
     % loop until we have items in the collection
     while ires.hasNext()
         % get next element in list
-        ele = ires.next();
+        eleDb = ires.next();
         % convert it to structure throught json
-        res{length(res)+1} = loadjson(char(ele.toJson()));
+        eleS = loadjson(char(eleDb.toJson()));
+        % checks key components that are converted from json as array of
+        % strings, instead of cell array of chars
+        if isfield(eleS.mdf_def.mdf_children,'mdf_fields') && isa(eleS.mdf_def.mdf_children.mdf_fields,'string')
+            eleS.mdf_def.mdf_children.mdf_fields = arrayfun(@(x) char(x), eleS.mdf_def.mdf_children.mdf_fields,'UniformOutput',0);
+        end
+        if isfield(eleS.mdf_def.mdf_children,'mdf_types') && isa(eleS.mdf_def.mdf_children.mdf_types,'string')
+            eleS.mdf_def.mdf_children.mdf_types = arrayfun(@(x) char(x), eleS.mdf_def.mdf_children.mdf_types,'UniformOutput',0);
+        end
+        % insert element in output
+        res{length(res)+1} = eleS;
     end %while
 
 end %function

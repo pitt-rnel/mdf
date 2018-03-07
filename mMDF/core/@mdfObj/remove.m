@@ -1,7 +1,9 @@
 function res = remove(obj)
     % function res = obj.remove()
     %
-    % remove object. That includes files and db document
+    % remove object, aka delete the object from this data collection. 
+    % That includes files and db document
+    %
     
     % initialize output value
     res = 0;
