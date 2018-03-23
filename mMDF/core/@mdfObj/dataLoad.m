@@ -25,7 +25,17 @@ function res = dataLoad(obj,dp)
             % load the data property requested
             % find returns a cell array, given the type of query that we run
             % we know that there is only one document matching it
-            obj.data.(dp) = mdf_data{1}.(dp);
+            %
+            % check if we need to flip the cell array
+            ds1 = size(mdf_data{1}.(dp));
+            ds2 = size(mdf_data{1}.(dp)');
+            if ( all(all(obj.mdf_def.mdf_data.(dp).mdf_size(:) == ds1(:))) )
+                obj.data.(dp) = mdf_data{1}.(dp);
+            elseif ( all(all(obj.mdf_def.mdf_data.(dp).mdf_size(:) == ds2(:))) )
+                obj.data.(dp) = mdf_data{1}.(dp)';
+            else
+                throw(MException('mdfObj:dataLoad','Inconsistency in data size'));
+            end %if
             % updates def properties
             obj.setDataInfo(dp);
             % marked as loaded

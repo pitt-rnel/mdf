@@ -104,10 +104,18 @@ function outdata = load(indata)
         if isa(indata.json,'char')
             indata.json = {indata.json};
         end %if
+
+        % check if this version of matlab has json functions builtin
+        jsonapi = (exist('jsondecode') == 5);
+
         % tries to convert json string to matlab structure
         % also checks if ther are all the fields needed
         try
-            mdf_data = cellfun(@(x) loadjson(x), indata.json,'UniformOutput', 0);
+            if jsonapi
+                mdf_data = cellfun(@(x) jsondecode(x), indata.json,'UniformOutput', 0);
+            else
+                mdf_data = cellfun(@(x) loadjson(x), indata.json,'UniformOutput', 0);
+            end %if
         catch
             % an error occured. returning empty handed
             return;

@@ -103,6 +103,9 @@ function res = find(obj,query,projection,sort)
         ires = ires.sort(isort);
     end %if
 
+    % check if this version of matlab has json functions builtin
+    jsonapi = (exist('jsondecode') == 5);
+    
     % if we got results, we transform them in structure and we pass it back as a cell array
     res = {};
     % loop until we have items in the collection
@@ -110,7 +113,11 @@ function res = find(obj,query,projection,sort)
         % get next element in list
         ele = ires.next();
         % convert it to structure throught json
-        res{length(res)+1} = loadjson(char(ele.toJson()));
+        if jsonapi
+            res{length(res)+1} = jsondecode(char(ele.toJson()));
+        else
+            res{length(res)+1} = loadjson(char(ele.toJson()));
+        end %if
     end %while
 
 end %function

@@ -47,12 +47,19 @@ function res = aggregate(obj,pipeline)
     % runs the aggregation
     % object returned is a container object with all the results
     oaggr = obj.coll.aggregate(aggrlist);
-    
+
+    % check if this version of matlab has json functions builtin
+    jsonapi = (exist('jsondecode') == 5);
+   
     % prepare output array
     % oaggr.results is a java json string with all the results
     % first we convert it to a matlab char,
     % than from json to cell array 
     % and finally we go from cell to matrix
-    res = cell2mat(loadjson(char(oaggr.results)));
+    if jsonapi
+        res = cell2mat(jsondecode(char(oaggr.results)));
+    else
+        res = cell2mat(loadjson(char(oaggr.results)));
+    end %if
 
 end %function
