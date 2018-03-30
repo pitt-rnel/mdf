@@ -103,24 +103,22 @@ function res = find(obj,query,projection,sort)
         ires = ires.sort(isort);
     end %if
 
+    % check if this version of matlab has json functions builtin
+    jsonapi = (exist('jsondecode') == 5);
+
     % if we got results, we transform them in structure and we pass it back as a cell array
     res = {};
     % loop until we have items in the collection
     while ires.hasNext()
         % get next element in list
-        eleDb = ires.next();
+        ele = ires.next();
         % convert it to structure throught json
-        eleS = loadjson(char(eleDb.toJson()));
-        % checks key components that are converted from json as array of
-        % strings, instead of cell array of chars
-        if isfield(eleS.mdf_def.mdf_children,'mdf_fields') && isa(eleS.mdf_def.mdf_children.mdf_fields,'string')
-            eleS.mdf_def.mdf_children.mdf_fields = arrayfun(@(x) char(x), eleS.mdf_def.mdf_children.mdf_fields,'UniformOutput',0);
-        end
-        if isfield(eleS.mdf_def.mdf_children,'mdf_types') && isa(eleS.mdf_def.mdf_children.mdf_types,'string')
-            eleS.mdf_def.mdf_children.mdf_types = arrayfun(@(x) char(x), eleS.mdf_def.mdf_children.mdf_types,'UniformOutput',0);
-        end
-        % insert element in output
-        res{length(res)+1} = eleS;
+        if jsonapi
+            res{length(res)+1} = jsondecode(char(ele.toJson()));
+        else
+            res{length(res)+1} = loadjson(char(ele.toJson()));
+        end %if
     end %while
+
 
 end %function

@@ -34,7 +34,11 @@ function res = insert(obj,records)
             % check if it is a struct
             if isa(record,'struct')
                 % transform in a json string
-                record = savejson('',record);
+                if jsonapi
+                    record = jsonencode(record);
+                else
+                    record = savejson('',record);
+                end %if
             end %if
             % record is in json format (aka string)
             ir = obj.coll.insert( ...

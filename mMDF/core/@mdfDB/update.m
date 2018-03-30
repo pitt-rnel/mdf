@@ -18,17 +18,28 @@ function res = update(obj,query,values)
 
     % import query object
     import com.mongodb.BasicDBObject
+    
+	% check if this version of matlab has json functions builtin
+    jsonapi = (exist('jsondecode') == 5);
 
     try
         % check if query is a struct
         if isa(query,'struct')
             % transform struct in a json string
-            query = savejson('',query);
+            if jsonapi
+                query = jsonencode(query);
+            else
+                query = savejson('',query);
+            end %if
         end %if
         % check if values is a struct
         if isa(values,'struct')
             % transform struct in a json string
-            values = savejson('',values);
+            if jsonapi
+                values = jsonencode(values);
+            else
+                values = savejson('',values);
+            end %if
         end %if
         % set the %set parameter in the values
         % this way it updates keeping previous fields
