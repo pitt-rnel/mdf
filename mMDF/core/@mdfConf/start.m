@@ -1,12 +1,23 @@
 function start(obj)
     % mdfConf.start(obj)
     %
+    % add additional localize values
+    % these are keys prefixed with MDF_
+    %
     % start selected RNEL db configuration
     %
     
+    %
+    for i = 1:length(obj.confData.configurations)
+        % add if we need to use json library within matlab or not
+        % added for backward compatibility
+        obj.confData.configurations(i).configuration.MDF_JASONAPI = (exist('jsondecode') == 5);
+
+    end % for
+
     % first get the configuration
-    C = obj.getC;
-    
+    C = obj.getC;    
+ 
     % run startup functions
     %
     % check if we have a user defined start up function

@@ -15,7 +15,6 @@ function res = aggregate(obj,pipeline)
     import com.mongodb.BasicDBObject
     import com.mongodb.BasicDBList
 
-
     % instantiate db list object
     aggrlist = BasicDBList();
     
@@ -26,17 +25,8 @@ function res = aggregate(obj,pipeline)
      
         % it is a structure (it supposed to be)
         % we need to convert in BasicDBObject that is the format the mongodb driver unerstand and accept
-        switch class(istep)
-            case {'struct'}
-                ostep = BasicDBObject.parse(savejson('',istep));
-            case {'char'}
-                ostep = BasicDBObject.parse(istep);
-            otherwise
-                throw( ...
-                    MException( ...
-                        'mdfDB:aggregate', ...
-                        'Invalid pipeline step'));
-        end %switch
+        ostep = obj.toBasicDBObject(istep);
+        
         % insert step in list
         aggrlist.add(ostep); 
     end %for
@@ -48,18 +38,13 @@ function res = aggregate(obj,pipeline)
     % object returned is a container object with all the results
     oaggr = obj.coll.aggregate(aggrlist);
 
-    % check if this version of matlab has json functions builtin
-    jsonapi = (exist('jsondecode') == 5);
-   
     % prepare output array
     % oaggr.results is a java json string with all the results
     % first we convert it to a matlab char,
     % than from json to cell array 
     % and finally we go from cell to matrix
-    if jsonapi
-        res = cell2mat(jsondecode(char(oaggr.results)));
-    else
-        res = cell2mat(loadjson(char(oaggr.results)));
-    end %if
-
+    %
+    % check with configuration if json library is native or not
+    res = cell2mat(mdf.fromJson(char(oaggr.results)));
+    
 end %function

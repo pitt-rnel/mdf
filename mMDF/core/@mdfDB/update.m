@@ -19,7 +19,7 @@ function res = update(obj,query,values,upsert)
 
     % import query object
     import com.mongodb.BasicDBObject
-
+   
     % check if upsert is set or not
     if nargin > 2 && upsert == true
 	upsert = true;
@@ -31,12 +31,12 @@ function res = update(obj,query,values,upsert)
         % check if query is a struct
         if isa(query,'struct')
             % transform struct in a json string
-            query = savejson('',query);
+            query = mdf.toJson(query);
         end %if
         % check if values is a struct
         if isa(values,'struct')
             % transform struct in a json string
-            values = savejson('',values);
+            values = mdf.toJson(values);
         end %if
         % set the %set parameter in the values
         % this way it updates keeping previous fields

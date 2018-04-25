@@ -36,36 +36,14 @@ function res = find(obj,query,projection,sort)
     iquery = BasicDBObject();
     if nargin > 1 && ~isempty(query)
         % we got a query
-        % it is a structure (it supposed to be)
-        % we need to convert in BasicDBObject that is the format the mongodb driver unerstand and accept
-        switch class(query)
-            case {'struct'}
-                iquery = BasicDBObject.parse(savejson('',query));
-            case {'char'}
-                iquery = BasicDBObject.parse(query);
-            otherwise
-                throw( ...
-                    MException( ...
-                        'mdfDB:find', ...
-                        'Invalid query type'));
-        end %switch
+        iquery = obj.toBasicDBObject(query)
     end %if
     
     % initialize projection flag
     fproj = false;
     if nargin > 2 && ~isempty(projection)
         % we got a projection too
-        switch class(projection)
-            case {'struct'}
-                iproj = BasicDBObject.parse(savejson('',projection));
-            case {'char'}
-                iproj = BasicDBObject.parse(projection);
-            otherwise
-                throw( ...
-                    MException( ...
-                        'mdfDB:find', ...
-                        'Invalid projection type'));
-        end %switch
+        iproj = obj.toBasicDBObject(projection)
         fproj = true;
     end %if
 
@@ -73,17 +51,7 @@ function res = find(obj,query,projection,sort)
     fsort = false;
     if nargin > 3 && ~isempty(sort)
         % we got the sorting 
-        switch class(sort)
-            case {'struct'}
-                isort = BasicDBObject.parse(savejson('',sort));
-            case {'char'}
-                isort = BasicDBObject.parse(sort);
-            otherwise
-                throw( ...
-                    MException( ...
-                        'mdfDB:find', ...
-                        'Invalid sort type'));
-        end %switch
+        isort = obj.toBasicDBObject(sort)
         fsort = true;
     end %if        
     
@@ -103,9 +71,6 @@ function res = find(obj,query,projection,sort)
         ires = ires.sort(isort);
     end %if
 
-    % check if this version of matlab has json functions builtin
-    jsonapi = (exist('jsondecode') == 5);
-    
     % if we got results, we transform them in structure and we pass it back as a cell array
     res = {};
     % loop until we have items in the collection
@@ -113,11 +78,7 @@ function res = find(obj,query,projection,sort)
         % get next element in list
         ele = ires.next();
         % convert it to structure throught json
-        if jsonapi
-            res{length(res)+1} = jsondecode(char(ele.toJson()));
-        else
-            res{length(res)+1} = loadjson(char(ele.toJson()));
-        end %if
+        res{length(res)+1} = mdf.fromJson(char(ele.toJson()));
     end %while
 
 end %function

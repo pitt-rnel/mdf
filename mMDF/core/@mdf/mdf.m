@@ -148,6 +148,23 @@ classdef (Sealed) mdf < handle
                 throw(MException('mdfConf:start',...
                     '2: Configuration missing MDF core code folder!!!'));
             end %if
+            % check if we have the collection type
+            % <MDF_COLLECTION_TYPE>MIXED, M, V_1_4</MDF_COLLECTION_TYPE>
+            % <MDF_COLLECTION_TYPE>DATABASE, DB, V_1_5</MDF_COLLECTION_TYPE>
+            if ( ~isfield(C,'MDF_COLLECTION_TYPE') )
+                % we cannot proceed
+                throw(MException('mdfConf:start',...
+                    ['3: Configuration missing MDF collection type!!!']));
+            else
+                switch C.MDF_COLLECTION_TYPE
+                    case {"MIXED", "M", "V_1_4"}
+                        
+                    case {"DATABASE", "DB", "V_1_5"}
+
+                end %switch
+            end %if
+
+
             % check if we have mdf data base
             %if ( ~isfield(C,'DATA_BASE') || ...
             %        ~exist(C.DATA_BASE,'dir') )
@@ -219,5 +236,8 @@ classdef (Sealed) mdf < handle
         % memory usage
         [total,used,free] = memoryUsage();
         [total,used,free] = mu();
+        % helper function
+        [indata] = toJson(outdata);
+        [indata] = fromJson(outdata);
     end %methods
 end %function
