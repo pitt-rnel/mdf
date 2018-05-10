@@ -156,11 +156,18 @@ classdef (Sealed) mdf < handle
                 throw(MException('mdfConf:start',...
                     ['3: Configuration missing MDF collection type!!!']));
             else
+                % check if type is correct and convert to standard format
                 switch C.MDF_COLLECTION_TYPE
                     case {"MIXED", "M", "V_1_4"}
-                        
-                    case {"DATABASE", "DB", "V_1_5"}
+                        C.MDF_COLLECTION_TYPE = "M";
 
+                    case {"DATABASE", "DB", "V_1_5"}
+                        C.MDF_COLLECTION_TYPE = "DB";
+
+                    otherwise
+                        throw(MException('mdfConf:start',...
+                            ['4: Invalid MDF collection type!!!']));
+                        
                 end %switch
             end %if
 
