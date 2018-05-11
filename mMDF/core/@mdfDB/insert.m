@@ -31,14 +31,11 @@ function res = insert(obj,records)
         % extract record to be inserted in db
         record = records{i};
         try
-            % check if it is a struct
-            if isa(record,'struct')
-                % transform in a json string
-                record = mdf.toJson(record);
-            end %if
-            % record is in json format (aka string)
+            % converts it to a basic db object
+            record = obj.toBasicDBObject(record)
+            % record is ready to be inserted
             ir = obj.coll.insert( ...
-                BasicDBObject.parse(record), ...
+                record, ...
                 wc);
             res = res + 1;
         catch
@@ -46,3 +43,4 @@ function res = insert(obj,records)
         end
     end %for 
 end %function
+

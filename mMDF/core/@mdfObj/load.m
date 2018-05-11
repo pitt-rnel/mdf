@@ -45,7 +45,9 @@ function outdata = load(indata)
     % retrieve handlers to db, manage and configuration class
     odb = mdfDB.getInstance();
     om = mdfManage.getInstance();
+    oconf = mdfConf.getInstance();
 
+    collection_type = conf.getC('MDF_COLLECTION_TYPE');
 
     % check if user specified the output that he/she wants
     mdf_output = 'object';
@@ -84,7 +86,8 @@ function outdata = load(indata)
                 ['{ "mdf_def.mdf_uuid" : "' indata.uuid '" }'], ...
                 '{ "mdf_def" : 1, "mdf_metadata" : 1}' ...
             );
-            if isempty(mdf_data)
+            % only if we are in mixed mode
+            if isempty(mdf_data) && strcmp(collection_type,'M')
                 % no luck through the db
                 % trys file
                 mdf_data = mdfObj.fileLoadInfo([indata.uuid '_md.yml']);
@@ -95,7 +98,9 @@ function outdata = load(indata)
     end %if
 
     % if mdf_data does not contains anything, next check if we have a file name
-    if isempty(mdf_data) && isfield(indata,'file')
+    % only if we are in mixed mode
+    if isempty(mdf_data) && isfield(indata,'file') && strcmp(collection_type,'M')
+
         % check if the object has been loaded
         % tryig to retrieve it by file name
         % retrieve handler, pass it back and return
@@ -167,7 +172,9 @@ function outdata = load(indata)
             % runs query and hopes for the best
             mdf_data = odb.find( ...
                 tmp2, ...
-                odb.find(tmp2,mongo_projection);
+                tmp2,mongo_projection);
+%                tmp2, ...
+%               odb.find(tmp2,mongo_projection);
         end %if
     end %if
 
@@ -315,4 +322,5 @@ function outdata = load(indata)
 
     end %if
 end %function
+
 

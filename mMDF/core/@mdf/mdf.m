@@ -3,7 +3,7 @@ classdef (Sealed) mdf < handle
     properties (Constant)
         libraries = '../../libs';
         pattern = '/[@\w]+/\.\./';
-        version = '1.5'
+        version = '1.6'
     end %properties
 
     methods (Static)
@@ -158,11 +158,11 @@ classdef (Sealed) mdf < handle
             else
                 % check if type is correct and convert to standard format
                 switch C.MDF_COLLECTION_TYPE
-                    case {"MIXED", "M", "V_1_4"}
-                        C.MDF_COLLECTION_TYPE = "M";
+                    case {'MIXED', 'M', 'V_1_4'}
+                        C.MDF_COLLECTION_TYPE = 'M';
 
-                    case {"DATABASE", "DB", "V_1_5"}
-                        C.MDF_COLLECTION_TYPE = "DB";
+                    case {'DATABASE', 'DB', 'V_1_5'}
+                        C.MDF_COLLECTION_TYPE = 'DB';
 
                     otherwise
                         throw(MException('mdfConf:start',...
@@ -172,13 +172,14 @@ classdef (Sealed) mdf < handle
             end %if
 
 
-            % check if we have mdf data base
-            %if ( ~isfield(C,'DATA_BASE') || ...
-            %        ~exist(C.DATA_BASE,'dir') )
-            %    % we cannot proceed
-            %    throw(MException('mdfConf:start',...
-            %        ['3: Configuration missing MDF data folder (' C.DATA_BASE ')!!!']));
-            %end %if
+            % check if we have mdf data base if we operates in mixed mode (v1.4.x)
+            if ( strcmp(C.MDF_COLLECTION_TYPE,'M') == 1 && ...
+                ( ~isfield(C,'DATA_BASE') || ..
+                  ~exist(C.DATA_BASE,'dir') )
+                % we cannot proceed
+                throw(MException('mdfConf:start',...
+                    ['5: Configuration missing MDF data folder (' C.DATA_BASE ')!!!']));
+            end %if
 
             % first of all needs to add functions root
             % so we can use the function addpath_recurse
@@ -248,3 +249,5 @@ classdef (Sealed) mdf < handle
         [indata] = fromJson(outdata);
     end %methods
 end %function
+
+

@@ -28,24 +28,18 @@ function res = update(obj,query,values,upsert)
     end %if
 
     try
-        % check if query is a struct
-        if isa(query,'struct')
-            % transform struct in a json string
-            query = mdf.toJson(query);
-        end %if
-        % check if values is a struct
-        if isa(values,'struct')
-            % transform struct in a json string
-            values = mdf.toJson(values);
-        end %if
+        % convert query to basic db object
+        query = obj.toBasicDBObject(query)
+        % convert values to basic db object
+        values = mdf.toJson(values)
         % set the %set parameter in the values
         % this way it updates keeping previous fields
-        values = ['{ "$set": ' values ' }'];
+        values = obj.toBasicDBObject(['{ "$set": ' values ' }']);
 
         % record is in json format (aka string)
         wr = obj.coll.update( ...
-            BasicDBObject.parse(query), ...
-            BasicDBObject.parse(values), ...
+            query, ...
+            values, ...
             upsert, ...
             false);
         res = 1;
@@ -53,3 +47,4 @@ function res = update(obj,query,values,upsert)
         % nothing to do
     end %for 
 end %function
+
