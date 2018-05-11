@@ -7,9 +7,7 @@ classdef mdfDBTest < matlab.unittest.TestCase
 
     % properties
     properties
-        xmlConfFile = '';
-        testFolder = '';
-        indata = struct();
+        configuration = '';
     end %properties
     
     methods (TestClassSetup)
@@ -36,15 +34,29 @@ classdef mdfDBTest < matlab.unittest.TestCase
         function defineTestObject(testCase)
             % prepare test values
             %
-            % set test configuration file, xml format
-            testCase.xmlConfFile = fullfile(testCase.testFolder,'..','conf','mdfDBTest.xml.conf');
-            % 
-            % set up input data to instantiate the object and have it ready for use
-            testCase.indata = struct( ...
-                'fileName', testCase.xmlConfFile, ...
-                'automation', 'start', ...
-                'menuType', 'text', ...
-                'selection', 1);
+            % set test configuration
+            testCase.configuration = struct();
+            testCase.configuration(1) = struct( ...
+                 'human_name', 'mdf metadata test container 1', ...
+                 'machine_name', 'metadata_test_container_1', ...
+                 'connector', 'mongodb', ...
+                 'type', 'mdf_metadata', ...
+                 'uuid', 'cc73c702-c349-11e7-8b12-3f28f420e9cd', ...
+                 'host' ,'localhost', ...
+                 'port', '27017', ...
+                 'database', 'mdf_test', ...
+                 'collection', 'mdf_test_1', ...
+                 'selected', 1 );
+            testCase.configuration(2) = struct( ...
+                 'human_name', 'mdf data test container 1', ...
+                 'machine_name', 'data_test_container_1', ...
+                 'connector', 'postgresql', ...
+                 'type', 'mdf_data', ...
+                 'uuid', 'cd0bf04a-c349-11e7-9f7e-c79901cff5dd', ...
+                 'host', 'localhost', ...
+                 'port', '27017', ...
+                 'database', 'mdf_test', ...
+                 'table', 'mdf_test_1');
 
         end %function
     end %methods
@@ -54,10 +66,26 @@ classdef mdfDBTest < matlab.unittest.TestCase
         function testInstantiate(testCase)
             % 
             % just test instantiation of mdfConf
-            obj = mdfConf.getInstance(testCase.xmlConfFile);
+            obj = mdfDB.getInstance( ...
+                struct('containers',[]), ...
+            );
             % test that we got the correct object
-            testCase.verifyClass(obj,'mdfConf');
+            testCase.verifyClass(obj,'mdfDB');
             % delete singleton
+            mdfDB.getInstance('release');
+        end % function
+
+        %
+        function testConfiguration(testCase)
+            %
+            % instantiate the object and load the test configuration file
+            obj = mdfDB.getInstance(testCase.configuration);
+            % test that the configuration is a structure
+            testCase.verifyClass(obj.configuration,'struct');
+            % test that the db object has the test configuration 
+            testCase.verifyEqual(obj.configuration,testCase.configuration);
+
+            % delete singleton)
             mdfConf.getInstance('release');
         end % function
 
@@ -65,11 +93,35 @@ classdef mdfDBTest < matlab.unittest.TestCase
         function testConnect(testCase)
             %
             % instantiate the object and load the configuration file
-            obj = mdfConf.getInstance(testCase.xmlConfFile);
+            obj = mdfDB.getInstance(testCase.configuration);
             %
-            obj.load();
-            % test that file has been loaded
-            testCase.verifyClass(obj.fileData,'org.apache.xerces.dom.DeferredDocumentImpl');
+            % select first container in configuration
+            contId = 1;
+            cont = obj.configuration(contId);
+            %
+            % connect to container db object using index
+            obj.connect(contId);
+            %
+            % test that there is one container, that's what the test configuration says
+            testCase.verifyClass(length(obj.containers),1);
+            %
+            % test that the uuid is the same
+            testCase.verifyEqual(cont.uuid,obj.containers(1).uuid);
+
+            % delete singleton)
+            mdfConf.getInstance('release');
+        end % function
+
+        %
+        function testInit(testCase)
+            %
+            % instantiate the object and load the configuration file
+            obj = mdfDB.getInstance(testCase.configuration);
+            % init the object
+            obj.init();
+            % test that there is one container, that's what the test configuration says
+            testCase.verifyClass(length(obj.containers),1);
+
             % delete singleton)
             mdfConf.getInstance('release');
         end % function

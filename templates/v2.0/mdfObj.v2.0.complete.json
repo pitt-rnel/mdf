@@ -1,96 +1,71 @@
 {
-	"_id" : ObjectId("58360a2637313b7400954d18"),
-	"mdf_version" : 2
-	"mdf_def" : {
-		"mdf_type" : "pulse",
-		"mdf_uuid" : "643da923-4250-4859-bb4a-5c0b150d1bea",
-		"mdf_vuuid" : "11110313-d364-46af-ac62-c47f006e164e",
-		"mdf_created" : "2016-11-23 16:29:10",
-		"mdf_modified" : "2016-11-23 16:29:10",
-// removed in version 2
-//		"mdf_files" : {
-//			"mdf_base" : "<DATA_BASE>/sbj_CRS02b/exp_OL/session_00001/set_0001/pulse_643da923-4250-4859-bb4a-5c0b150d1bea",
-//			"mdf_data" : "<DATA_BASE>/sbj_CRS02b/exp_OL/session_00001/set_0001/pulse_643da923-4250-4859-bb4a-5c0b150d1bea.data.mat",
-//			"mdf_metadata" : "<DATA_BASE>/sbj_CRS02b/exp_OL/session_00001/set_0001/pulse_643da923-4250-4859-bb4a-5c0b150d1bea.md.yml"
-//		},
-        "mdf_habitats": [
-            <selection-string> : <habuuid>
-            ...
-        ]
-		"mdf_data" : {
-			"mdf_fields" : [
-				"snippet"
-			],
-			"snippet" : {
-				"mdf_class" : "double",
-				"mdf_size" : [
-					160,
-					1
-				],
-				"mdf_mem" : 1280
-				"mdf_habitats" : [
-				    { 
-				        "mdf_habuuid" : "643da923-4250-4859-bb4a-5c0b150d1bea",
-				        "mdf_location" : "mdf_data[:<data_field_name>]",
-				        "mdf_uiid" : "643da923-4250-4859-bb4a-5c0b150d1bea",
-				        "mdf_file" : "<file_path>", // can be absolute or relative to the base folder of the habitat
-				    }
-			    ],
-			}
-		},
-		"mdf_metadata" : {
-		    "mdf_habitats" : [
-		        {
-			        "mdf_habuuid": "643da923-4250-4859-bb4a-5c0b150d1bea", 
-			        "mdf_location" : "mdf_embedded" 
-			        "mdf_uiid" : "643da923-4250-4859-bb4a-5c0b150d1bea",
-			        "mdf_file" : "<file_path>",
-			    },
-			    
-		    ],
-		},
-		"mdf_children" : {
-			"mdf_fields" : [ "<field_name_1>", "<field_name_2>", ... ],
-			"mdf_types" : [ "<field_type_1>", "<field_type_2>", ... ],
-			"field_name_1" : {
-			    "mdf_uuid" : "<children_uuid>",
-			    "mdf_habitats" : [
-			        {
-			            "mdf_habuuid": "<children_habuuid>",
-			            "mdf_file" : "<file_path>",
-			        }
-			    ]
-			}
-		},
-		"mdf_parents" : [
-		    {
-			    "mdf_uuid": "<parent_uuid>",
-			    "mdf_type": "<parent_type>",
-			    "mdf_habitats" : [
-			        {
-			            "mdf_habuuid": "<parent_habuuid>",
-			            "mdf_file" : "<file_path>",
-			        }
-			    ]
-		    },
-		]
-		"mdf_links" : {
-			"mdf_fields" : [ <lin-name-1>, <link-name-2>, ... ],
-			"mdf_types" : [ <link-type-1>, <link-type-2>, ... ],
-			"mdf_directions" : [ <link-dir-1>, <link-dir-2>, ... ]
-			<link-name-1>: {
-			    "mdf_uuid" :"<link-uuid-1>",
-			    "mdf_type" : "link-type-1>",
-			    "mdf_habitats" : [
-			        {
-			            "mdf_habuuid": "<link_1_habuuid_1>",
-			            "mdf_file" : "<link_1_path>",
-			        }
-			    ]
-			}
-		}
-	},
-	"mdf_metadata" : {
+  "mdf_version" : 2
+  "mdf_def" : {
+    "mdf_type" : "EMGData",
+    "mdf_uuid" : "643da923-4250-4859-bb4a-5c0b150d1bea",
+    "mdf_vuuid" : "11110313-d364-46af-ac62-c47f006e164e",
+    "mdf_created" : "2016-11-23 16:29:10",
+    "mdf_modified" : "2016-11-23 16:29:10",
+    "mdf_files" : {
+      "mdf_base" : "<just_for_backward_compativbility>",
+      "mdf_data" : "<just_for_backward_compativbility>",
+      "mdf_metadata" : "<just_for_backward_compativbility>" },
+    "mdf_data" : {
+      "mdf_fields" : [
+        "time", "wf", "labels", "info" ],
+      "time" : {
+        "mdf_container" : "<container_uuid>" ,
+        "mdf_class" : "numeric",
+        "mdf_size" : [
+          1000,
+          1 ],
+        "mdf_mem" : 1280 },
+      "wf" : {
+        "mdf_container" : "<container_uuid>" ,
+        "mdf_class" : "numeric",
+        "mdf_size" : [
+          1000,
+          1 ],
+        "mdf_mem" : 1280 },
+      "labels" : {
+        "mdf_container" : "<container_uuid>" ,
+        "mdf_class" : "string",
+        "mdf_size" : [
+          1000,
+          1 ],
+        "mdf_mem" : 1280 },
+      "info" : {
+        "mdf_container" : "<container_uuid>" ,
+        "mdf_class" : "struct",
+        "mdf_size" : #number_of_keys_when_flatten ,
+        "mdf_mem" : 10000 } },
+    "mdf_metadata" : {
+      "mdf_order" : [] },
+    "mdf_children" : {
+      "mdf_fields" : [ "<field_name_1>", "<field_name_2>", ... ],
+      "mdf_types" : [ "<field_type_1>", "<field_type_2>", ... ],
+      "field_name_1" : {
+        "mdf_uuid" : "<children_uuid>",
+        "mdf_type": "<parent_type>",
+        "mdf_container" : "<container_uuid>"  },
+      "<field_name_2>" : ... },
+    "mdf_parents" : [
+      {
+        "mdf_uuid": "<parent_uuid>",
+        "mdf_type": "<parent_type>",
+        "mdf_container" : "<container_uuid>"  },
+      { ... } ],
+    "mdf_links" : {
+      "mdf_fields" : [ <link-name-1>, <link-name-2>, ... ],
+      "mdf_types" : [ <link-type-1>, <link-type-2>, ... ],
+      "mdf_directions" : [ <link-dir-1>, <link-dir-2>, ... ],
+      "<link-name-1>" : {
+        "mdf_uuid" :"<link-uuid-1>",
+        "mdf_type" : "link-type-1>",
+        "mdf_container" : "<container_uuid>"  },
+      "<link-name-1>" : ... } 
+  }, 
+  "mdf_metadata" : {
 		"subject" : "CRS02b",
 		"location" : "Lab",
 		"status" : "complete",
@@ -113,13 +88,6 @@
 		"timestamp_NSP2" : 5433.7762,
 		"ChanConfigMessageID" : 1,
 		"DAQmod" : "Analog_mod00"
-	}
-// only if object is saved with modality mdf_all
-	"mdf_data": {
-	    <data-field-name-1> : {
-          <values>
-	    }
-        ...
 	}
 }
 

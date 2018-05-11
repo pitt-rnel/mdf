@@ -246,9 +246,16 @@ classdef mdfConf < handle
             %   obj: the singleton instance
 
             % 
-            % persistent variable holding the reference to the singleton instance
-            persistent uniqueInstance;
-            
+            % we check if the global place maker for mdf exists and if it has a valid mdfConf in it
+            global omdfc;
+            if ~isstruct(omdfc) 
+                omdfc = struct();
+            end %if
+
+            if ~isfield(omdfc,'conf')
+                omdfc.conf  = [];
+            end %if
+           
             conf = '';
             if nargin > 0
                 conf = varargin{1};
@@ -258,25 +265,24 @@ classdef mdfConf < handle
             if isa(conf,'char') && strcmp('release',lower(conf))
                 % we need to clear the current unique instance 
                 % (aka singleton)
-                if isa(uniqueInstance,'mdfConf')
+                if isa(omdfc.conf,'mdfConf')
                     % delete isntance
-                    delete(uniqueInstance);
-                    uniqueInstance = [];
+                    delete(omdfc.conf);
+                    omdfc.conf = [];
                     % we are done
                     return
                 end %if
             % check if the singleton is already instantiated or not
-            elseif isempty(uniqueInstance) && nargin > 0
+            elseif ( isempty(omdfc.conf) || ~isa(omdfc.conf,'mdfConf') ) && nargin > 0
                 conf = varargin{1};
                 % singleton needs to be instantiated
                 obj = mdfConf(conf);
                 % save it in persistent variable
-                uniqueInstance = obj;
+                omdfc.conf = obj;
             else
                 % returned singleton object
-                obj = uniqueInstance;
+                obj = omdfc.conf;
             end %if
-            mlock;
         end
         
         % return if there is an active rneldbconf class instantiated

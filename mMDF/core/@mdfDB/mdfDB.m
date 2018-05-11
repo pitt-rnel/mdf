@@ -5,51 +5,8 @@ classdef (Sealed) mdfDB < handle
     end  
 
     properties
-        % connection info
-        habitats = struct( ...
-            'byuuids', struct(), ...
-            'bytype', struct(), ...
-            'byconnector', struct(), ...
-            'uuids', {} ...
-        );
-        %
-        % <habitat>
-        %  <uuid>1ec528de-f5ee-4ecd-be3f-3fae08ebf65c</uuid>
-        %  <name>mdf test files repo</name>
-        %  <connector>mdf_yaml</connector>
-        %  <type>files</type>
-        %  <mode>batch</mode>
-        %  <access>rw</access>
-        %  <base relative_path_to="DATA_BASE"></base>
-        %  <group>vmd</group>
-        %  <components>
-        %   <component>mdf_all</component>
-        %  </components>
-        %  <objects>
-        %   <object>mdf_all</object>
-        %  </objects>
-        % </habitat>
-        % <habitat>
-        %  <uuid>1ec528de-f5ee-4ecd-be3f-3fae18ebf65c</uuid>
-        %  <name>mdf test collection 1</name>
-        %  <loadOnInit>true</loadOnInit>
-        %  <connector>mdf_mongodb</connector>
-        %  <type>db</type>
-        %  <mode>live</mode>
-        %  <access>rw</access>
-        %  <host>localhost</host>
-        %  <port>27017</port>
-        %  <database>mdf_test</database>
-        %  <collection>mdf_test_1</collection>
-        %  <group>vmd</group>
-        %  <components>
-        %   <component>mdf_def_metadata</component>
-        %  </components>
-        %  <objects>
-        %   <object>mdf_all</object>
-        %  </objects>
-        % </habitat>
-        %
+        % containers info
+        containers = struct();
         configuration = [];
     end
 
@@ -59,7 +16,7 @@ classdef (Sealed) mdfDB < handle
         end
     end
     methods (Static)
-        function singleObj = getInstance(conf)
+        function obj = getInstance(conf)
             % function singleton = getInstance(conf)
             %
             % return singleton object
@@ -68,13 +25,28 @@ classdef (Sealed) mdfDB < handle
             %         none or (string) "mdf" or "auto". use mdfConf habitats
             %         (struct) local configuration (mostly for debug/testing)
             %
-            mlock;
-            % use a persistent variable to mantain the instance
-            persistent localObj
+
+            % 
+            % we check if the global place maker for mdf exists and if it has a valid mdfConf in it
+            global omdfc;
+            if ~isstruct(omdfc)
+                omdfc = struct();
+            end %if
+
+            if ~isfield(omdfc,'db')
+                omdfc.db  = [];
+            end %if
+
+            % we got the object
             %
-            % check if the persisten object is actually an object and 
-            % is valid
-            if isempty(localObj) || ~isa(localObj,'mdfDB')
+            % check if user is asking us to delete the singleton instance
+            if isa(conf,'char') && strcmp('release',lower(conf))
+                % delete object if it is the right class
+                if isa(omdfc.db,'mdfDB')
+                    delete(omdfc.db);
+                end %if
+                omdfc.db = [];
+            elseif isempty(omdfc.db) || ~isa(omdfc.db,'mdfDB')
                 % no object yet
                 %
                 % instantiate new object
@@ -89,68 +61,65 @@ classdef (Sealed) mdfDB < handle
                     % get mdfConf object
                     oc = mdfConf.getInstance();
                     %
-	            % get habitats configuration
-                    obj.configuration = oc.getHabs(); 
+	            % get containers configuration as it is specified in configuration
+                    omdfc.db.configuration = oc.getConts(); 
                 else
                     % user passed habitats configuration
-                    obj.configuration = conf
+                    omdfc.db.configuration = conf
                 end %if
                 % check if we need to instantiate connectors
                 if nargin > 1 && isa(conf,'char') && strcmp(conf,'auto')
                     % instantiate connectors
-                    localObj.init();
+                    omdfc.db.init();
                 end %if
             else 
-                % we got the object
-                %
-                % check if user is asking us to delete the singleton instance
-                if isa(conf,'char') && strcmp(conf,'release')
-                    % delete object
-                    delete(localObj);
-                    localObj = [];
-                end %if
+                % return reference to db instance
+                obj = omdfc.db;
             end %if
-            
-            % return object
-            singleObj = localObj;
         end %def getInstance
     end
 
     methods
-        % init function. Instantiate habitats
+        % init function. Instantiate connectors
         res = init(obj);
-        % returns the handle to the habitat, given the habitat uuid
-        ohab = getH(habuuid);
-        ohab = getHab(habuuid);
-        ohab = getHabitat(habuuid);
-        % returns the handle to the habitats, given the habitat type: db, file
-        ohab = getHsbT(habtype);
-        ohab = getHabitatsByType(habtype);
-        % save function. Internally calls sSave
+        % instantiate a connector and connect to the container
+        res = connect(obj,id);
+        % disconnect from container and remove connector instance
+        res = disconnect(obj,id);
+
+        % returns the handle to the container
+        oC = getCont(obj,id);
+        % return an array with the handles to the habitats
+        oCs = getConts(obj)
+        % return the configuration structure used when instantiated the object
+        C = getConf(obj)
+        % return all the available operations within the specific container/connector
+        ops = getOps(obj,id)
+        % return container uuid(s) from uuid, human name, machine name or connector type
+        uuids = getContainerUuid(obj,id)
+        % return true if the container is active 
+        % (aka the connection with the backend is open)
+        res = isConnected(obj,id)
+        
+        % save function for backward compatibility. Internally calls sSave
         res = save(obj,indata)
         % syncronous save function. All the resquested saves are done syncronously (aka right away)
         res = sSave(obj,indata)
-        % asyncronous save function. All the requested saves are queued until Aflush is called
+        % asyncronous save function. 
+        % All the requested saves are queued until Aflush is called
         res = aSave(obj,indata)
         % triggers the actions on all the asyncrounous saves queued
         res = aFlush(obj)
         % run multiple queries on habitats
         res = query(obj,indata)
-        % syncronously delete objects from habitats
+        % syncronously delete objects from containers
         res = sDelete(obj,indata)
-        % run specific operations on habitats. Operation are habitat/connector dependent
-        res = sOperations(obj,indata)
-        % return the configuration structure used when instantiated the object
-        res = getConf(obj)
-        % return an array with the handles to the habitats
-        res = getHabitats(obj,habuuid)
-        % return which habitat accepts what piece of data
-        res = assH(obj,indata)
-        res = assignHabitats(obj,indata)
-        % returns the operations allowed by the habitat requested
-        res = getOps(obj,habuuid)
-        res = getOperations(obj,habuuid)
-    end
+        % asyncronously delete objects from containers. 
+        % All the requestes are queued until aFlush is called
+        res = aDelete(obj,indata)
+        % run specific operations on containers. Operation are container/connector dependent
+        res = sOps(obj,indata)
+    end %methods
     
-end
+end %class
 

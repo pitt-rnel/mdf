@@ -1,74 +1,46 @@
 classdef (Sealed) mdf_connector < handle
 
     properties
-        % sort query run weight
-        % it is the number used when you want to order the habitats
-        % to run a query on all of them
-        sqrw = 0;
         %
         % habitat configuration
-        habitat = [];
+        configuration = [];
         %
-        % selection string
-        selectionString = '';
+        % operations available by the connector
+        operations = { ...
+            "insert", ...
+            "update", ...
+            "query", ...
+            "delete" };
     end
 
     methods
-        function obj = mdf_connector(habitat)
+        function obj = mdf_connector(configuration)
             % constructor
-            obj.habitat = habitat;
-            obj.getSS();
+            obj.configuration = configuration;
         end
     end
 
     methods
+        %
         % 
-        function res = getSortQueryRunWeight(obj)
-            % function res = obj.getSortQueryRunWeight()
+        function res = getOps(obj)
+            % function res = obj.getOps()
             %
-            % return the weight to be used when ordering the habitats
-            % for a blind query run
-            % this function is place mark for getsqrtw
-            res = obj.getsqrw();
+            res = obj.operations;
         end %function
         %
         % 
-        function res = getOperations(obj)
-            % function res = obj.getOperations()
-            %
-            % return the operations that this connector allows
-            % this function is place mark for getsqrtw
-            res = obj.getOps();
-        end %function
-        %
-        % 
-        function ss = getSS(obj)
-            if isempty(obj.selectionString)
-                % prepare selector string and habuuid
-                for i1 = [1:length(obj.habitat.objects.object)]
-                    for i2 = [1:length(obj.habitat.components.component)]
- 
-                        % connection string:
-                        % group.object.component[:data-prop]
-                        res{end+1} = [ ...
-                            obj.habitat.group ':' ...
-                            obj.habitat.objects.object{i1} ':' ...
-                            obj.habitat.components.component{i2} ];
-                    end %for
-                end %for
-            end %if
-            ss = obj.selectionString;
+        function uuid = getUuid(obj)
+            uuid = obj.configuration.uuid;
         end %function
 
     end
 
     methods (Abstract)
-        res = getsqrw();
-        res = getMethods(obj);
-        res = save(obj,indata);
-        res = find(obj,indata);
+        res = insert(obj,indata);
+        res = update(obj,indata);
+        res = query(obj,indata);
         res = delete(obj,indata);
-        res = getOps(obj);
     end
     
 end

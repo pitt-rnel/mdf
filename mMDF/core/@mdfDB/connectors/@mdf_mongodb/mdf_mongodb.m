@@ -26,6 +26,11 @@ classdef (Sealed) mdf_mongodb < mdf_connector
             %
             % save configuration
             obj.configuration = conf
+            % 
+            % update list of operations
+            obj.operations = [ ...
+                getOps@Parent(), ...
+                {'find' 'remove', 'save', 'getCollStats', 'aggregate'}];
             %
             % establish connection to the database 
             % if required 
@@ -48,25 +53,21 @@ classdef (Sealed) mdf_mongodb < mdf_connector
         % check if the database handle is valid
         res = isValidDatabase(obj)
         % check if connection, database and collection handles are valid
-        res = isValid.m(obj)
+        res = isValid(obj)
         % search and return onbject founds 
         res = find(obj,query,projection,sort)
-        % delete objects according to query. placemark for remove
-        res = delete(obj,query)
         % remove objects according to query
         res = remove(obj,query)
-        % ??
+        % save mdf object in database/collection
+        % use upsert to speed up 
+        % (insert and update call this function)
         res = save(obj,query)
-        % we should combine the next two with an upsert
-        % insert records in database
-        res = insert(obj,query)
-        % update record in database
-        res = update(obj,query,values)
+        % perform aggregate function
+        res = aggregate(obj,query)
         % return object types in this ecosystem and how many of them
         res = getCollStats(obj)
-        % return list of methods available
-        % MN: find if we can place it in the abstract class
-        res = getMethods(obj)
+        % return keys, which object they are found and how many of them
+        res = getKeysStats(obj)
     end
     
     methods (Static)

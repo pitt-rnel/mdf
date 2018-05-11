@@ -7,7 +7,7 @@ function res = query(obj,indata)
     % - indata: (string or struct) individual query with no habitat specified. 
     %           Internally it's transformed in the second type
     %           (cell array)
-    %           each cell should be on eof the following cases 
+    %           each cell should be one of the following cases:
     %           1) string: could be a uuid, a file or a query already in native format
     %           2) struct without fields habuuid and query: this is a query in struct format.
     %                      the habitat will take care of convert it to native format
