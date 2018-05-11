@@ -180,7 +180,13 @@ classdef mdfConf < handle
                     obj.extract();
                     if ( step > 3 )
                         % select configuration
-                        obj.select();
+                        if ( isfield(conf,'selection') && ...
+                            isnumeric(conf.selection) )
+                            % save menu type
+                            obj.select(conf.selection);
+                        else
+                            obj.select();
+                        end %if
                         if ( step > 4 )
                             % start database
                             obj.start();
@@ -236,21 +242,43 @@ classdef mdfConf < handle
             %   obj: the singleton instance
 
             % 
-            % persistent variable holding the reference to the singleton instance
-            persistent uniqueInstance;
-            
+            % we check if the global place maker for mdf exists and if it has a valid mdfConf in it
+            global omdfc;
+            if ~isstruct(omdfc)
+                omdfc = struct();
+            end %if
+
+            if ~isfield(omdfc,'conf')
+                omdfc.conf  = [];
+            end %if
+
+            conf = '';
+            if nargin > 0
+                conf = varargin{1};
+            end %if
+
+            % check if we need to release the current singleton
+            if isa(conf,'char') && strcmp('release',lower(conf))
+                % we need to clear the current unique instance 
+                % (aka singleton)
+                if isa(omdfc.conf,'mdfConf')
+                    % delete isntance
+                    delete(omdfc.conf);
+                    omdfc.conf = [];
+                    % we are done
+                    return
+                end %if
             % check if the singleton is already instantiated or not
-            if isempty(uniqueInstance) && nargin > 0
+            elseif ( isempty(omdfc.conf) || ~isa(omdfc.conf,'mdfConf') ) && nargin > 0
                 conf = varargin{1};
                 % singleton needs to be instantiated
                 obj = mdfConf(conf);
                 % save it in persistent variable
-                uniqueInstance = obj;
+                omdfc.conf = obj;
             else
                 % returned singleton object
-                obj = uniqueInstance;
-            end
-            mlock;
+                obj = omdfc.conf;
+            end %if
         end
         
         % return if there is an active rneldbconf class instantiated

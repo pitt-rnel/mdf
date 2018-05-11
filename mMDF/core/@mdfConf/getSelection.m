@@ -9,10 +9,19 @@ function [n, varargout]  = getSelection(obj)
     %   i = (optional) configuration index in names array
     %
     
+    n = 0;
+    if nargout > 1
+        varargout{1} = "";
+    end %if
+    if nargout > 2
+        varargout{2} = 0;
+    end %if
+    
     % check if
     % - we already loaded the configuration
     % - select one configuration
     if ( ~isempty(obj.selection) && ...
+            obj.selection > 0 && ...
             ~isempty(obj.confData) && ...
             isa(obj.confData,'struct') && ...
             isfield(obj.confData,'configurations') && ...
