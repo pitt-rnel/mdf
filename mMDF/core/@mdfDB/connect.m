@@ -1,5 +1,5 @@
-function res = connect(obj)
-    % function res = obj.connect()
+function res = connect(obj,conf)
+    % function res = obj.connect(conf)
     %
     % this function establish the connection to mongodb
     % the connection is stored in a global variable called RF_DB
@@ -25,38 +25,50 @@ function res = connect(obj)
     % at start up time, this appear to not work
     import com.mongodb.*;
 
-    % get reference to configuration class
-    oc = mdfConf.getInstance();
-    
     % force re-instantiation flag
     ri = false;
 
-	% update connection info if needed and set reinstantiation flag
-    % host
-    temp = oc.getConstant('DB_HOST','value',mdfDB.DEFAULT_HOST); 
-    if ~strcmp(obj.host,temp)
-        obj.host = temp;
-        ri = true;
+    % check input and that it is of the correct type
+    if ~obj.isConfSet()
+        
+        if nargin == 1 && ~isstruct(conf)
+            % get reference to configuration class
+            oc = mdfConf.getInstance();
+    
+            conf = struct( ...
+                'host', oc.getConstant('DB_HOST','value',mdfDB.DEFAULT_HOST), ...
+                'port', str2num(oc.getConstant('DB_PORT','value',mdfDB.DEFAULT_PORT)), ...
+                'database', oc.getConstant('DB_DATABASE','value',mdfDB.DEFAULT_DATABASE), ...
+                'collection', oc.getConstant('DB_COLLECTION','value',mdfDB.DEFAULT_COLLECTION) ...
+            );
+        else
+            conf = [];
+        end %if
+    
+
+        % update connection info if needed and set reinstantiation flag
+        % host
+        if ~strcmp(obj.host,conf.host)
+            obj.host = conf.host;
+            ri = true;
+        end %if
+        % port
+        if ~isnumeric(obj.port) || isempty(obj.port) || obj.port ~= conf.port
+            obj.port = conf.port;
+            ri = true;
+        end %if
+        % database
+        if ~strcmp(obj.database,conf.database)
+            obj.database = conf.database;
+            ri = true;
+        end %if
+        % collection
+        if ~strcmp(obj.host,conf.collection)
+            obj.collection = conf.collection;
+            ri = true;
+        end %if
     end %if
-    % port
-    temp = str2num(oc.getConstant('DB_PORT','value',mdfDB.DEFAULT_PORT)); 
-    if ~isnumeric(obj.port) || isempty(obj.port) || obj.port ~= temp
-        obj.port = temp;
-        ri = true;
-    end %if
-    % database
-    temp = oc.getConstant('DB_DATABASE','value',mdfDB.DEFAULT_DATABASE); 
-    if ~strcmp(obj.database,temp)
-        obj.database = temp;
-        ri = true;
-    end %if
-    % collection
-    temp = oc.getConstant('DB_COLLECTION','value',mdfDB.DEFAULT_COLLECTION); 
-    if ~strcmp(obj.host,temp)
-        obj.collection = temp;
-        ri = true;
-    end %if
- 
+        
     % skip instantiation
     si = false;
     % instantiate connector class

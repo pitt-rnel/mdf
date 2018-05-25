@@ -420,7 +420,9 @@ classdef mdfConf < handle
         
         % return value of multi level key
         C = getNCV(obj,selection,level)
-        
+
+        % return the type of the selected collection
+        ct = getCollectionType(obj,selection)
     end
     
     methods (Static)

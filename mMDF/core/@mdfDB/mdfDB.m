@@ -19,55 +19,122 @@ classdef (Sealed) mdfDB < handle
         m = [];
         db = [];
         coll = [];
+        % variables used in checking configuration
+        fieldsRequired = {};
+        fieldInfo = struct();
     end
 
     methods (Access = private)
         function obj = mdfDB
+            % list of field types
+            obj.fieldInfo = struct( ...
+                'host', struct( ...
+                    'required', 1, ...
+                    'type', 'char'), ...
+                'port', struct( ...
+                    'required', 1, ...
+                    'type', 'numeric'), ...
+                'database', struct( ...
+                    'required', 1, ...
+                    'type', 'char'), ...
+                'collection', struct( ...
+                    'required', 1, ...
+                    'type', 'char'), ...
+                'connect', struct( ...
+                    'required', 0, ...
+                    'type', 'boolean') ...
+            );
+            % list of required fields
+            t1 = boolean(cell2mat(cellfun(@(f) obj.fieldInfo.(f).required, fields(obj.fieldInfo),'UniformOutput',0)));
+            t2 = fields(obj.fieldInfo);
+            obj.fieldsRequired = t2{t1};
         end
     end
     methods (Static)
-        function singleObj = getInstance(conf)
-            mlock;
-            % use a persistent variable to mantain the instance
-            persistent localObj
-            % check if the persisten object is actually an object and is
-            % valid
-            if isempty(localObj) || ~isvalid(localObj)
-                % instantiate new object
-                localObj = mdfDB;
+        function obj = getInstance(varargin)
+            % access the global variable containing reference to the main
+            % mdf core objects
+            global omdfc;
+            % check if it exists, otherwise initialize it
+            if ~isstruct(omdfc)
+                omdfc = struct();
+            end %if
+            % check if the field for db exists
+            if ~isfield(omdfc,'db')
+                omdfc.db  = [];
+            end %if
+
+            release = false;
+            if nargin > 0 && isa(varargin{1},'char') && strcmp('release',lower(varargin{1}))
+                release = true;
             end %if
             
-            % check input argument
-            if nargin < 1
-                connect = false;
+            conf = '';
+            if nargin == 1 && isstruct(varargin{1})
+                conf = varargin{1};
+            elseif nargin >= 4
+                conf = struct( ...
+                    'host', varargin{1}, ...
+                    'port', varargin{2}, ...
+                    'database', varargin{3}, ...
+                    'collection', varargin{4}, ...
+                    'connect',  false ...
+                );
+                if nargin > 4
+                    conf.connect = varargin{5};
+                end %if
+            end %if
+            %
+            % check if connect is defined
+            if isstruct(conf) && ~isfield(conf,'connect')
+                conf.connect = false;
+            end %if
+
+            % check if we need to release the current singleton
+            if release
+                % we need to clear the current unique instance 
+                % (aka singleton)
+                if isa(omdfc.db,'mdfDB')
+                    % delete isntance
+                    delete(omdfc.db);
+                    omdfc.db = [];
+                    % we are done
+                    return
+                end %if
+            % check if the singleton is already instantiated or not
+            elseif ( isempty(omdfc.db) || ~isa(omdfc.db,'mdfDB') )
+                % singleton needs to be instantiated
+                obj = mdfDB();
+                % save it in persistent variable
+                omdfc.db = obj;
             else
-                connect = conf;
+                % returned singleton object
+                obj = omdfc.db;
             end %if
-                            
-            % check if we need to connect
-            if connect || ...
-                    ~isa(localObj.m,'com.mongodb.Mongo') || ...
-                    ~isa(localObj.db,'com.mongodb.DB') || ...
-                    ~isa(localObj.coll,'com.mongodb.DBCollection')
-%                    ( ~isobject(localObj.m) || ~isvalid(localObj.m) ) || ...
-%                    ( ~isobject(localObj.db) || ~isvalid(localObj.db) ) || ...
-%                    ( ~isobject(localObj.coll) || ~isvalid(localObj.coll) ) 
+            
+            % if conf has been given, make sure to memorize it
+            if isstruct(conf) && ~isempty(conf)
+                if obj.isValidConf(conf)
+                    obj.setDbUri(conf);
+                end %if
                 % connect to database
-                localObj.connect();
+                if conf.connect
+                    obj.connect(conf);
+                end %if
             end %if
-            % return object
-            singleObj = localObj;
         end %function
     end
 
     methods
-        res = connect(obj)
+        res = connect(obj,conf)
         res = isValidCollection(obj)
         res = isValidConnection(obj)
         res = isValidDatabase(obj)
         res = isValid(obj)
+        res = isValidConf(obj,conf)
+        res = isConfSet(obj);
         res = find(obj,query,projection,sort)
-        res = delete(obj,query)
+        %res = delete(obj,query)
         res = insert(obj,query)
         res = update(obj,query,values,upsert)
         res = getCollStats(obj,varargin)
