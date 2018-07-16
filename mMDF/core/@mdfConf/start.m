@@ -11,7 +11,8 @@ function start(obj)
     for i = 1:length(obj.confData.configurations)
         % add if we need to use json library within matlab or not
         % added for backward compatibility
-        obj.confData.configurations.configuration{1}.constants.MDF_JASONAPI = (exist('jsondecode') == 5);
+        obj.confData.configurations.configuration{1}.constants.MDF_MATLAB_JSONAPI = ...
+            (exist('jsondecode') == 5);
 
     end % for
 

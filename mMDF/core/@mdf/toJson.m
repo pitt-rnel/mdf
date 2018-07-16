@@ -1,5 +1,5 @@
-indata = function toJson(outdata)
-    % indata = mdf.toJson(outdata)
+function outdata = toJson(indata)
+    % outdata = mdf.toJson(indata)
     %
     % convert matlab structure to json
     %
@@ -8,7 +8,7 @@ indata = function toJson(outdata)
     oc = mdfConf.getInstance(); 
 
     % convert according
-    switch (oc.getConstant(obj,'MDF_JSONAPI'))
+    switch (oc.getConstant('MDF_JSONAPI'))
         case 'MATLAB'
             outdata = jsonencode(indata);
         case 'JSONLAB'

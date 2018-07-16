@@ -9,6 +9,12 @@ classdef mdfDBTest < matlab.unittest.TestCase
     properties
         configuration = '';
         testFolder = '';
+        recordFiles = {};
+        records = {};
+        recordTypes = {};
+        recordUniqueTypes = {};
+        recordQuantity = [];
+        aggregationPipeline = {};
     end %properties
     
     methods (TestClassSetup)
@@ -45,10 +51,59 @@ classdef mdfDBTest < matlab.unittest.TestCase
                  'collection', 'mdfDbTest', ...
                  'connect', 0);
             %
+            %
+            testCase.recordFiles = { 
+                'record1.json', ...
+                'record2.json', ...
+                'record3.json', ...
+                'record4.json' };
+            
+            % load all the records
+            for i = [1:length(testCase.recordFiles)]
+                jsonText = fileread(testCase.recordFiles{i});
+                testCase.records{i} = jsondecode(jsonText);
+            end %for
+
+                        %
+            % prepare additional data for tests
+            testCase.recordTypes = cellfun( ...
+                @(item) item.mdf_def.mdf_type, ...
+                testCase.records, ...
+                'UniformOutput',0);
+            testCase.recordUniqueTypes = unique(testCase.recordTypes,'stable');
+            testCase.recordQuantity = cell2mat( ...
+                cellfun( ...
+                    @(x) sum(ismember(testCase.recordTypes,x)), ...
+                    testCase.recordUniqueTypes, ...
+                    'UniformOutput',0));
+
+            % prepare the aggregation pipeline
+            testCase.aggregationPipeline = { ...
+              '{ $project : { "mdf_uuid" : "$mdf_def.mdf_uuid", "mdf_type" : "$mdf_def.mdf_type" }}',  ...   
+              '{ $group : { "_id" : "$mdf_type", "count" : { $sum : 1 }, "uuids" : { $addToSet : "$mdf_uuid" }}}', ...
+              '{ $project : { "_id" : 0, "type" : "$_id", "count" : 1, "uuids" : 1}}' };
+
+        end %function
+
+        %
+        function createMdfConf(testCase)
+            % instantiate a mock mdfConf, so we can run the tests
             % 
-             
+
+            global omdfc;
+            omdfc.conf = mdfConf();
+
         end %function
     end %methods
+
+    methods (TestClassTeardown)
+        function destroyMdfConf(testCase)
+            global omdfc;
+            delete(omdfc.conf);
+            clear omdfc;
+        end %function
+    end %methods
+
 
     methods (Test)
         % 
@@ -85,22 +140,42 @@ classdef mdfDBTest < matlab.unittest.TestCase
         %
         function testConnect(testCase)
             %
-            % instantiate the object and load the configuration file
+            % instantiate the object and load the configuration
             obj = mdfDB.getInstance(testCase.configuration);
             %
             % connect to container db object using index
             obj.connect();
             %
             % test that there is one container, that's what the test configuration says
-            testCase.verifyClass(obj.db,'db');
-            testCase.verifyClass(obj.db,'collection');
+            testCase.verifyClass(obj.db,'com.mongodb.DB');
+            testCase.verifyClass(obj.coll,'com.mongodb.DBCollection');
             %
             % test that the uuid is the same
             testCase.verifyEqual(obj.isValidConnection,true);
 
-            % delete singleton)
+            % delete singleton
             mdfDB.getInstance('release');
         end % function
+
+        %
+        function testDeleteAllEmpty(testCase)
+            % 
+            % instantiate the object and load configuration
+            obj = mdfDB.getInstance(testCase.configuration);
+            %
+            % connect to container db object using index
+            obj.connect();
+            %
+            % delete all entries
+            res = obj.remove('{}');
+            %
+            % test that res is a number
+            testCase.verifyClass(res,'double');
+
+            % delete singleton
+            mdfDB.getInstance('release');
+  
+        end %function
 
         %
         function testInsert(testCase)
@@ -109,10 +184,14 @@ classdef mdfDBTest < matlab.unittest.TestCase
             obj = mdfDB.getInstance(testCase.configuration);
             obj.connect();
             %
-            % insert one record
-            res = obj.insert(testCase.records(1));
+            % delete all entries
+            res = obj.remove('{}');
+            %
+            % insert records
+            res = obj.insert(testCase.records);
+            
             % make sure that the insert returns 1
-            testCase.verifyClass(res,1);
+            testCase.verifyEqual(res,length(testCase.records));
             
             % delete singleton
             mdfDB.getInstance('release');
@@ -121,147 +200,235 @@ classdef mdfDBTest < matlab.unittest.TestCase
         %
         function testFind(testCase)
             %
-            % test that we can find selected records
+            % instantiate class and connect to db
+            obj = mdfDB.getInstance(testCase.configuration);
+            obj.connect();
+            %
+            % delete all entries
+            res = obj.remove('{}');
+            %
+            % insert records
+            res = obj.insert(testCase.records);
 
             %
-            % insert record
+            % find record
+            query = ['{ "mdf_def.mdf_uuid" : "' testCase.records{1}.mdf_def.mdf_uuid '" }'];
+            res = obj.find(query);
             
             %
-            % find record
+            % check if we got back a cell array of struct
+            testCase.verifyClass(res,'cell');
+            testCase.verifyClass(res{1},'struct');
             
             %
             % compare records
+            testCase.verifyEqual(res{1},testCase.records{1});
             
         end %function
 
         %
         function testUpdate(testCase)
-            % test conf selection
+            %
+            % instantiate class and connect to db
             obj = mdfDB.getInstance(testCase.configuration);
+            obj.connect();
+            %
+            % prepare query
+            query = ['{ "mdf_def.mdf_uuid" : "' testCase.records{1}.mdf_def.mdf_uuid '" }'];
+            %
+            % delete all entries
+            res = obj.remove('{}');
             %
             % insert record
-            
+            res = obj.insert(testCase.records);
+            %
+            % change record
+            record = testCase.records{1};
+            record.mdf_def.mdf_modified = datestr(now,'yyyy-mm-dd HH:MM:SS');
             %
             % update record
+            res = obj.update(...
+                query, ...
+                record, ...
+                true);
             
+            % check that we changed only one record
+            testCase.verifyEqual(res,1);
+            
+            %
             % find record
+            res = obj.find(query);
             
+            %
+            % check if we got back a cell array of struct
+            testCase.verifyClass(res,'cell');
+            testCase.verifyClass(res{1},'struct');
+            
+            %
             % compare records
-
-            % test that file has been loaded
-            testCase.verifyEqual(obj.selection,1);
-            % delete singleton)
-            mdfDB.getInstance('release');
-        end %function
-
-        %
-        function testDelete(testCase)
-            % test instantiating the singleton with a struct and the full automation
-            % instantiate class
-            obj = mdfDB.getInstance(testCase.configuration);
-            
-            
-            % check that the conf has been read
-            testCase.verifyClass(obj.confData,'struct');
-            % check that selection is correct
-            testCase.verifyEqual(obj.selection,1);
-            % check that we get the configuration back 
-            testCase.verifyClass(obj.confData,'struct');
-
+            testCase.verifyEqual(res{1},record);
 
             % delete singleton
             mdfDB.getInstance('release');
         end %function
 
         %
-        function testDeleteAll(testCase)
-            % test universe
+        function testDelete(testCase)
+            %
+            % instantiate class and connect to db
             obj = mdfDB.getInstance(testCase.configuration);
+            obj.connect();
             %
+            % delete all entries
+            res = obj.remove('{}');
             %
-            % test that env is a struct
-            testCase.verifyClass(uni,'struct');
+            % insert records
+            res = obj.insert(testCase.records);
             %
-            % test that some of the fields matches
-            testCase.verifyEqual( ...
-                uni, ...
-                obj.confData.universe.ecosystem{:});
-
-            % delete singleton)
+            % delete one entry
+            res = obj.remove(['{ "mdf_def.mdf_uuid" : "' testCase.records{1}.mdf_def.mdf_uuid '"}']);
+            %
+            % check that we deleted only one record
+            testCase.verifyClass(res,'double');
+            testCase.verifyEqual(res,1);
+            %
+            % delete singleton
             mdfDB.getInstance('release');
-  
         end %function
 
         %
-        function testCollStats(testCase)
-            % test ecosystem
-            obj = mdfDB.getInstance(testCase.configuration);
+        function testAggregation(testCase)
             %
-            % load in all test records
-            
+            % instantiate class and connect to db
+            obj = mdfDB.getInstance(testCase.configuration);
+            obj.connect();
+            %
+            % delete all entries
+            res = obj.remove('{}');
+            %
+            % insert records
+            res = obj.insert(testCase.records);
+            %
+            % execute the aggregation
+            res = obj.aggregate(testCase.aggregationPipeline);
+            %
+            % test results
+            testCase.verifyClass(res,'cell');
+            testCase.verifyEqual(length(res),4);
+            for i = 1:length(res)
+                switch (res{i}.type)
+                    case 'pulse'
+                        testCase.verifyEqual(res{i}.count,3);
+                    case 'dummy'
+                        testCase.verifyEqual(res{i}.count,2);
+                    case 'electrode'
+                        testCase.verifyEqual(res{i}.count,1);
+                    case 'trial'
+                        testCase.verifyEqual(res{i}.count,1);
+                    case 'system'
+                        testCase.verifyEqual(res{i}.count,1);
+                    otherwise
+                        testCase.verifyEqual(res{i}.type,'unknown');
+                end %switch
+            end %for     
+            %
+            % delete singleton
+            mdfDB.getInstance('release');
+        end %testAggregate
+
+        %
+        function testCollStats(testCase)
+            %
+            % instantiate class and connect to db
+            obj = mdfDB.getInstance(testCase.configuration);
+            obj.connect();
+            %
+            % delete all entries
+            res = obj.remove('{}');
+            %
+            % insert records
+            res = obj.insert(testCase.records);
             %
             % run coll stats
-            
+            res = obj.getCollStats();
             %
             % check results
-            testCase.verifyClass(eco,'struct');
+            testCase.verifyClass(res,'struct');
+            testCase.verifyEqual(length(res),length(testCase.recordUniqueTypes));
+            for i = 1:length(res)
+                j = find(strcmp(testCase.recordUniqueTypes,res(i).mdf_type),1);
+                testCase.verifyEqual(res(i).mdf_type,testCase.recordUniqueTypes{j});
+                testCase.verifyEqual(res(i).quantity,testCase.recordQuantity(j));
+            end %for
             %
-            % test that some of the fields matches
-            testCase.verifyEqual( ...
-                eco, ...
-                obj.confData.universe.ecosystem{obj.selection});
-
-            % delete singleton)
+            % delete singleton
             mdfDB.getInstance('release');
         end %function
 
         %
         function testValidateRelationships(testCase)
-            % test conf selection
+            %
+            % instantiate class and connect to db
             obj = mdfDB.getInstance(testCase.configuration);
+            obj.connect();
             %
-            % load 
-            env = obj.getEnv();
+            % delete all entries
+            res = obj.remove('{}');
             %
-            % test that env is a struct
-            testCase.verifyClass(env,'struct');
+            % insert records
+            res = obj.insert(testCase.records);
             %
-            % test that some of the fields matches
-            testCase.verifyEqual( ...
-                env, ...
-                obj.confData.universe.ecosystem{obj.selection}.environment)
+            % run relationship validation
+            res = obj.validateRelationships();
+            %
+            % test that res is false as the data have few missing links
+            testCase.verifyEqual(res,false);
 
+            %
+            % run relationship validation and request additional data
+            [res, ed] = obj.validateRelationships();
+            %
+            % test that res is false as the data have few missing links
+            testCase.verifyEqual(res,false);
+            testCase.verifyEqual(length(ed.parentChild.missingChild),1);
+            testCase.verifyEqual(length(ed.parentChild.missingParent),1);
+            testCase.verifyEqual(length(ed.parentChild.missingBidirectionality),1);
+            testCase.verifyEqual(length(ed.bidirectional.missingDestination),1);
+            testCase.verifyEqual(length(ed.bidirectional.missingBidirectionality),1);
+            testCase.verifyEqual(length(ed.unidirectional.missingDestination),0);
+            %
             % delete singleton)
             mdfDB.getInstance('release');
         end %function
 
         % 
         function testValidationUuid(testCase)
-            % test habitats list
-            obj = mdfDB.getInstance(testCase.configuration);
             %
-            % load test enviornment
-            habs = obj.getHabitats();
+            % instantiate class and connect to db
+            obj = mdfDB.getInstance(testCase.configuration);
+            obj.connect();
+            %
+            % delete all entries
+            res = obj.remove('{}');
+            %
+            % insert records
+            res = obj.insert(testCase.records);
+            %
+            % run relationship validation
+            res = obj.validateUuids();
             %
             % run validate uuid function
-            testCase.verifyClass(habs,'cell');
+            testCase.verifyClass(res,true);
             %
-            % test that some of the fields matches
-            testCase.verifyEqual( ...
-                habs,  ...
-                obj.confData.universe.ecosystem{obj.selection}.habitats.habitat)
-
+            % run relationship validation
+            [res, ed] = obj.validateUuids();
             %
-            % test get habitats by type
-            h1 = habs;
-            h1(~strcmp(cellfun(@(x) x.type, h1,'UniformOutput',0),'db')) = [];
-            h2 = obj.getHabsByType('db');
+            % test results
+            testCase.verifyClass(res,true);
+            testCase.verifyEqual(length(ed),1);
+            testCase.verifyEqual(ed(1).uuid,testCase.records{end}.mdf_def.mdf_uuid);
+            testCase.verifyEqual(ed(1).count,2);
             %
-            % test that some of the fields matches
-            testCase.verifyEqual( ...
-                h1,  ...
-                h2);
-
             % delete singleton)
             mdfDB.getInstance('release');
         end %function

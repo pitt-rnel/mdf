@@ -32,7 +32,7 @@ function res = insert(obj,records)
         record = records{i};
         try
             % converts it to a basic db object
-            record = obj.toBasicDBObject(record)
+            record = obj.toBasicDBObject(record);
             % record is ready to be inserted
             ir = obj.coll.insert( ...
                 record, ...

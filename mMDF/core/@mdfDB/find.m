@@ -36,7 +36,7 @@ function res = find(obj,query,projection,sort)
     iquery = BasicDBObject();
     if nargin > 1 && ~isempty(query)
         % we got a query
-        iquery = obj.toBasicDBObject(query)
+        iquery = obj.toBasicDBObject(query);
     end %if
     
     % initialize projection flag
@@ -78,7 +78,7 @@ function res = find(obj,query,projection,sort)
         % get next element in list
         ele = ires.next();
         % convert it to structure throught json
-        res{length(res)+1} = mdf.fromJson(char(ele.toJson()));
+        res{length(res)+1} = rmfield(mdf.fromJson(char(ele.toJson())),'x_id');
     end %while
 
 end %function

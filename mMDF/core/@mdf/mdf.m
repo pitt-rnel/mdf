@@ -174,8 +174,8 @@ classdef (Sealed) mdf < handle
 
             % check if we have mdf data base if we operates in mixed mode (v1.4.x)
             if ( strcmp(C.MDF_COLLECTION_TYPE,'M') == 1 && ...
-                ( ~isfield(C,'DATA_BASE') || ..
-                  ~exist(C.DATA_BASE,'dir') )
+                ( ~isfield(C,'DATA_BASE') || ...
+                  ~exist(C.DATA_BASE,'dir') ) )
                 % we cannot proceed
                 throw(MException('mdfConf:start',...
                     ['5: Configuration missing MDF data folder (' C.DATA_BASE ')!!!']));

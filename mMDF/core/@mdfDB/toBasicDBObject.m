@@ -4,6 +4,9 @@ function outobj = toBasicDBObject(obj,inobj)
     % takes a obj as structure or string format and converts it 
     % to BasicDBObject ready to be used in a mongodb query
 
+    % import query object
+    import com.mongodb.BasicDBObject
+    
     switch class(inobj)
         case {'struct'}
             outobj = BasicDBObject.parse(mdf.toJson(inobj));

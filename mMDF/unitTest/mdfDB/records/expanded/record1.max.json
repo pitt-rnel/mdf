@@ -1,0 +1,106 @@
+{
+  "mdf_def": {
+    "mdf_type": "pulse",
+    "mdf_uuid": "643da923-4250-4859-bb4a-5c0b150d1bea",
+    "mdf_vuuid": "11110313-d364-46af-ac62-c47f006e164e",
+    "mdf_created": "2016-11-23 16:29:10",
+    "mdf_modified": "2016-11-23 16:29:10",
+    "mdf_files": {
+      "mdf_base": "<DATA_BASE>/pulse/pulse_643da923-4250-4859-bb4a-5c0b150d1bea",
+      "mdf_data": "<DATA_BASE>/pulse/pulse_643da923-4250-4859-bb4a-5c0b150d1bea.data.mat",
+      "mdf_metadata": "<DATA_BASE>/pulse/pulse_643da923-4250-4859-bb4a-5c0b150d1bea.md.yml"
+    },
+    "mdf_data": {
+      "mdf_fields": [
+        "snippet"
+      ],
+      "snippet": {
+        "mdf_class": "double",
+        "mdf_size": [
+          160,
+          1
+        ],
+        "mdf_mem": 1280
+      }
+    },
+    "mdf_metadata": {},
+    "mdf_children": {
+      "mdf_fields": [
+       "dummy"
+      ],
+      "mdf_types": [
+       "dummy"
+      ],
+      "dummy" : [
+       {
+        "mdf_uuid" : "7e703306-7a0a-11e8-991f-f32dd2fcbbcd",
+        "mdf_type" : "dummy",
+        "mdf_file" : ""
+       }
+      ]
+    },
+    "mdf_parents": [
+      {
+        "mdf_type" : "trial",
+        "mdf_uuid" : "8bab54f8-6f86-11e8-89b5-ab2844a61796"
+      }
+    ],
+    "mdf_links": {
+      "mdf_fields": [
+       "electrode,system"
+      ],
+      "mdf_types": [
+       "electrode,system"
+      ],
+      "mdf_directions": [
+       "b,u"
+      ],
+      "electrode" : [
+       {
+        "mdf_type" : "electrode",
+        "mdf_uuid" : "f316db02-6fdc-11e8-b746-cfd28d8409eb",
+        "mdf_file" : "",
+        "mdf_direction" : "b"
+       },
+       {
+        "mdf_type" : "electrode",
+        "mdf_uuid" : "e8771b86-74f9-11e8-a637-0b912a1bbd62",
+        "mdf_file" : "",
+        "mdf_direction" : "b"
+       }
+      ],
+      "system" : [
+       {
+        "mdf_type" : "system",
+        "mdf_uuid" : "72d65d76-74f7-11e8-82fb-bf9ebf1e158f",
+        "mdf_file" : "",
+        "mdf_direction" : "u"
+       }
+      ]
+    }
+  },
+  "mdf_metadata": {
+    "subject": "CRS02b",
+    "location": "Lab",
+    "status": "complete",
+    "experimentType": "OL",
+    "experimentDescription": "open loop",
+    "session": "00001",
+    "set": "0001",
+    "block": "0001",
+    "trial": "0001",
+    "rep": "0000",
+    "channel": 14,
+    "date": "2015-05-11",
+    "time": "14:17:03",
+    "origin": "<CRS_ARRAY_BASE>/CRS02b/DataConversion/OpenLoopStim/Batch_noReformat/CRS02bLab.data.00001/DAQ.Set0001.Block0001.Trial0001.Rep000011-May-2015_14_17_03.mat",
+    "maxV": 0.151164335,
+    "minV": -0.456205129,
+    "inter": -0.167848333,
+    "stimAmp": 4,
+    "timestamp_NSP1": 5428.410833,
+    "timestamp_NSP2": 5433.7762,
+    "ChanConfigMessageID": 1,
+    "DAQmod": "Analog_mod00"
+  }
+}
