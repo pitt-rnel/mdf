@@ -15,19 +15,18 @@ function res = remove(obj,query)
     res = 0;
 
     % import query object
-    import com.mongodb.BasicDBObject
+    %import com.mongodb.BasicDBObject
 
     % prepare write concern object
-    wc = com.mongodb.WriteConcern(1);
+    %wc = com.mongodb.WriteConcern(1);
 
     try
         % transform struct in a json string
-        query = obj.toBasicDBObject(query);
+        query = obj.toBsonDocument(query);
         % record is in json format (aka string)
-        wr = obj.coll.remove( ...
-            query, ...
-            wc);
-        res = wr.getN();
+        wr = obj.coll.deleteMany( ...
+            query);
+        res = wr.getDeletedCount();
     catch
         % nothing to do
         res = -1;

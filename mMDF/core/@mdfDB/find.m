@@ -29,21 +29,18 @@ function res = find(obj,query,projection,sort)
     %
     
 
-    % import query object
-    import com.mongodb.BasicDBObject
-
     % first check if we need to convert query to BasicDBObject
-    iquery = BasicDBObject();
+    iquery = obj.toBsonDocument('{}');
     if nargin > 1 && ~isempty(query)
         % we got a query
-        iquery = obj.toBasicDBObject(query);
+        iquery = obj.toBsonDocument(query);
     end %if
     
     % initialize projection flag
     fproj = false;
     if nargin > 2 && ~isempty(projection)
         % we got a projection too
-        iproj = obj.toBasicDBObject(projection)
+        iproj = obj.toBsonDocument(projection)
         fproj = true;
     end %if
 
@@ -51,18 +48,18 @@ function res = find(obj,query,projection,sort)
     fsort = false;
     if nargin > 3 && ~isempty(sort)
         % we got the sorting 
-        isort = obj.toBasicDBObject(sort)
+        isort = obj.toBsonDocument(sort)
         fsort = true;
     end %if        
     
-    % runs the query and gets a java collection with iterator
+    % runs the query and gets a java FindItarable object
+	ires = obj.coll.find(iquery);
+    
+    % create the projection if needed
     if fproj
         % we need to run the query and returns only some fields indicated
         % by the projection
-        ires = obj.coll.find(iquery,iproj);
-    else
-        % we just need to run the query. No fields selection
-        ires = obj.coll.find(iquery);
+        ires = ires.projection(iproj);
     end %if
     
     % check if we need to sort
@@ -70,13 +67,16 @@ function res = find(obj,query,projection,sort)
         % sort ires object
         ires = ires.sort(isort);
     end %if
+    
+    % get iteratable cursor
+    icur = ires.iterator();
 
     % if we got results, we transform them in structure and we pass it back as a cell array
     res = {};
     % loop until we have items in the collection
-    while ires.hasNext()
+    while icur.hasNext()
         % get next element in list
-        ele = ires.next();
+        ele = icur.next();
         % convert it to structure throught json
         res{length(res)+1} = rmfield(mdf.fromJson(char(ele.toJson())),'x_id');
     end %while

@@ -9,6 +9,7 @@ classdef mdfDBTest < matlab.unittest.TestCase
     properties
         configuration = '';
         testFolder = '';
+        recordFolder = 'records/minimized';
         recordFiles = {};
         records = {};
         recordTypes = {};
@@ -51,12 +52,14 @@ classdef mdfDBTest < matlab.unittest.TestCase
                  'collection', 'mdfDbTest', ...
                  'connect', 0);
             %
+            % add dull path to folder where test records are located
+            testCase.recordFolder = fullfile(testCase.testFolder,testCase.recordFolder);
             %
-            testCase.recordFiles = { 
-                'record1.json', ...
-                'record2.json', ...
-                'record3.json', ...
-                'record4.json' };
+            % listall the json files and extract just the names
+            testCase.recordFiles = arrayfun( ...
+                @(item)(fullfile(testCase.recordFolder,item.name)), ...
+                dir(fullfile(testCase.recordFolder,'*.json')), ...
+                'UniformOutput',0);
             
             % load all the records
             for i = [1:length(testCase.recordFiles)]
@@ -147,8 +150,8 @@ classdef mdfDBTest < matlab.unittest.TestCase
             obj.connect();
             %
             % test that there is one container, that's what the test configuration says
-            testCase.verifyClass(obj.db,'com.mongodb.DB');
-            testCase.verifyClass(obj.coll,'com.mongodb.DBCollection');
+            testCase.verifyClass(obj.db,'com.mongodb.client.internal.MongoDatabaseImpl');
+            testCase.verifyClass(obj.coll,'com.mongodb.client.internal.MongoCollectionImpl');
             %
             % test that the uuid is the same
             testCase.verifyEqual(obj.isValidConnection,true);
@@ -171,6 +174,7 @@ classdef mdfDBTest < matlab.unittest.TestCase
             %
             % test that res is a number
             testCase.verifyClass(res,'double');
+            testCase.verifyGreaterThanOrEqual(res,0);
 
             % delete singleton
             mdfDB.getInstance('release');
@@ -192,6 +196,26 @@ classdef mdfDBTest < matlab.unittest.TestCase
             
             % make sure that the insert returns 1
             testCase.verifyEqual(res,length(testCase.records));
+            
+            % delete singleton
+            mdfDB.getInstance('release');
+        end % function
+
+        %
+        function testInsertMany(testCase)
+            %
+            % instantiate class and connect to db
+            obj = mdfDB.getInstance(testCase.configuration);
+            obj.connect();
+            %
+            % delete all entries
+            res = obj.remove('{}');
+            %
+            % insert records
+            res = obj.insertMany(testCase.records);
+            
+            % make sure that the insert returns 1
+            testCase.verifyEqual(res,1);
             
             % delete singleton
             mdfDB.getInstance('release');
@@ -252,7 +276,7 @@ classdef mdfDBTest < matlab.unittest.TestCase
                 record, ...
                 true);
             
-            % check that we changed only one record
+            % check that update operation worked accordingly
             testCase.verifyEqual(res,1);
             
             %
@@ -314,22 +338,15 @@ classdef mdfDBTest < matlab.unittest.TestCase
             %
             % test results
             testCase.verifyClass(res,'cell');
-            testCase.verifyEqual(length(res),4);
+            testCase.verifyEqual(length(res),length(testCase.recordUniqueTypes));
             for i = 1:length(res)
-                switch (res{i}.type)
-                    case 'pulse'
-                        testCase.verifyEqual(res{i}.count,3);
-                    case 'dummy'
-                        testCase.verifyEqual(res{i}.count,2);
-                    case 'electrode'
-                        testCase.verifyEqual(res{i}.count,1);
-                    case 'trial'
-                        testCase.verifyEqual(res{i}.count,1);
-                    case 'system'
-                        testCase.verifyEqual(res{i}.count,1);
-                    otherwise
-                        testCase.verifyEqual(res{i}.type,'unknown');
-                end %switch
+                % find if type is correct
+                index = find(strcmp(testCase.recordUniqueTypes,res{i}.type));
+                if ~isempty(i)
+                    testCase.verifyEqual(res{i}.count,testCase.recordQuantity(index));
+                else
+                    testCase.verifyEqual(res{i}.type,'unknown');
+                end %if
             end %for     
             %
             % delete singleton

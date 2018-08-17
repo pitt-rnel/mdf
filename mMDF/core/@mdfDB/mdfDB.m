@@ -1,8 +1,7 @@
 classdef (Sealed) mdfDB < handle
 
     properties (Constant)
-        %Jar =  '../../../java/mongo-java-driver-3.2.1.jar';
-        Jar =  '../../../java/mongo-java-driver-3.4.2.jar';
+        Jar =  '../../../java/mongo-java-driver-3.8.0.jar';
         DEFAULT_HOST = 'localhost';
         DEFAULT_PORT = 27017;
         DEFAULT_DATABASE = 'mdf';
@@ -136,9 +135,13 @@ classdef (Sealed) mdfDB < handle
         res = find(obj,query,projection,sort)
         %res = delete(obj,query)
         res = insert(obj,query)
+        res = insertMany(obj,query)        
         res = update(obj,query,values,upsert)
         res = getCollStats(obj,varargin)
         res = aggregate(obj,pipeline)
+        
+        outobj = toBasicDBObject(obj,inobj)
+        outobj = toBsonDocument(obj,inobj)
     end
     
     methods (Static)

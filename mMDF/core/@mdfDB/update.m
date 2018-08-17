@@ -16,32 +16,31 @@ function res = update(obj,query,values,upsert)
 
     % initialize output
     res = 0;
-
-    % import query object
-    import com.mongodb.BasicDBObject
-   
+    
+    % import needed java classes
+    import com.mongodb.client.model.UpdateOptions;
+  
     % check if upsert is set or not
+    options = UpdateOptions;
+    options.upsert(false);
     if nargin > 2 && upsert == true
-	    upsert = true;
-    else
-        upsert = false;
+	    options.upsert(true);
     end %if
 
     try
         % convert query to basic db object
-        query = obj.toBasicDBObject(query);
+        query = obj.toBsonDocument(query);
         % convert values to basic db object
         values = mdf.toJson(values);
         % set the %set parameter in the values
         % this way it updates keeping previous fields
-        values = obj.toBasicDBObject(['{ "$set": ' values ' }']);
+        values = obj.toBsonDocument(['{ "$set": ' values ' }']);
 
         % record is in json format (aka string)
-        wr = obj.coll.update( ...
+        wr = obj.coll.updateMany( ...
             query, ...
             values, ...
-            upsert, ...
-            false);
+            options);
         res = 1;
     catch
         % nothing to do

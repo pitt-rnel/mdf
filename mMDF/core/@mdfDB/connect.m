@@ -74,7 +74,7 @@ function res = connect(obj,conf)
     % instantiate connector class
     if ( ri || ~isobject(obj.m) || ~isvalid(obj.m) )
         try 
-            obj.m = Mongo(obj.host,obj.port);
+            obj.m = MongoClient(obj.host,obj.port);
             ri = true;
         catch
             si = true;
@@ -84,7 +84,7 @@ function res = connect(obj,conf)
     % instantiate database class
     if ~si && ri || ( ~isobject(obj.db) || ~isvalid(obj.db) )
         try
-            obj.db = obj.m.getDB(obj.database);
+            obj.db = obj.m.getDatabase(obj.database);
             ri = true;
         catch
             si = true;

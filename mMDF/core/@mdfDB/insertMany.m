@@ -1,7 +1,7 @@
-function res = insert(obj,records)
-    % function res = obj.insert(records)
+function res = insertMany(obj,records)
+    % function res = obj.insertMany(records)
     %
-    % insert records in database back end
+    % insert records in database back end using insertMany
     % input
     %   records : single string, or single struct or cell array of string or structs
     %             if it is a single string, it is assumed that is the json rapresentation of the record.
@@ -15,30 +15,35 @@ function res = insert(obj,records)
     % initialize output
     res = 0;
 
-    % import query object
-    %import com.mongodb.BasicDBObject
+    % import java array list
+    import java.util.ArrayList;
 
     % transform input in cell if needed
     if ~isa(records,'cell')
         records = {records};
     end %if
 
-    % prepare write concern object
-    %wc = com.mongodb.WriteConcern(1);
-
+    % initialize list
+    recordList = ArrayList();
+    
     % loop on all the records to be inserted
     for i = 1:length(records)
         % extract record to be inserted in db
         record = records{i};
-        try
-            % converts it to a basic db object
-            record = obj.toBsonDocument(record);
-            % record is ready to be inserted
-            obj.coll.insertOne(record);
-            res = res + 1;
-        catch
-            % nothing to do
-        end
-    end %for 
+        % converts it to a basic db object
+        record = obj.toBsonDocument(record);
+        % append to list
+        recordList.add(record);
+    end %for
+        
+    % execute insert
+    try
+        % record is ready to be inserted
+        obj.coll.insertMany(recordList);
+        res = 1;
+    catch
+    	% nothing to do
+        res = -1;
+    end
 end %function
 

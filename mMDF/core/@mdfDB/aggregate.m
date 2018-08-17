@@ -12,11 +12,10 @@ function res = aggregate(obj,pipeline)
     
 
     % import needed mongodb java object
-    import com.mongodb.BasicDBObject
-    import com.mongodb.BasicDBList
+    import java.util.ArrayList;
 
     % instantiate db list object
-    aggrlist = BasicDBList();
+    aggrlist = ArrayList();
     
     % loops on all the elements in the pipeline and insert them in the list
     for i = 1:length(pipeline)
@@ -25,26 +24,26 @@ function res = aggregate(obj,pipeline)
      
         % it is a structure (it supposed to be)
         % we need to convert in BasicDBObject that is the format the mongodb driver unerstand and accept
-        ostep = obj.toBasicDBObject(istep);
+        ostep = obj.toBsonDocument(istep);
         
         % insert step in list
         aggrlist.add(ostep); 
     end %for
 
-    % prepare options (for future version of the API)
-    % options = BasicDBObject.parse('{ cursor: {} }');
-    
     % runs the aggregation
     % object returned is a container object with all the results
-    oaggr = obj.coll.aggregate(aggrlist);
-
-    % prepare output array
-    % oaggr.results is a java json string with all the results
-    % first we convert it to a matlab char,
-    % than from json to cell array 
-    % and finally we go from cell to matrix
-    %
-    % check with configuration if json library is native or not
-    res = cell2mat(mdf.fromJson(char(oaggr.results)));
+    oaggr = obj.coll.aggregate(aggrlist);    
     
+    % get iteratable cursor
+    ocur = oaggr.iterator();
+
+    % if we got results, we transform them in structure and we pass it back as a cell array
+    res = {};
+    % loop until we transfer all the returned objects
+    while ocur.hasNext()
+        % get next element in list
+        ele = ocur.next();
+        % convert it to structure throught json
+        res{length(res)+1} = mdf.fromJson(char(ele.toJson()));
+    end %while
 end %function

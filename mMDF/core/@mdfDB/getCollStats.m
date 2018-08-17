@@ -21,7 +21,7 @@ function outdata = getCollStats(obj,varargin)
     end %if
     
     % improt correct java object
-    import com.mongodb.BasicDBObject
+    %import com.mongodb.BasicDBObject
     
     % run map reduce command on collection
     % db.sensory.mapReduce( ...
@@ -32,9 +32,9 @@ function outdata = getCollStats(obj,varargin)
     % java object MapReduceOutput
     mrOut = obj.coll.mapReduce( ...
         'function() { emit( this.mdf_def.mdf_type, 1 )}', ...
-        'function(key, values) { return Array.sum(values) }', ...
-        'obj_num', ...
-        BasicDBObject.parse('{}') );
+        'function(key, values) { return Array.sum(values) }');
+    
+    % get object iterator
     
     % get db cursor
     mrDBCursor = mrOut.results();
