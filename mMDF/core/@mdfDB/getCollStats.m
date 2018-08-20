@@ -9,9 +9,10 @@ function outdata = getCollStats(obj,varargin)
     %                     Default: false
     %
     % output
-    % - outdata (struct): objects type and how many. It is a struct where
-    %                     the keys are the type of objects and the value is 
-    %                     how many of each type are present in the collection 
+    % - outdata (array of struct): 
+    %                     each element specify the mdf_type of the objects
+    %                     found and how many have been found
+    %                     keys: mdf_type, value
     %
     
     % check if user specified table argument
@@ -20,48 +21,33 @@ function outdata = getCollStats(obj,varargin)
         table = varargin{1};
     end %if
     
-    % improt correct java object
-    %import com.mongodb.BasicDBObject
-    
-    % run map reduce command on collection
-    % db.sensory.mapReduce( ...
-    %  function() { emit( this.mdf_def.mdf_type, 1 )}, ...
-    %  function(key, values) { return Array.sum(values) }, ...
-    %  { query: {}, out: "obj_num" } ).find()
-    %
     % java object MapReduceOutput
-    mrOut = obj.coll.mapReduce( ...
+    mrOutput = obj.coll.mapReduce( ...
         'function() { emit( this.mdf_def.mdf_type, 1 )}', ...
         'function(key, values) { return Array.sum(values) }');
     
     % get object iterator
+    mrIterator = mrOutput.iterator();
     
-    % get db cursor
-    mrDBCursor = mrOut.results();
-    % get java array
-    mrJArrayList = mrDBCursor.toArray();
-    % get java mongodb objects
-    mrMongoDBObjects = mrJArrayList.toArray();
-    
-    % initialize output structure
-    outdata = struct('mdf_type','','quantity','');
-    % loop on each result returned
-    for i = 1:length(mrMongoDBObjects)
-        % get inidvidual result
-        row = mrMongoDBObjects(i);
-        % get key and value
-        outdata(i).mdf_type = row.get('_id');
-        outdata(i).quantity = row.get('value');
-    end %for
-    
-    % drop temp collection
-    tempcoll = obj.db.getCollection('obj_num');
-    tempcoll.drop();
+    % if we got results, we transform them in structure and we pass it back as a cell array
+    outdata = {};
+    % loop until we transfer all the returned objects
+    while mrIterator.hasNext()
+        % get next element in list
+        ele = mrIterator.next();
+        % convert it to structure throught json
+        outdata{length(outdata)+1} = mdf.fromJson(char(ele.toJson()));
+    end %while
+    % convert cell array to struct array
+    outdata = cell2mat(outdata);
+    % rename _id field to mdf_type
+    [outdata.mdf_type] = outdata.x_id;
+    outdata = rmfield(outdata,'x_id');
     
     if table
         format = '%20s %10';
         disp(sprintf([format,'s'],'MDF object type','Quantity'));
         disp(sprintf([format,'s'],'--------------------','----------'));
-        arrayfun(@(item) disp(sprintf([format, 'd'],item.mdf_type,item.quantity)),outdata);
+        arrayfun(@(item) disp(sprintf([format, 'd'],item.mdf_type,item.value)),outdata);
     end %if
 end %function

@@ -375,7 +375,7 @@ classdef mdfDBTest < matlab.unittest.TestCase
             for i = 1:length(res)
                 j = find(strcmp(testCase.recordUniqueTypes,res(i).mdf_type),1);
                 testCase.verifyEqual(res(i).mdf_type,testCase.recordUniqueTypes{j});
-                testCase.verifyEqual(res(i).quantity,testCase.recordQuantity(j));
+                testCase.verifyEqual(res(i).value,testCase.recordQuantity(j));
             end %for
             %
             % delete singleton
