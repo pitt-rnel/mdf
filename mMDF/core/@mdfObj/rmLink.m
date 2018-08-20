@@ -29,7 +29,7 @@ function res = rmLink(obj, prop, link)
         % get link uuid an dobject
         [uLink, oLink] = mdf.getUAO(link);
         % find link in list
-        pos = find(strcmp(obj.mdf_def.mdf_links.(prop).mdf_uuid,uLink));
+        pos = find(strcmp({obj.mdf_def.mdf_links.(prop).mdf_uuid},uLink));
         if isempty(pos)
            throw(MException('mdfObj:rmLink','Link uuid not found in links property.')); 
         end %if
