@@ -101,6 +101,7 @@
     "timestamp_NSP1": 5428.410833,
     "timestamp_NSP2": 5433.7762,
     "ChanConfigMessageID": 1,
-    "DAQmod": "Analog_mod00"
+    "DAQmod": "Analog_mod00",
+    "selected": true
   }
 }

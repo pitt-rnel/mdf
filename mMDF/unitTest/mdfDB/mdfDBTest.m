@@ -407,19 +407,20 @@ classdef mdfDBTest < matlab.unittest.TestCase
             %
             % test that res is false as the data have few missing links
             testCase.verifyEqual(res,false);
-            testCase.verifyEqual(length(ed.parentChild.missingChild),1);
-            testCase.verifyEqual(length(ed.parentChild.missingParent),1);
-            testCase.verifyEqual(length(ed.parentChild.missingBidirectionality),1);
-            testCase.verifyEqual(length(ed.bidirectional.missingDestination),1);
-            testCase.verifyEqual(length(ed.bidirectional.missingBidirectionality),1);
-            testCase.verifyEqual(length(ed.unidirectional.missingDestination),0);
+            testCase.verifyEqual(length(ed.parentChild.missingChildObject),2);
+            testCase.verifyEqual(length(ed.parentChild.missingParentObject),1);
+            testCase.verifyEqual(length(ed.parentChild.missingChildParentRef),1);
+            testCase.verifyEqual(length(ed.parentChild.missingParentChildRef),2);
+            testCase.verifyEqual(length(ed.bidirectional.missingDestObject),1);
+            testCase.verifyEqual(length(ed.bidirectional.missingDestSourceRef),1);
+            testCase.verifyEqual(length(ed.unidirectional.missingDestObject),1);
             %
             % delete singleton)
             mdfDB.getInstance('release');
         end %function
 
         % 
-        function testValidationUuid(testCase)
+        function testValidationUuids(testCase)
             %
             % instantiate class and connect to db
             obj = mdfDB.getInstance(testCase.configuration);
@@ -451,24 +452,33 @@ classdef mdfDBTest < matlab.unittest.TestCase
         end %function
 
         %
-        function testValidationKeys(testCase)
-            % test single habitat
+        function testValidationSchema(testCase)            %
+            % instantiate class and connect to db
             obj = mdfDB.getInstance(testCase.configuration);
+            obj.connect();
             %
-            % load test environment
-            
+            % delete all entries
+            res = obj.remove('{}');
             %
-            % request the full environemnt
-            hab2 = obj.getHabitat(hab1.uuid);
+            % insert records
+            res = obj.insert(testCase.records);
             %
+            % run schema validation
+            res = obj.validateSchema();
+            %            %
             % test that habitat is a struct
-            testCase.verifyClass(hab2,'struct');
+            testCase.verifyEqual(res,false);
+            %
+            % run schema validation once more
+            [res, stats, raw] = obj.validateSchema();
             %
             % test that uuid is correct
-            testCase.verifyEqual(hab2.uuid,hab1.uuid);
-            %
-            % test that the habitat is the same
-            testCase.verifyEqual(hab2,hab1);
+            testCase.verifyEqual(res,false);
+            testCase.verifyClass(stats,'struct');
+            testCase.verifyEqual(stats.fieldConsistency,false);
+            testCase.verifyEqual(stats.valueTypeConsistency,true);
+            testCase.verifyEqual(length(stats.schema),length(testCase.recordUniqueTypes));
+            
 
             % delete singleton)
             mdfDB.getInstance('release');

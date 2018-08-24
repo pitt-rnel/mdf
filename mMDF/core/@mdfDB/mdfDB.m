@@ -2,6 +2,7 @@ classdef (Sealed) mdfDB < handle
 
     properties (Constant)
         Jar =  '../../../java/mongo-java-driver-3.8.0.jar';
+        SchemaFunctionFile = '../../../javascript/mdfDbSchema.js';
         DEFAULT_HOST = 'localhost';
         DEFAULT_PORT = 27017;
         DEFAULT_DATABASE = 'mdf';
@@ -21,6 +22,9 @@ classdef (Sealed) mdfDB < handle
         % variables used in checking configuration
         fieldsRequired = {};
         fieldInfo = struct();
+        % variable containing the javascript code to get the collection
+        % schema
+        jsSchemaFunction = '';
     end
 
     methods (Access = private)
@@ -121,6 +125,11 @@ classdef (Sealed) mdfDB < handle
                     obj.connect(conf);
                 end %if
             end %if
+            
+            % load the javascript code to get the collection schema
+            fid = fopen(obj.SchemaFunctionFile);
+            obj.jsSchemaFunction = char(fread(fid,inf)');
+            fclose(fid);
         end %function
     end
 
@@ -139,9 +148,14 @@ classdef (Sealed) mdfDB < handle
         res = update(obj,query,values,upsert)
         res = getCollStats(obj,varargin)
         res = aggregate(obj,pipeline)
+        res = mapReduce(obj,map,reduce,options)
         
         outobj = toBasicDBObject(obj,inobj)
         outobj = toBsonDocument(obj,inobj)
+        
+        [res, ed] = validateRelationships(obj)
+        [res, ed] = validateUuids(obj)
+        [res, stats, res] = validateSchema(obj)
     end
     
     methods (Static)

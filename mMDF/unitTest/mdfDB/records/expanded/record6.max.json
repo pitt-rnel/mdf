@@ -52,6 +52,12 @@
         "mdf_uuid" : "72d65d76-74f7-11e8-82fb-bf9ebf1e158f",
         "mdf_file" : "",
         "mdf_direction" : "u"
+       },
+       {
+        "mdf_type" : "system",
+        "mdf_uuid" : "012da4ec-a583-11e8-9d58-d304c293165d",
+        "mdf_file" : "",
+        "mdf_direction" : "u"
        }
       ]
     }

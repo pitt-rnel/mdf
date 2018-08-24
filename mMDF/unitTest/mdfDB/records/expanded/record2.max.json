@@ -62,6 +62,10 @@
     "timestamp_NSP1": 5428.431,
     "timestamp_NSP2": 5433.796367,
     "ChanConfigMessageID": 1,
-    "DAQmod": "Analog_mod00"
+    "DAQmod": "Analog_mod00",
+    "notes" : {
+      "note1" : "this is the first note",
+      "note2" : "this is the second note"
+    }
   }
 }
