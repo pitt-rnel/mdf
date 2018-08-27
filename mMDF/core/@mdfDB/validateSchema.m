@@ -98,7 +98,7 @@ function [res, stats, raw] = validateSchema(obj)
     %
     % check if schema is consistent
     mdf_metadata_all = [schema(:).mdf_metadata];
-    fieldConsistency = all([mdf_metadata_all.percent] == 1)
+    fieldConsistency = all([mdf_metadata_all.percent] == 1);
     %
     % value type consistency
     valueTypeConsistency = all(arrayfun(@(item)( length(item.data_type) ),mdf_metadata_all));

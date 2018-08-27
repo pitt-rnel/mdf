@@ -436,16 +436,17 @@ classdef mdfDBTest < matlab.unittest.TestCase
             res = obj.validateUuids();
             %
             % run validate uuid function
-            testCase.verifyClass(res,true);
+            testCase.verifyClass(res,'logical');
+            testCase.verifyEqual(res,true);
             %
             % run relationship validation
             [res, ed] = obj.validateUuids();
             %
             % test results
-            testCase.verifyClass(res,true);
+            testCase.verifyClass(ed,'cell');
             testCase.verifyEqual(length(ed),1);
-            testCase.verifyEqual(ed(1).uuid,testCase.records{end}.mdf_def.mdf_uuid);
-            testCase.verifyEqual(ed(1).count,2);
+            testCase.verifyEqual(ed{1}.mdf_uuid,testCase.records{end}.mdf_def.mdf_uuid);
+            testCase.verifyEqual(ed{1}.count,2);
             %
             % delete singleton)
             mdfDB.getInstance('release');
