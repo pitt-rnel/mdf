@@ -16,6 +16,9 @@ classdef mdfDBTest < matlab.unittest.TestCase
         recordUniqueTypes = {};
         recordQuantity = [];
         aggregationPipeline = {};
+        mapReduceMapFunction1 = '';
+        mapReduceMapFunction2 = '';
+        mapReduceReduceFunction = '';
     end %properties
     
     methods (TestClassSetup)
@@ -85,7 +88,15 @@ classdef mdfDBTest < matlab.unittest.TestCase
               '{ $project : { "mdf_uuid" : "$mdf_def.mdf_uuid", "mdf_type" : "$mdf_def.mdf_type" }}',  ...   
               '{ $group : { "_id" : "$mdf_type", "count" : { $sum : 1 }, "uuids" : { $addToSet : "$mdf_uuid" }}}', ...
               '{ $project : { "_id" : 0, "type" : "$_id", "count" : 1, "uuids" : 1}}' };
-
+          
+            % prepare  the map reduce functions
+            testCase.mapReduceMapFunction1 = ...
+              'function() { emit("mdfObject",this.mdf_metadata.hasOwnProperty("block")); }';
+            testCase.mapReduceMapFunction2 = ...
+              'function() { emit("mdfObject",this.mdf_metadata.hasOwnProperty("selected")); }';
+            testCase.mapReduceReduceFunction = ...
+              'function(key,values) { return Array.sum(values); }';
+            
         end %function
 
         %
@@ -353,6 +364,42 @@ classdef mdfDBTest < matlab.unittest.TestCase
             mdfDB.getInstance('release');
         end %testAggregate
 
+        function testMapReduce(testCase)
+            %
+            % instantiate class and connect to db
+            obj = mdfDB.getInstance(testCase.configuration);
+            obj.connect();
+            %
+            % delete all entries
+            res = obj.remove('{}');
+            %
+            % insert records
+            res = obj.insert(testCase.records);
+            %
+            % execute the aggregation #1
+            res = obj.mapReduce( ...
+                testCase.mapReduceMapFunction1, ...
+                testCase.mapReduceReduceFunction);
+            %
+            % test results
+            testCase.verifyClass(res,'cell');
+            testCase.verifyEqual(res{1}.value,4);
+
+            %
+            % execute the aggregation #2
+            res = obj.mapReduce( ...
+                testCase.mapReduceMapFunction2, ...
+                testCase.mapReduceReduceFunction);
+            %
+            % test results
+            testCase.verifyClass(res,'cell');
+            testCase.verifyEqual(res{1}.value,1);
+
+            %
+            % delete singleton
+            mdfDB.getInstance('release');
+        end %testMapReduce
+        
         %
         function testCollStats(testCase)
             %
