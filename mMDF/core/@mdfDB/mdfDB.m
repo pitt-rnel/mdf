@@ -128,7 +128,7 @@ classdef (Sealed) mdfDB < handle
             
             % load the javascript code to get the collection schema
             fid = fopen(obj.SchemaFunctionFile);
-            obj.jsSchemaFunction = char(fread(fid,inf)');
+            obj.jsSchemaFunction = strrep(char(fread(fid,inf)'),'<COLLECTION>',obj.collection);
             fclose(fid);
         end %function
     end

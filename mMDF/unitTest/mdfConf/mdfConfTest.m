@@ -50,7 +50,12 @@ classdef mdfConfTest < matlab.unittest.TestCase
                     'fileName', testCase.xmlConfFile, ...
                     'automation', 'start', ...
                     'menuType', 'text', ...
-                    'selection', 2)];
+                    'selection', 2), ...
+                struct( ...
+                    'fileName', testCase.xmlConfFile, ...
+                    'automation', 'start', ...
+                    'menuType', 'text', ...
+                    'selection', 3)];
 
         end %function
     end %methods
@@ -107,27 +112,18 @@ classdef mdfConfTest < matlab.unittest.TestCase
             % test if all of them has been unselected
             testCase.verifyEqual(sel,0);
             %
-            % select by index
-            collId = 1;
-            obj.select(collId);
-            % get selection
-            [n, m, i] = obj.getSelection();
-            % test that we have 1 collection selected
-            testCase.verifyEqual(i,1);
-            % test that the collection selected is the right one
-            testCase.verifyEqual(n,obj.confData.configurations.names{i});
-            testCase.verifyEqual(m,obj.confData.configurations.machines{i});
-            %
-            % select by machine name
-            collId = 2;
-            obj.select(collId);
-            % get selection
-            [n, m, i] = obj.getSelection();
-            % test that we have 2 collections selected
-            testCase.verifyEqual(i,2);
-            % test that file has been loaded
-            testCase.verifyEqual(n,obj.confData.configurations.names{i});
-            testCase.verifyEqual(m,obj.confData.configurations.machines{i});
+            % select all configuration and test
+            for collId = [1:length(testCase.indata)]
+                % select configuration
+                obj.select(collId);
+                % get selection
+                [n, m, i] = obj.getSelection();
+                % test that we have 1 collection selected
+                testCase.verifyEqual(i,collId);
+                % test that the collection selected is the right one
+                testCase.verifyEqual(n,obj.confData.configurations.names{collId});
+                testCase.verifyEqual(m,obj.confData.configurations.machines{collId});
+            end %for
             
             % delete singleton)
             mdfConf.getInstance('release');
@@ -137,7 +133,7 @@ classdef mdfConfTest < matlab.unittest.TestCase
         function testAutomation(testCase)
             % test instantiating the singleton with a struct and the full automation
             
-            for collId = [1 2]
+            for collId = [1:length(testCase.indata)]
                 % instantiate class
                 obj = mdfConf.getInstance(testCase.indata(collId));
                 % check that the conf has been read
@@ -157,10 +153,7 @@ classdef mdfConfTest < matlab.unittest.TestCase
             % instantiate conf object
             obj = mdfConf.getInstance(testCase.indata(1));
 
-            for collId = [1 2]
-
-                % decide which collection to use for testing
-                collId = 1;
+            for collId = [1:length(testCase.indata)]
                 %
                 % request the current full configuration structure
                 conf = obj.getConf(collId);
@@ -181,26 +174,42 @@ classdef mdfConfTest < matlab.unittest.TestCase
         end %function
 
         %
-        function testCollectionType(testCase)
+        function testCollectionConf(testCase)
             
-            for collId = [1 2]
+            for collId = [1:length(testCase.indata)]
                 % test configuration
                 obj = mdfConf.getInstance(testCase.indata(collId));
                 %
                 % request the current full confguration structure
-                ver = obj.getCollectionType();
+                collConf = obj.getCollectionConf();
                 %
                 % test that env is a char
-                testCase.verifyClass(ver,'char');
+                testCase.verifyClass(collConf,'struct');
                 %
-                % test that some of the fields matches
+                % test that the collection conf isset properly
                 testCase.verifyEqual( ...
-                    ver, ...
-                    obj.confData.configurations.configuration{collId}.constants.MDF_COLLECTION_TYPE);
-            end %for
+                    collConf.YAML, ...
+                    obj.confData.configurations.configuration{collId}.constants.MDF_COLLECTION.YAML);
+                testCase.verifyEqual( ...
+                    collConf.DATA, ...
+                    obj.confData.configurations.configuration{collId}.constants.MDF_COLLECTION.DATA);
+                %
+                % get directly yaml
+                yamlConf = obj.getCollectionYaml();
+                testCase.verifyClass(yamlConf,'logical');
+                testCase.verifyEqual( ...
+                    yamlConf, ...
+                    obj.confData.configurations.configuration{collId}.constants.MDF_COLLECTION.YAML);
+                
+                dataConf = obj.getCollectionData();
+                testCase.verifyClass(dataConf,'char');
+                testCase.verifyEqual( ...
+                    dataConf, ...
+                    obj.confData.configurations.configuration{collId}.constants.MDF_COLLECTION.DATA);
 
-            % delete singleton
-            mdfConf.getInstance('release');
+                % delete singleton
+                mdfConf.getInstance('release');
+            end %for
 
         end %function
 
@@ -210,7 +219,7 @@ classdef mdfConfTest < matlab.unittest.TestCase
             % test mixed collection
             obj = mdfConf.getInstance(testCase.indata(1));
 
-            for collId = [1,2]
+            for collId = [1:length(testCase.indata)]
                 %
                 % select configuration
                 obj.select(collId);

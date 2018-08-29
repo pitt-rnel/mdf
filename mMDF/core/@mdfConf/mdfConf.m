@@ -423,6 +423,11 @@ classdef mdfConf < handle
 
         % return the type of the selected collection
         ct = getCollectionType(obj,selection)
+        
+        % function to retrieve the collection configuration 
+        [arg1,arg2,arg3] = getCollectionConf(obj,selection);
+        yaml = getCollectionYaml(obj,selection);
+        data = getCollectionData(obj,selection);
     end
     
     methods (Static)
@@ -482,7 +487,6 @@ classdef mdfConf < handle
         
         % local import toolbox
         importToolbox(obj,toolbox_folder_name,dir_ignore);
-        
     end
     
 end

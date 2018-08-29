@@ -148,27 +148,52 @@ classdef (Sealed) mdf < handle
                 throw(MException('mdfConf:start',...
                     '2: Configuration missing MDF core code folder!!!'));
             end %if
-            % check if we have the collection type
-            % <MDF_COLLECTION_TYPE>MIXED, M, V_1_4</MDF_COLLECTION_TYPE>
-            % <MDF_COLLECTION_TYPE>DATABASE, DB, V_1_5</MDF_COLLECTION_TYPE>
-            if ( ~isfield(C,'MDF_COLLECTION_TYPE') )
-                % we cannot proceed
-                throw(MException('mdfConf:start',...
-                    ['3: Configuration missing MDF collection type!!!']));
-            else
+            % check if we have the collection configuration
+            if ( isfield(C,'MDF_COLLECTION') && ...
+                isfield(C.MDF_COLLECTION,'YAML') && ...
+                isfield(C.MDF_COLLECTION,'DATA') )
+                % newer configuration
+                % 
+                % set the database to mongodb
+                C.MDF_COLLECTION.DB = "MONGODB";
+                %
+                % check yaml
+                C.MDF_COLLECTION.YAML = ( C.MDF_COLLECTION.YAML == true );
+                %
+                %
+                switch C.MDF_COLLECTION.DATA
+                    case {'MATFILE', 'FILE', 'MAT', 'M'}
+                        C.MDF_COLLECTION.DATA = 'MATFILE';
+  
+                    case {'DATABASE', 'DB', 'D'}
+                        C.MDF_COLLECTION.DATA = 'DATABASE';
+  
+                    otherwise
+                        throw(MException('mdfConf:start',...
+                            ['4: Invalid MDF collection data!!!']));
+                end %case
+
+            elseif ( isfield(C,'MDF_COLLECTION_TYPE') )
+                % <MDF_COLLECTION_TYPE>MIXED, M, V_1_4</MDF_COLLECTION_TYPE>
+                % <MDF_COLLECTION_TYPE>DATABASE, DB, V_1_5</MDF_COLLECTION_TYPE>
                 % check if type is correct and convert to standard format
                 switch C.MDF_COLLECTION_TYPE
                     case {'MIXED', 'M', 'V_1_4'}
-                        C.MDF_COLLECTION_TYPE = 'M';
+                        C.MDF_COLLECTION_TYPE = 'MIXED';
 
                     case {'DATABASE', 'DB', 'V_1_5'}
-                        C.MDF_COLLECTION_TYPE = 'DB';
+                        C.MDF_COLLECTION_TYPE = 'DATABASE';
 
                     otherwise
                         throw(MException('mdfConf:start',...
                             ['4: Invalid MDF collection type!!!']));
                         
                 end %switch
+
+            else
+                % we cannot proceed
+                throw(MException('mdfConf:start',...
+                    ['3: Configuration missing MDF collection configuration!!!']));
             end %if
 
 

@@ -21,6 +21,10 @@ function C = getCollectionType(obj,selection)
     % check if we have a selection defined
     if ~isempty(obj.selection)
         % extract selected configuration
-        C = obj.confData.configurations.configuration{obj.selection}.constants.MDF_COLLECTION_TYPE;
+        try
+            C = obj.confData.configurations.configuration{obj.selection}.constants.MDF_COLLECTION_TYPE;
+        catch
+            C = 'UNDEFINED';
+        end %try/catch
     end
 end
