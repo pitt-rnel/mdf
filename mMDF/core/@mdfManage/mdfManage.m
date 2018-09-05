@@ -12,7 +12,7 @@ classdef (Sealed) mdfManage < handle
     end
 
     methods (Static)
-        function obj = getInstance()
+        function obj = getInstance(varargin)
             % access the global variable containing reference to the main
             % mdf core objects
             global omdfc;
@@ -42,7 +42,7 @@ classdef (Sealed) mdfManage < handle
                     return
                 end %if
             % check if the singleton is already instantiated or not
-            elseif ( isempty(omdfc.manage) || ~isa(omdfc.db,'mdfManage') )
+            elseif ( isempty(omdfc.manage) || ~isa(omdfc.manage,'mdfManage') )
                 % singleton needs to be instantiated
                 obj = mdfManage();
                 % save it in persistent variable
@@ -193,7 +193,10 @@ classdef (Sealed) mdfManage < handle
           % find the index of the object required
           index = obj.index(query);
           % remove object if it was found
-          res = obj.removeByIndex(index(1));
+          res = false;
+          if ~isempty(index)
+              res = obj.removeByIndex(index(1));
+          end %if
       end %function
       
       function res = clear(obj,query)
@@ -233,7 +236,7 @@ classdef (Sealed) mdfManage < handle
 
           else
 
-              indexes = [ obj.index(query) ];
+              indexes = obj.index(query);
           end %if
 
           % sort indexes

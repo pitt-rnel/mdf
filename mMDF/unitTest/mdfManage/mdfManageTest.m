@@ -1,4 +1,4 @@
-classdef mdfMnageTest < matlab.unittest.TestCase
+classdef mdfManageTest < matlab.unittest.TestCase
     % 
     % unit tests for mdfManage
     %
@@ -13,6 +13,8 @@ classdef mdfMnageTest < matlab.unittest.TestCase
         noos = -1;
         selection1 = [];
         selection2 = [];
+        clearSelection1 = {};
+        clearSelection2 = [];
         index1 = -1;
         index2 = -1;
     end %properties
@@ -30,7 +32,7 @@ classdef mdfMnageTest < matlab.unittest.TestCase
             % locate current file and current path
             cffp = mfilename('fullpath');
             [cpfp,~,~] = fileparts(cffp);
-            testCase.testFolder = cpfp;
+            %testCase.testFolder = cpfp;
             % add path to core classes of mdf
             addpath(fullfile(cpfp,'..','..','core'));
             % add path to libs
@@ -56,10 +58,12 @@ classdef mdfMnageTest < matlab.unittest.TestCase
 
             %
             % instantiate fake mdfObj
-            for i = 1:length(obj.uuids)
-                testCase.mdfObjs(end+1) = mdfObj(uuid);
-                testCase.files{end+1} = ['mdfObj_' testObj.uuid '.test'];
+            testCase.mdfObjs = mdfObj('first_fake_object_to define_type');
+            for i = 1:length(testCase.uuids)
+                testCase.mdfObjs(end+1) = mdfObj(testCase.uuids{i});
+                testCase.files{end+1} = ['mdfObj_' testCase.uuids{i} '.test'];
             end %for
+            testCase.mdfObjs(1) = [];
 
             %
             % numberof objects defined by the test class
@@ -76,26 +80,42 @@ classdef mdfMnageTest < matlab.unittest.TestCase
             % index of the element for inclusion test
             testCase.index1 = testCase.selection1(floor(length(testCase.selection1)/2));
             % index of the element for exclusion test
-            testCase.index2 = testCase.selection1[end]; 
+            testCase.index2 = testCase.selection1(end); 
+            
+            % clear selections
+            for i = testCase.selection1
+                if mod(i,2)
+                    testCase.clearSelection1{i} = testCase.uuids{i};
+                else
+                    testCase.clearSelection1{i} = testCase.mdfObjs(i);
+                end %if
+            end %for
+            testCase.clearSelection2 = testCase.mdfObjs(testCase.selection1);
         end %function
     end %methods
 
     methods (TestClassTeardown)
         function destroyMdfConf(testCase)
             global omdfc;
-            delete(omdfc.conf);
+            delete(omdfc.manage);
             clear omdfc;
         end %function
     end %methods
 
     methods
         
-        function res = insertAllMdfObj(testCase)
-            % function res = testCase.insertAll()
+        function res = insertAllMdfObj(testCase,obj,varargin)
+            % function res = testCase.insertAllMdfObj(obj,indexes)
             %
+            %
+            % check if we got the index of objects to insert
+            indeces = [1:testCase.noos];
+            if nargin > 2
+                indeces = varargin{1};
+            end %if
             % create and insert all fake mdfObj defined and requested in the test class
             res = [];
-            for i = 1:testCase.noos
+            for i = indeces
                 res(end+1) = obj.insert( ...
                     testCase.uuids{i}, ...
                     testCase.files{i}, ...
@@ -104,11 +124,14 @@ classdef mdfMnageTest < matlab.unittest.TestCase
         end %function
 
         function res = replenishMdfObjects(testCase)
+            res = 0;
             for i = 1:testCase.noos
                 if ~isvalid(testCase.mdfObjs(i))
                     testCase.mdfObjs(i) = mdfObj(testCase.uuids{i});
+                    res = res + 1;
                 end %if
             end %for
+            testCase.clearSelection2 = testCase.mdfObjs(testCase.selection1);
         end %function
     end %methods
 
@@ -130,9 +153,9 @@ classdef mdfMnageTest < matlab.unittest.TestCase
             % instantiate the object
             obj = mdfManage.getInstance();
             % test that the buffer is empty
-            testCase.verifyEqual(length(obj.objects),0;
-            testCase.verifyEqual(length(obj.uuid,'double'),0);
-            testCase.verifyEqual(length(obj.file,'char'),0);
+            testCase.verifyEqual(length(obj.object),0);
+            testCase.verifyEqual(length(obj.uuid),0);
+            testCase.verifyEqual(length(obj.file),0);
 
             % delete singleton)
             mdfManage.getInstance('release');
@@ -145,7 +168,7 @@ classdef mdfMnageTest < matlab.unittest.TestCase
             obj = mdfManage.getInstance();
             %
             % insert test objects
-            res = testCase.inserAllMdfObj();
+            res = testCase.insertAllMdfObj(obj);
   
             % check if buffer size is correct 
             testCase.verifyEqual(length(obj.object),testCase.noos);
@@ -166,7 +189,7 @@ classdef mdfMnageTest < matlab.unittest.TestCase
             testCase.verifyEqual(obj.usage(),0);
             %
             % insert test objects
-            res = testCase.inserAllMdfObj();
+            res = testCase.insertAllMdfObj(obj);
   
             % check if buffer size is correct 
             testCase.verifyEqual(obj.usage(),testCase.noos);
@@ -183,13 +206,13 @@ classdef mdfMnageTest < matlab.unittest.TestCase
             obj = mdfManage.getInstance();
             %
             % insert test objects
-            res = testCase.inserAllMdfObj(testCase.selection2);
+            res = testCase.insertAllMdfObj(obj,testCase.selection2);
 
             % get one object at index 5 and check that is the correct one 
             index = obj.indexByUuid(testCase.uuids{testCase.index1});
             % check if buffer size is correct 
             testCase.verifyNotEmpty(index);
-            testCase.verifyEqual(index,testCase.index1);
+            testCase.verifyEqual(index,find(testCase.selection1 == testCase.index1));
 
             % get one object at index 5 and check that is the correct one 
             index = obj.indexByUuid(testCase.uuids{testCase.index2});
@@ -208,13 +231,13 @@ classdef mdfMnageTest < matlab.unittest.TestCase
             obj = mdfManage.getInstance();
             %
             % insert test objects
-            res = testCase.inserAllMdfObj(testCase.selection2);
+            res = testCase.insertAllMdfObj(obj,testCase.selection2);
 
             % get one object at index 5 and check that is the correct one 
             index = obj.indexByFile(testCase.files{testCase.index1});
             % check if buffer size is correct 
             testCase.verifyNotEmpty(index);
-            testCase.verifyEqual(index,testCase.index1);
+            testCase.verifyEqual(index,find(testCase.selection1 == testCase.index1));
 
             % get one object at index 5 and check that is the correct one 
             index = obj.indexByUuid(testCase.files{testCase.index2});
@@ -233,25 +256,28 @@ classdef mdfMnageTest < matlab.unittest.TestCase
             obj = mdfManage.getInstance();
             %
             % insert test objects
-            res = testCase.inserAllMdfObj();
+            res = testCase.insertAllMdfObj(obj,testCase.selection2);
+            
+            %
+            correctIndex = find(testCase.selection1 == testCase.index1);
             
             % get index passing in the object
             % and check if index is correct
             index = obj.index(testCase.mdfObjs(testCase.index1));
             testCase.verifyNotEmpty(index);
-            testCase.verifyEqual(index,testCase.index1);
+            testCase.verifyEqual(index,correctIndex);
 
             % get index passing in the uuid
             % and check if index is correct
             index = obj.index(testCase.uuids{testCase.index1});
             testCase.verifyNotEmpty(index);
-            testCase.verifyEqual(index,testCase.index1);
+            testCase.verifyEqual(index,correctIndex);
 
             % get index passing in the file
             % and check if index is correct
             index = obj.index(testCase.files{testCase.index1});
             testCase.verifyNotEmpty(index);
-            testCase.verifyEqual(index,testCase.index1);
+            testCase.verifyEqual(index,correctIndex);
 
             % get index passing in a struct
             % and check if index is correct
@@ -259,7 +285,7 @@ classdef mdfMnageTest < matlab.unittest.TestCase
                 struct( ...
                     'uuid', testCase.uuids{testCase.index1}));
             testCase.verifyNotEmpty(index);
-            testCase.verifyEqual(index,testCase.index1);
+            testCase.verifyEqual(index,correctIndex);
 
             % get index passing in a struct
             % and check if index is correct
@@ -267,33 +293,33 @@ classdef mdfMnageTest < matlab.unittest.TestCase
                 struct( ...
                     'file', testCase.files{testCase.index1}));
             testCase.verifyNotEmpty(index);
-            testCase.verifyEqual(index,testCase.index1);
+            testCase.verifyEqual(index,correctIndex);
 
             % get index passing in the object
             % and check if index is correct
-            index = obj.exists(testCase.mdfObjs(testCase.index2));
+            index = obj.index(testCase.mdfObjs(testCase.index2));
             testCase.verifyEmpty(index);
 
             % get index passing in the uuid
             % and check if index is correct
-            index = obj.exists(testCase.uuids{testCase.index2});
+            index = obj.index(testCase.uuids{testCase.index2});
             testCase.verifyEmpty(index);
 
             % get index passing in the file
             % and check if index is correct
-            index = obj.exists(testCase.files{testCase.index2});
+            index = obj.index(testCase.files{testCase.index2});
             testCase.verifyEmpty(index);
 
             % get index passing in a struct
             % and check if index is correct
-            index = obj.exists( ...
+            index = obj.index( ...
                 struct( ...
                     'uuid', testCase.uuids{testCase.index2}));
             testCase.verifyEmpty(index);
 
             % get index passing in a struct
             % and check if index is correct
-            index = obj.exists( ...
+            index = obj.index( ...
                 struct( ...
                     'file', testCase.files{testCase.index2}));
             testCase.verifyEmpty(index);
@@ -303,20 +329,20 @@ classdef mdfMnageTest < matlab.unittest.TestCase
 
         end %function
 
-        function testExistsByUuid(testCase)
+        function testExistByUuid(testCase)
             %
             % instantiate the object and load the configuration
             obj = mdfManage.getInstance();
             %
             % insert test objects
-            res = testCase.inserAllMdfObj(testCase.selection2);
+            res = testCase.insertAllMdfObj(obj,testCase.selection2);
 
             % get one object at index 5 and check that is the correct one 
-            res = obj.existsByUuid(testCase.uuids{testCase.index1});
+            res = obj.existByUuid(testCase.uuids{testCase.index1});
             testCase.verifyEqual(res,true);
             
             % get one object at index 5 and check that is the correct one 
-            res = obj.existsByUuid(testCase.uuids{testCase.index2});
+            res = obj.existByUuid(testCase.uuids{testCase.index2});
             testCase.verifyEqual(res,false);
 
             % delete singleton
@@ -325,21 +351,21 @@ classdef mdfMnageTest < matlab.unittest.TestCase
         end % function
 
         %
-        function testExistsByFile(testCase)
+        function testExistByFile(testCase)
             %
             % instantiate the object and load the configuration
             obj = mdfManage.getInstance();
             %
             % insert test objects
-            res = testCase.inserAllMdfObj(testCase.Selection2);
+            res = testCase.insertAllMdfObj(obj,testCase.selection2);
 
             % get one object at index 5 and check that is the correct one 
-            res = obj.existsByFile(testCase.files{testCase.index1});
+            res = obj.existByFile(testCase.files{testCase.index1});
             testCase.verifyEqual(res,true);
 
             % get one object at index 5 and check that is the correct one 
-            res = obj.existsByFile(testCase.files{testCase.index2});
-            testCase.verifyEqual(res.False);
+            res = obj.existByFile(testCase.files{testCase.index2});
+            testCase.verifyEqual(res,false);
 
             % delete singleton
             mdfManage.getInstance('release');
@@ -347,68 +373,68 @@ classdef mdfMnageTest < matlab.unittest.TestCase
         end % function
 
         %
-        function testExists(testCase)
+        function testExist(testCase)
             %
             % instantiate the object and load the configuration
             obj = mdfManage.getInstance();
             %
             % insert test objects
-            res = testCase.inserAllMdfObj(testCase.selection2);
+            res = testCase.insertAllMdfObj(obj,testCase.selection2);
             
             % get index passing in the object
             % and check if index is correct
-            res = obj.exists(testCase.mdfObjs(testCase.index1));
+            res = obj.exist(testCase.mdfObjs(testCase.index1));
             testCase.verifyEqual(res,true);
 
             % get index passing in the uuid
             % and check if index is correct
-            res = obj.exists(testCase.uuids{testCase.index1});
+            res = obj.exist(testCase.uuids{testCase.index1});
             testCase.verifyEqual(res,true);
 
             % get index passing in the file
             % and check if index is correct
-            res = obj.exists(testCase.files{testCase.index1});
+            res = obj.exist(testCase.files{testCase.index1});
             testCase.verifyEqual(res,true);
 
             % get index passing in a struct
             % and check if index is correct
-            res = obj.exists( ...
+            res = obj.exist( ...
                 struct( ...
                     'uuid', testCase.uuids{testCase.index1}));
             testCase.verifyEqual(res,true);
 
             % get index passing in a struct
             % and check if index is correct
-            res = obj.exists( ...
+            res = obj.exist( ...
                 struct( ...
                     'file', testCase.files{testCase.index1}));
             testCase.verifyEqual(res,true);
 
             % get index passing in the object
             % and check if index is correct
-            res = obj.exists(testCase.mdfObjs(testCase.index2));
+            res = obj.exist(testCase.mdfObjs(testCase.index2));
             testCase.verifyEqual(res,false);
 
             % get index passing in the uuid
             % and check if index is correct
-            res = obj.exists(testCase.uuids{testCase.index2});
+            res = obj.exist(testCase.uuids{testCase.index2});
             testCase.verifyEqual(res,false);
 
             % get index passing in the file
             % and check if index is correct
-            res = obj.exists(testCase.files{testCase.index2});
+            res = obj.exist(testCase.files{testCase.index2});
             testCase.verifyEqual(res,false);
 
             % get index passing in a struct
             % and check if index is correct
-            res = obj.exists( ...
+            res = obj.exist( ...
                 struct( ...
                     'uuid', testCase.uuids{testCase.index2}));
             testCase.verifyEqual(res,false);
 
             % get index passing in a struct
             % and check if index is correct
-            res = obj.exists( ...
+            res = obj.exist( ...
                 struct( ...
                     'file', testCase.files{testCase.index2}));
             testCase.verifyEqual(res,false);
@@ -425,7 +451,7 @@ classdef mdfMnageTest < matlab.unittest.TestCase
             obj = mdfManage.getInstance();
             %
             % insert test objects
-            res = testCase.inserAllMdfObj(testCase.selection2);
+            res = testCase.insertAllMdfObj(obj,testCase.selection2);
             %
             % retrieve inserted object
             res = obj.get(testCase.mdfObjs(testCase.index1));
@@ -438,7 +464,7 @@ classdef mdfMnageTest < matlab.unittest.TestCase
             testCase.verifyEqual(res,testCase.mdfObjs(testCase.index1));
 
             %
-            res = obj.exists(testCase.files{testCase.index1});
+            res = obj.get(testCase.files{testCase.index1});
             testCase.verifyClass(res,'mdfObj');
             testCase.verifyEqual(res,testCase.mdfObjs(testCase.index1));
 
@@ -465,17 +491,17 @@ classdef mdfMnageTest < matlab.unittest.TestCase
             testCase.verifyEqual(res,[]);
 
             %
-            res = obj.exists(testCase.files{testCase.index2});
+            res = obj.get(testCase.files{testCase.index2});
             testCase.verifyEqual(res,[]);
 
             %
-            res = obj.exists( ...
+            res = obj.get( ...
                 struct( ...
                     'uuid', testCase.uuids{testCase.index2}));
             testCase.verifyEqual(res,[]);
 
             %
-            res = obj.exists( ...
+            res = obj.get( ...
                 struct( ...
                     'file', testCase.files{testCase.index2}));
             testCase.verifyEqual(res,[]);
@@ -492,14 +518,14 @@ classdef mdfMnageTest < matlab.unittest.TestCase
             obj = mdfManage.getInstance();
             %
             % insert test objects
-            res = testCase.inserAllMdfObj(testCase.selection2);
+            res = testCase.insertAllMdfObj(obj,testCase.selection2);
             %
             % insert object already inserted
-            pos1 = obj.get(testCase.mdfObjs(testCase.index1));
+            pos1 = obj.index(testCase.mdfObjs(testCase.index1));
             len1 = obj.usage();
             pos2 = obj.insert( ...
                 testCase.uuids{testCase.index1}, ...
-                testCase.filess{testCase.index1}, ...
+                testCase.files{testCase.index1}, ...
                 testCase.mdfObjs(testCase.index1) ...
             );
             testCase.verifyEqual(pos1,pos2);
@@ -509,10 +535,10 @@ classdef mdfMnageTest < matlab.unittest.TestCase
             len1 = obj.usage();
             pos2 = obj.insert( ...
                 testCase.uuids{testCase.index2}, ...
-                testCase.filess{testCase.index2}, ...
+                testCase.files{testCase.index2}, ...
                 testCase.mdfObjs(testCase.index2) ...
             );
-            testCase.verifyGreatThan(len1,pos2);
+            testCase.verifyGreaterThan(pos2,len1);
             testCase.verifyEqual(len1+1,obj.usage());
 
             % delete singleton
@@ -527,7 +553,7 @@ classdef mdfMnageTest < matlab.unittest.TestCase
             obj = mdfManage.getInstance();
             %
             % insert test objects
-            res = testCase.inserAllMdfObj(testCase.selection2);
+            res = testCase.insertAllMdfObj(obj,testCase.selection2);
             %
             % get index for one inserted object
             ind1 = obj.index(testCase.mdfObjs(testCase.index1));
@@ -552,7 +578,7 @@ classdef mdfMnageTest < matlab.unittest.TestCase
             obj = mdfManage.getInstance();
             %
             % insert test objects
-            res = testCase.inserAllMdfObj(testCase.selection2);
+            res = testCase.insertAllMdfObj(obj,testCase.selection2);
             %
             % save how many object we have in memory
             len1 = obj.usage();
@@ -586,11 +612,11 @@ classdef mdfMnageTest < matlab.unittest.TestCase
             %
             % make sure that all the fake mdfObj are still valid
             % or creates new ones
-            testCase.replenishMdfObjs();
+            testCase.replenishMdfObjects();
 
             %
             % insert test objects
-            res = testCase.inserAllMdfObj(testCase.selection1);
+            res = testCase.insertAllMdfObj(obj,testCase.selection1);
 
             % get number of object managed
             len1 = obj.usage();
@@ -598,7 +624,7 @@ classdef mdfMnageTest < matlab.unittest.TestCase
             % remove one object
             res = obj.clear(testCase.clearSelection1{1});
             testCase.verifyEqual(res,1);
-            testCase.verifyEqual(obj.usage(),len-1);
+            testCase.verifyEqual(obj.usage(),len1-1);
 
             % delete singleton
             mdfManage.getInstance('release');
@@ -614,13 +640,13 @@ classdef mdfMnageTest < matlab.unittest.TestCase
             %
             % make sure that all the fake mdfObj are still valid
             % or creates new ones
-            testCase.replenishMdfObjs();
+            testCase.replenishMdfObjects();
 
             %
             % insert test objects
-            res = testCase.inserAllMdfObj(testCase.selection1);
+            res = testCase.insertAllMdfObj(obj,testCase.selection1);
 
-            % remove one object
+            % remove all objects
             res = obj.clear(testCase.clearSelection1);
             testCase.verifyEqual(res,testCase.noos);
             testCase.verifyEqual(obj.usage(),0);
@@ -639,11 +665,11 @@ classdef mdfMnageTest < matlab.unittest.TestCase
             %
             % make sure that all the fake mdfObj are still valid
             % or creates new ones
-            testCase.replenishMdfObjs();
+            testCase.replenishMdfObjects();
 
             %
             % insert test objects
-            res = testCase.inserAllMdfObj(testCase.selection1);
+            res = testCase.insertAllMdfObj(obj,testCase.selection1);
 
             % remove one object
             res = obj.clear(testCase.clearSelection2);
@@ -660,18 +686,22 @@ classdef mdfMnageTest < matlab.unittest.TestCase
             %
             % instantiate the object and load the configuration
             obj = mdfManage.getInstance();
-            %
-            % insert test objects
-            res = testCase.inserAllMdfObj(testCase.selection2);
 
             %
             % make sure that all the fake mdfObj are still valid
             % or creates new ones
-            testCase.replenishMdfObjs();
+            testCase.replenishMdfObjects();
+            
+            %
+            % insert test objects
+            res = testCase.insertAllMdfObj(obj,testCase.selection2);
+
+            % save usage
+            usage1 = obj.usage();
 
             % clear all object
             res = obj.clearAll();
-            testCase.verifyEqual(res,testCase.noos);
+            testCase.verifyEqual(res,usage1);
             testCase.verifyEqual(obj.usage(),0);
 
             % delete singleton
