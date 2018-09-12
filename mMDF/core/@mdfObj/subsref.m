@@ -4,30 +4,64 @@ function [res] = subsref(obj,S)
     %
     % overload default subsref matlab function
 
-    % check if we get an array in input,
-    % loop on each one of them
-    if length(obj) > 1
-        % check if we just want to extract one element of the array
-        if strcmp(S(1).type,'()')
+    % check if the object itself is a single object or a vector
+    if ~isvector(obj) && max(builtin('size',obj)) > 1
+        % we got a matrix, and we do not know what to do with it
+        throw(MException( ...
+            'mdfObj:subsref', ...
+            ['Operation not possible. Please transform object in a vector']));
+    elseif strcmp(S(1).type,'()')
+        % check if the first operation is an array indexing
+        % we assume that the user knows the length of the vector
+        #
+        % if that's the case, we extract the element and apply the rest of the
+        % subsref steps
+        if length(S(1).subs) ~= 1
+            % check if we got multiple dimensions in the slicing
+            throw(MException( ...
+                'mdfObj:subsref', ...
+                ['Please specify only one index. This object can only be a vector']));
+        elseif length(S(1).subs{1}) == 1
+            % the user specify only one index
+            % the user wants to extract a specific element from the array
             res = obj(S(1).subs{1});
             % remove requested operation from S
             S(1) = [];
-            if length(S) > 0 
+            % if we have more subsref steps, go ahead and perform them
+            if length(S) > 0
                 res = res.subsref(S);
             end %if
+            % we are done
+            return
         else
-            % we assume that we should apply the operation requested to
-            % every single object in the array
-            % prepare output
-            res = {};
-            % loops on all the elements
-            for i = 1:length(obj)
-                res{end+1} = obj(i).subsref(S);
-            end %for
-        end %if
+            % the user has specified multiple indexes to be extracted
+            % applies the remaining subsref to the selected elements and
+            % returns a cell array
+            %
+            %
+            % get the selected indexes
+            selectedIndexes = S(1).subs{1};
+            % remove indezing from subsref operation
+            S(1) = [];
+            % loops on the indexes and applies the subsrefs operations
+            res = arrayfun(@(item)(item.subsref(S)),obj(selectedIndexes),'UniformOutput',0);
+            % we are done
+            return;
+        end % if
+    elseif length(obj)>1
+        % now checks if we have n array in input and if we should perform the
+        % subsref operation on all the elements
+        %
+        % we assume that we should apply the operation requested to
+        % every single object in the array
+        % prepare output
+        res = {};
+        % loops on all the elements
+        res = arrayfun(@(item)(item.subsref(S)),obj,'UniformOutput',0);
         % we are done
         return
     end %if
+
     % manage the different cases
     %
 	% obj(<string>)

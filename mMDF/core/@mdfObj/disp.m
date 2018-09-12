@@ -230,24 +230,22 @@ function disp(obj,type)
     end %if
 
     % print parent
-    if type == 'a'
-        if isempty(obj.mdf_def.mdf_parents) || ...
-                isempty(fields(obj.mdf_def.mdf_parents))
-            printKeyValue('parents','[]',ill1);
-        else
-            printKeyValue('parents','',ill1);
-            % plot all parents
-            for i = 1:length(obj.mdf_def.mdf_parents)
-                % extract parent information
-                p = obj.mdf_def.mdf_parents(i);
-                % display
-                printKeyValue(p.mdf_type,p.mdf_uuid,ill2);
-                if type == 'a'
-                    disp(sprintf(['%' num2str(ill2) '   %s]'], ...
-                        '',p.mdf_file));
-                end %if
-            end %for
-        end %if
+    if isempty(obj.mdf_def.mdf_parents) || ...
+            isempty(fields(obj.mdf_def.mdf_parents))
+        printKeyValue('parents','[]',ill1);
+    else
+        printKeyValue('parents','',ill1);
+        % plot all parents
+        for i = 1:length(obj.mdf_def.mdf_parents)
+            % extract parent information
+            p = obj.mdf_def.mdf_parents(i);
+            % display
+            printKeyValue(p.mdf_type,p.mdf_uuid,ill2);
+            if type == 'a'
+                disp(sprintf(['%' num2str(ill2) '   %s]'], ...
+                    '',p.mdf_file));
+            end %if
+        end %for
     end %if
 end %function
 
