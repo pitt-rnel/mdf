@@ -16,7 +16,8 @@ classdef mdfObjTest < matlab.unittest.TestCase
         conf = [];
         db = [];
         manage = [];
-        testObjIndex = 1;
+        testObjIndex = -1;
+        testOther ObjInde = []; 
         testMdfType = 'TestObj';
     end %properties
     
@@ -74,6 +75,15 @@ classdef mdfObjTest < matlab.unittest.TestCase
             %
             % child property
             testCase.childProperty = 'test';
+
+            %
+            % pick the selected test object
+            tempIndex = randperm(length(testCase.uuids));
+            testCase.testObjIndex = tempIndex(1);
+            testCase.testOtherObjIndex = tempIndex(2:end);
+            tempIndex = randperm(length(testCase.uuids)-1);
+            testCase.insertPosition = tempIndex(1);
+
         end %function
 
         %
@@ -589,7 +599,7 @@ classdef mdfObjTest < matlab.unittest.TestCase
               
                 %
                 % test that obj is populated correctly
-                dataProperties = obj.getLDP();
+                dataProperties = obj.mdf_def.mdf_data.mdf_fields;
                 for i = 1:length(dataProperties)
                     dataProp = dataProperties{i};
                     test = obj.data.(dataProp);
@@ -617,7 +627,7 @@ classdef mdfObjTest < matlab.unittest.TestCase
             testCase.manage.clearAll();
 
         end %function
-%--------
+
         function testListDataProperties(testCase)
             %
             % load  one of the test objects
@@ -653,47 +663,46 @@ classdef mdfObjTest < matlab.unittest.TestCase
             %
             % add children
             res = true;
-            for i = 1:length(testCase.uuids)
+            for i = tempCase.testOtherObjIndex
                 res1 = obj.addChild(testCase.testProperty,testCase.uuids{i});
                 res = res & res1;
             end
-            testCase.verifyEqual(res,testCase.testObjIndexue);
+            testCase.verifyEqual(res,true);
             testCase.verifyEqual( ...
-                testCase.testProperty, ...
-                obj.mdf_def.mdf_children.mdf_fields{0});
+                any( ...
+                    ismember(testCase.testProperty, ...
+                    obj.mdf_def.mdf_children.mdf_fields),
+                true);
             testCase.verifyEqual( ...
                 length(testCase.uuids), ...
                 length(obj.mdf_def.mdf_children.(testCase.testProperty)));
 
             %
-            % clear memory
+            % clear memory and does note save it
             testCase.manage.clearAll();
 
             % 
-            % randomize the insert order and select a position
-            order = randperm(length(testCase.uuids));
-            pos = order(1);
-
+            % insert last child at a random place
             %
             % add all children excepct last
-            for i = 1:length(testCase.uuids)-1
+            for i = 1:length(testCase.testOtherObjIndex)-1
                 res = obj.addChild( ...
                     testCase.testProperty, ...
-                    testCase.uuids{i}, ...
+                    testCase.uuids{testCase.testOtherObjIndex(i)}, ...
                     );
             end
             % add last child in predefind position
             res = obj.addChild( ...
                 testCase.testProperty,
-                testCase.uuids{end},
-                pos);
-            testCase.verifyEqual(res,testCase.testObjIndexue);
+                testCase.uuids{testCase.testOtherObjIndex(end)},
+                testCase.insertPosition);
+            testCase.verifyEqual(res,true);
             testCase.verifyEqual( ...
-                length(testCase.uuids), ...
+                length(testCase.testOtherObjIndex), ...
                 length(obj.mdf_def.mdf_children.(testCase.testProperty)));
             testCase.verifyEqual( ...
-                testCase.uuids{end}, ...
-                obj.mdf_def.mdf_children.(testCase.testProperty)(pos));
+                testCase.uuids{testCase.testOtherObjIndex(end)}, ...
+                obj.mdf_def.mdf_children.(testCase.testProperty)(testCase.insertPosition));
 
             % this time save the object
             res = obj.save()
@@ -709,17 +718,19 @@ classdef mdfObjTest < matlab.unittest.TestCase
             %
             % test for function getPropIter
             %
-            % load object                        
-            obj = mdfObj.load(testCase.getTestObjUuid);
+            % load object
+            obj = mdfObj.load(testCase.getTestObjUuid());
             %
             % get vector iterator
-            iter = obj.getPropIter(...
+            iter = obj.getPropIter( ...
                 testCase.testProperty, ...
                 'asc', ...
                 'children');
             % 
             % verify that we got the right thing
-            testCase.verifyEqual(iter,[1:length(obj.mdf_def.mdf_children.(testCase.testProperty))]);
+            testCase.verifyEqual( ...
+                iter, ...
+                [1:length(obj.mdf_def.mdf_children.(testCase.testProperty))]);
 
             %
             % get vector iterator
@@ -729,7 +740,9 @@ classdef mdfObjTest < matlab.unittest.TestCase
                 'children');
             % 
             % verify that we got the right thing
-            testCase.verifyEqual(iter,[length(obj.mdf_def.mdf_children.(testCase.testProperty)):-1:1]);
+            testCase.verifyEqual( ...
+                iter, ...
+                [length(obj.mdf_def.mdf_children.(testCase.testProperty)):-1:1]);
 
             %
             % clear memory
@@ -742,13 +755,15 @@ classdef mdfObjTest < matlab.unittest.TestCase
             % test for function getUuids
             %
             % load object                        
-            obj = mdfObj.load(testCase.getTestObjUuid);
+            obj = mdfObj.load(testCase.getTestObjUuid());
             %
             % get uuids of the children
             uuids = obj.getUuids('children',testCase.testProperty,'default');
             %
             % check if the uuids are the same that we inserted
-            testCase.verifyEqual(sort(uuids),sort(testCase.uuids));
+            testCase.verifyEqual( ...
+                sort(uuids), ...
+                sort(testCase.uuids(testCase.testOtherObjIndex)));
 
             %
             % clear memory
@@ -761,13 +776,13 @@ classdef mdfObjTest < matlab.unittest.TestCase
             % test for function getLen
             %
             % load object                        
-            obj = mdfObj.load(testCase.getTestObjUuid);
+            obj = mdfObj.load(testCase.getTestObjUuid());
             %
             % get length (aka # of children objects)
             len = obj.getLen(testCase.testProperty,'children');
             %
             % check that we get the right length
-            testCase.verifyEqual(len,length(testCase.uuids);
+            testCase.verifyEqual(len,length(testCase.testOtherObjIndex);
 
             %
             % clear memory
@@ -780,7 +795,7 @@ classdef mdfObjTest < matlab.unittest.TestCase
             % test for function isProp
             %
             % load object                        
-            obj = mdfObj.load(testCase.getTestObjUuid);
+            obj = mdfObj.load(testCase.getTestObjUuid());
             %
             % check if property is reported as such
             res = obj.isProp(testCase.testProperty,'children');
@@ -801,22 +816,50 @@ classdef mdfObjTest < matlab.unittest.TestCase
         end % function
 
         %
-        function testRmChildren(testCase)
+        function testGetChildren(testCase)
             %
-            % test for function rmChild
+            % test for loading a child
+            obj = mdfObj.load(testCase.getTestObjUuid());
             %
-            % load object                        
-            obj = mdfObj.load(testCase.getTestObjUuid);
+            % retrieve specific child
+            chObj = obj.data.(testCase.testProperty)(testCase.insertPosition);
+            %
+            testCase.verifyClass(chObj,'mdfObj');
+            testCase.verifyEqual( ...
+                chObj.uuid,
+                testCase.uuids{testCase.testOtherObjIndex(end)});
+
+        end % function
+
+        %
+        function testRmOneChildren(testCase)
+            %
+            % test for function rmChild, removing only one child
+            %
+            % load object
+            obj = mdfObj.load(testCase.getTestObjUuid());
             %
             % remove one child and check 
-            res = obj.rmChild(testCase.testProperty,testCase.uuids{1});
+            res = obj.rmChild( ...
+                testCase.testProperty, ...
+                testCase.uuids{testCase.testOtherObjIndex(end)});
             %
             % 
             testCase.verifyEqual(res,true);
             testCase.veirfyEqual( ...
                 length(obj.mdf_def.mdf_children.(testCase.testProperty)), ...
-                length(testCase.uuids)-1);
+                length(testCase.testOtherObjIndex)-1);
+            %
+            % clear memory
+            testCase.manage.clearAll();
 
+        end %function
+
+        %
+        function testRmAllChildren(testCase)
+            %
+            % test for function rmChild, removing all children under property
+            %
             %
             % remove all children under the same property
             res = obj.rmChild(testCase.testProperty);
@@ -836,16 +879,6 @@ classdef mdfObjTest < matlab.unittest.TestCase
             % clear memory
             testCase.manage.clearAll();
 
-        end % function
-
-        %
-        function testGetChildren(testCase)
-            %
-            % test for loading a child
-            objs = mdfObj.load('mdf_type','TestObj');
-            %
-            % make one the child of the other
-            res = objs{1}.addChild(testCase.testProperty,testCase.uuids{i});
         end % function
 
 
