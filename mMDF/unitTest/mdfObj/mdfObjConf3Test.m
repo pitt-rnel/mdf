@@ -52,7 +52,7 @@ classdef mdfObjTest < matlab.unittest.TestCase
             testCase.uuidsFile = fullfile(testCase.testFolder, '..', 'conf', 'uuid.json');
             % 
             % set up input configuration to conf object
-            % select the file based configuration with yml metadata file
+            % select a database data collection
             testCase.confIndata = stestCase.testObjIndexuct( ...
                     'fileName', testCase.xmlConfFile, ...
                     'automation', 'start', ...
@@ -70,7 +70,7 @@ classdef mdfObjTest < matlab.unittest.TestCase
                     'port', C.DB.PORT, ...
                     'database', C.DB.DATABASE, ...
                     'collection', C.DB.COLLECTION, ...
-                    'connect', testCase.testObjIndexue);
+                    'connect', true);
             testCase.db = mdfDb.getInstance(testCase.dbIndata);
             testCase.manage = mdfManage.getInstance();
 
@@ -158,24 +158,10 @@ classdef mdfObjTest < matlab.unittest.TestCase
             uuid = testCase.records{testCase.testObjIndex}.mdf_def.mdf_uuid);
         end %function
 
-        function filename = getFilenameFromUuid(uuid,type)
-            switch lower(type)
-                case 'data'
-                    filename = fullfile( '<DATA_BASE>', [testCase.testMdfType '_' uuid '.md.yml'] );
-                case 'name'
-                    filename = fullfile( '<DATA_BASE>', [testCase.testMdfType '_' uuid '.d.mat'] );
-                otherwise
-                    filename = fullfile( '<DATA_BASE>', [testCase.testMdfType '_' uuid] );
-            end %switch
-        end %function
-
         function obj = createMdfObjFromUuid(uuid)
             %
             % instantiate the object
             obj = mdfObj(uuid,testCase.testMdfType);
-            %
-            % set files for this object
-            res = obj.setFiles( testCase.getFilenameFromUuid(uuid));
             %
             % add some metadata
             obj.metadata.name = [testCase.testMdfType ' ' uuid];
@@ -231,22 +217,13 @@ classdef mdfObjTest < matlab.unittest.TestCase
             % instantiate the object
             obj = mdfObj();
             %
-            % set files for thisobjects
+            % set files for this objects
             res = obj.setFiles(testCase.records{testCase.testObjIndex}.mdf_def.mdf_files.mdf_base);
             %
             % check results
-            testCase.verifyEqual( ...
-                res.base, ...
-                testCase.conf.filter( ...
-                    testCase.records{testCase.testObjIndex}.mdf_def.mdf_files.mdf_base));
-            testCase.verifyEqual( ...
-                res.metadata, ...
-                testCase.conf.filter( ...
-                    testCase.records{testCase.testObjIndex}.mdf_def.mdf_files.mdf_metadata));
-            testCase.verifyEqual( ...
-                res.data, ...
-                testCase.conf.filter( ...
-                    testCase.records{testCase.testObjIndex}.mdf_def.mdf_files.mdf_data));
+            testCase.verifyEqual( res.base, '' );
+            testCase.verifyEqual( res.metadata, '');
+            testCase.verifyEqual( res.data, '');
             %
             %
             delete(obj);
@@ -255,26 +232,17 @@ classdef mdfObjTest < matlab.unittest.TestCase
             % instantiate the object
             obj = mdfObj();
             %
-            % set files for thisobjects
+            % set files for this objects
             res = obj.setFiles( ...
-                stestCase.testObjIndexuct( ...
+                struct( ...
                     'base', testCase.records{testCase.testObjIndex}.mdf_def.mdf_files.mdf_base, ...
                     'metadata', testCase.records{testCase.testObjIndex}.mdf_def.mdf_files.mdf_metadata, ...
                     'data', testCase.records{testCase.testObjIndex}.mdf_def.mdf_files.mdf_data));
             %
             % check results
-            testCase.verifyEqual( ...
-                res.base, ...
-                testCase.conf.filter( ..
-                    testCase.records{testCase.testObjIndex}.mdf_def.mdf_files.mdf_base));
-            testCase.verifyEqual( ...
-                res.metadata, ...
-                testCase.conf.filter( ...
-                    testCase.records{testCase.testObjIndex}.mdf_def.mdf_files.mdf_metadata));
-            testCase.verifyEqual( ...
-                res.data, ...
-                testCase.conf.filter( ...
-                    testCase.records{testCase.testObjIndex}.mdf_def.mdf_files.mdf_data));
+            testCase.verifyEqual( res.base, '' );
+            testCase.verifyEqual( res.metadata, '' );
+            testCase.verifyEqual( res.data, '' );
             %
             %
             delete(obj);
@@ -296,33 +264,18 @@ classdef mdfObjTest < matlab.unittest.TestCase
             res = obj.getFiles();
             %
             % check results
-            testCase.verifyEqual( ...
-                res.base, ...
-                testCase.conf.filter( ...
-                    testCase.records{testCase.testObjIndex}.mdf_def.mdf_files.mdf_base));
-            testCase.verifyEqual( ...
-                res.metadata, ...
-                testCase.conf.filter( ...
-                    testCase.records{testCase.testObjIndex}.mdf_def.mdf_files.mdf_metadata));
-            testCase.verifyEqual( ...
-                res.data, ...
-                testCase.conf.filter( ...
-                    testCase.records{testCase.testObjIndex}.mdf_def.mdf_files.mdf_data));
+            testCase.verifyEqual( res.base, '' );
+            testCase.verifyEqual( res.metadata, '' );
+            testCase.verifyEqual( res.data, '' );
 
             %
             % get files for this object
             res = obj.getFiles(false);
             %
             % check results
-            testCase.verifyEqual( ...
-                res.base, ...
-                testCase.records{testCase.testObjIndex}.mdf_def.mdf_files.mdf_base);
-            testCase.verifyEqual( ...
-                res.metadata, ...
-                testCase.records{testCase.testObjIndex}.mdf_def.mdf_files.mdf_metadata);
-            testCase.verifyEqual( ...
-                res.data, ...
-                testCase.records{testCase.testObjIndex}.mdf_def.mdf_files.mdf_data);
+            testCase.verifyEqual( res.base, '' );
+            testCase.verifyEqual( res.metadata, '' );
+            testCase.verifyEqual( res.data, '' );
 
             %
             %
@@ -346,36 +299,26 @@ classdef mdfObjTest < matlab.unittest.TestCase
             res = obj.getDataFileName();
             %
             % check results
-            testCase.verifyEqual( ...
-                res, ...
-                testCase.conf.filter( ...
-                    testCase.records{testCase.testObjIndex}.mdf_def.mdf_files.mdf_data));
+            testCase.verifyEqual( res, false );
             %
             % get files for this object
             res = obj.getDFN();
             %
             % check results
-            testCase.verifyEqual( ...
-                res, ...
-                testCase.conf.filter( ...
-                    testCase.records{testCase.testObjIndex}.mdf_def.mdf_files.mdf_data));
+            testCase.verifyEqual( res, false );
 
             %
             % get files for this object
             res = obj.getDataFileName(false);
             %
             % check results
-            testCase.verifyEqual( ...
-                res, ...
-                testCase.records{testCase.testObjIndex}.mdf_def.mdf_files.mdf_data);
+            testCase.verifyEqual( res, false );
             %
             % get files for this object
             res = obj.getDFN(false);
             %
             % check results
-            testCase.verifyEqual( ...
-                res, ...
-                testCase.records{testCase.testObjIndex}.mdf_def.mdf_files.mdf_data);
+            testCase.verifyEqual( res, false );
 
             %
             %
@@ -400,36 +343,26 @@ classdef mdfObjTest < matlab.unittest.TestCase
             res = obj.getMetadataFileName();
             %
             % check results
-            testCase.verifyEqual( ...
-                res, ...
-                testCase.conf.filter(
-                    testCase.records{testCase.testObjIndex}.mdf_def.mdf_files.mdf_metadata));
+            testCase.verifyEqual( res, false )
             %
             % get files for this object
             res = obj.getMFN();
             %
             % check results
-            testCase.verifyEqual( ...
-                res, ...
-                testCase.conf.filter( ...
-                    testCase.records{testCase.testObjIndex}.mdf_def.mdf_files.mdf_metadata));
+            testCase.verifyEqual( res, false );
 
             %
             % get files for this object
             res = obj.getMetadataFileName(false);
             %
             % check results
-            testCase.verifyEqual( ...
-                res, ...
-                testCase.records{testCase.testObjIndex}.mdf_def.mdf_files.mdf_metadata);
+            testCase.verifyEqual( res, false );
             %
             % get files for this object
             res = obj.getMFN(false);
             %
             % check results
-            testCase.verifyEqual( ...
-                res, ...
-                testCase.records{testCase.testObjIndex}.mdf_def.mdf_files.mdf_metadata);
+            testCase.verifyEqual( res, false );
 
             %
             %
@@ -451,24 +384,15 @@ classdef mdfObjTest < matlab.unittest.TestCase
                 %
                 % save object
                 res = obj.save();
- 
-                %
-                verifyEqual(res,true);
-                res = exist( ...
-                    obj.getMFN(), ...
-                    'file');
-                verifyEqual(res,2);
-                res = exist( ...
-                    obj.getDFN(), ...
-                    'file');
-                verifyEqual(res,2);
+            
             end % for
 
             % check that the number of objects in the database is correct
             stats = testCase.db.getCollStat();
             verifyEqual(length(stats),1);
-            verifyEqual(stats.mdfType,'TestObj');
-            verifyEqual(stats.count,2);
+            verifyEqual(stats.mdfType,tesCase.testMdfType);
+            verifyEqual(stats.count,length(testCase.uuids));
+
 
             %
             %
@@ -484,30 +408,7 @@ classdef mdfObjTest < matlab.unittest.TestCase
                     testCase.conf.filter( ...
                         testCase.getFilenameFromUuid( ...
                             testCase.uuids{testCase.testObjIndex},'data')));
-            verifyEqual( ...
-                res.mdf_def.mdf_uuid, ...
-                testCase.uuids{testCase.testObjIndex});
-            verifyEqual( ...
-                res.mdf_def.mdf_type, ...
-                testCase.testMdfType);
-            verifyEqual( ...
-                res.mdf_metadata.name, ...
-                [ testCase.testMdfType ' ' testCase.uuids{testCase.testObjIndex}]);
-            %    
-            %
-            res = mdfObj.fileLoadInfo( ...
-                    testCase.conf.filter( ...
-                        testCase.getFilenameFromUuid( ...
-                            testCase.uuids{testCase.testObjIndex},'metadata')));
-            verifyEqual( ...
-                res.mdf_def.mdf_uuid, ...
-                testCase.uuids{testCase.testObjIndex});
-            verifyEqual( ...
-                res.mdf_def.mdf_type, ...
-                testCase.testMdfType);
-            verifyEqual( ...
-                res.mdf_metadata.name, ...
-                [ testCase.testMdfType ' ' testCase.uuids{testCase.testObjIndex}]);
+            verifyEmpty( res );
 
         end %function
 
@@ -550,14 +451,14 @@ classdef mdfObjTest < matlab.unittest.TestCase
                 %
                 % test that obj is populated correctly
                 testCase.verifyEqual( ...
-                    objs(i).uuid, ...
-                    testCase.uuids{i});
+                    any(ismember(objs(i).uuid, testCase.uuids)), ...
+                    true);
                 testCase.verifyEqual( ...
                     objs(i).type, ...
                     testCase.testMdfType);
                 testCase.verifyEqual( ...
                     objs(i).metadata.name, ...
-                    [ testCase.testMdfType ' ' testCase.uuids{testCase.testObjIndex}]);
+                    [ testCase.testMdfType ' ' obj.uuid]);
             end % for
 
             %
@@ -1294,7 +1195,7 @@ classdef mdfObjTest < matlab.unittest.TestCase
             % retrieve specific link by uuid
             pObjs = obj.getParent( ...
                 struct( ...
-                    'mdf_type', 'TestObj'));
+                    'mdf_type', testCase.testMdfType));
             %
             testCase.verifyClass(pObjs,'mdfObj');
             testCase.verifyEqual( ...
@@ -1422,26 +1323,15 @@ classdef mdfObjTest < matlab.unittest.TestCase
                 % load object
                 obj = mdfObj.load(testCase.uuids{i});
                 %
-                % get file name
-                dFile = obj.getDFN();
-                mFile = obj.getMFN();
-                %
                 % remove object
                 obj.remove();
                 % 
                 % check that the dbentry is removed
                 obj = mdfObj.load(testCase.uuids{i});
                 testCase.verifyEmpty(obj);
-                %
-                % verify that the files is gone
-                res = exist( dFile, 'file');
-                verifyEqual(res,0);
-                res = exist( mFile, 'file');
-                verifyEqual(res,0);
             end %for
 
         end % function
-
 
     end % methods
     

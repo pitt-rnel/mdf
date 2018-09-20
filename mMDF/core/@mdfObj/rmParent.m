@@ -12,7 +12,7 @@ function res = rmParent(obj,parent)
     res = false;
     
     % get uuid and object from argument passed
-    [uParent, oParent] = mdf.getUuidAndObject(parent);
+    [uParent, oParent] = mdf.getUAO(parent);
     if isempty(oParent)
         throw(MException('mdfObj:rmParent',['Invalid object or uuid ']));
     end %if
