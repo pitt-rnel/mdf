@@ -44,15 +44,29 @@ function res = fileLoadInfo(file)
                                 res.mdf_def.mdf_data.(dpname).mdf_size);
                     end %if
                 end %for
+                res.mdf_from_file = 'yml';
             case {'.mat', '.h5'}
                 % we have a mat or an h5 file
                 % load values through matfile function
                 tmp1 = matfile(file);
                 % transfer what we need
                 res = struct( ...
-                    'mdf_version', tmp1.mdf_version, ...
+                    'mdf_version', '1.4', ...
                     'mdf_def', tmp1.mdf_def, ...
                     'mdf_metadata', tmp1.mdf_metadata );
+                if ismember('mdf_version',fields(tmp1))
+                    res.mdf_version = tmp1.mdf_version;
+                end %if
+                if ~isempty(res.mdf_def.mdf_data.mdf_fields)
+                    % loads data properties
+                    res.mdf_data = struct();
+                    for i = 1:length(res.mdf_def.mdf_data.mdf_fields)
+                        dp = res.mdf_def.mdf_data.mdf_fields{i};
+                        res.mdf_data.(dp) = tmp1.(dp);
+                    end %for
+                    res.mdf_data_loaded = true;
+                end %if
+                res.mdf_from_file = 'mat';
          end %switch
     catch
         % nothing to do

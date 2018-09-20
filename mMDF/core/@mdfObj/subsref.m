@@ -26,7 +26,7 @@ function [res] = subsref(obj,S)
                 res = res.subsref(S);
             end %if
             % we are done
-            return
+            return;
         else
             % the user has specified multiple indexes to be extracted
             % applies the remaining subsref to the selected elements and
@@ -53,7 +53,7 @@ function [res] = subsref(obj,S)
         % loops on all the elements
         res = arrayfun(@(item)(item.subsref(S)),obj,'UniformOutput',0);
         % we are done
-        return
+        return;
     end %if
 
     % manage the different cases
@@ -66,7 +66,7 @@ function [res] = subsref(obj,S)
             length(S.subs) == 1 && ...
             ischar(S.subs{1})
         S.type = '.';
-        S.subs = S.subs{1};    
+        S.subs = S.subs{1};
     end %if
     
     % obj.[...]
