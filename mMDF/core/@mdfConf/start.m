@@ -13,8 +13,13 @@ function start(obj)
     for i = 1:length(obj.confData.configurations.configuration)
         % add if we need to use json library within matlab or not
         % added for backward compatibility
-        obj.confData.configurations.configuration{i}.constants.MDF_MATLAB_JSONAPI = ...
-            (exist('jsondecode') == 5);
+        if (exist('jsondecode') == 5)
+            obj.confData.configurations.configuration{i}.constants.MDF_MATLAB_JSONAPI = true
+            obj.confData.configurations.configuration{i}.constants.MDF_JSONAPI = 'MATLAB'
+        else
+            obj.confData.configurations.configuration{i}.constants.MDF_MATLAB_JSONAPI = false
+            obj.confData.configurations.configuration{i}.constants.MDF_JSONAPI = 'JSONLAB'
+        end %if
 
         % check if we have the collection configuration
         if ( (isfield(obj.confData.configurations.configuration{i}.constants,'MDF_COLLECTION')) & ...
@@ -23,13 +28,14 @@ function start(obj)
             % newer configuration
             %
             % set the database to mongodb
-            obj.confData.configurations.configuration{i}.constants.MDF_COLLECTION.DB = "MONGODB";
+            obj.confData.configurations.configuration{i}.constants.MDF_COLLECTION.DB = 'MONGODB';
             %
             % check if we need to write yaml metadata file
+            YAML = obj.confData.configurations.configuration{i}.constants.MDF_COLLECTION.YAML;
             obj.confData.configurations.configuration{i}.constants.MDF_COLLECTION.YAML = ...
-                ( (obj.confData.configurations.configuration{i}.constants.MDF_COLLECTION.YAML == true)  | ...
-                  (obj.confData.configurations.configuration{i}.constants.MDF_COLLECTION.YAML ~= 0)  | ...
-                  (strcmp(upper(obj.confData.configurations.configuration{i}.constants.MDF_COLLECTION.YAML),'TRUE')) );
+                ( ( islogical(YAML) && ( YAML == true ) ) | ...
+                  ( isnumeric(YAML) && ( YAML ~= 0 ) ) | ...
+                  ( ischar(YAML) &&  strcmp(upper(YAML),'TRUE') ) );
             %
             % check if we need to save the data to file or database and
             % which

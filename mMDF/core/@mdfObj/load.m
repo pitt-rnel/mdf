@@ -47,13 +47,13 @@ function outdata = load(indata)
     om = mdfManage.getInstance();
     oconf = mdfConf.getInstance();
 
-    collection_type = conf.getC('MDF_COLLECTION_TYPE');
+    collection_type = oconf.getCollectionData();
 
     % check if user specified the output that he/she wants
     mdf_output = 'object';
     mongo_projection = '{"_id" : 0,  "mdf_def" : 1, "mdf_metadata" : 1 }';
     if isfield(indata,'mdf_output')
-        switch (indata.mdf_output) {
+        switch (indata.mdf_output)
             case 'uuid'
                 mdf_output = 'uuid';
                 mongo_projection = '{"_id" : 0, "mdf_def.mdf_uuid": 1}';
@@ -172,7 +172,7 @@ function outdata = load(indata)
             % runs query and hopes for the best
             mdf_data = odb.find( ...
                 tmp2, ...
-                tmp2,mongo_projection);
+                mongo_projection);
 %                tmp2, ...
 %               odb.find(tmp2,mongo_projection);
         end %if

@@ -11,6 +11,6 @@ function res = ldp(obj)
     
     % return the list of the data properties tdirectly from the internal
     % structure of the object
-    res = obj.listDataProperties();
+    res = obj.getListDataProperties();
     
 end %function

@@ -48,27 +48,33 @@ function res = connect(obj,conf)
 
         % update connection info if needed and set reinstantiation flag
         % host
-        if ~strcmp(obj.host,conf.host)
+        if isstruct(conf) && isfield(conf,'host') && ~strcmp(obj.host,conf.host)
             obj.host = conf.host;
             ri = true;
         end %if
         % port
-        if ~isnumeric(obj.port) || isempty(obj.port) || obj.port ~= conf.port
+        if isstruct(conf) && isfield(conf,'port') && obj.port ~= conf.port 
             obj.port = conf.port;
             ri = true;
         end %if
         % database
-        if ~strcmp(obj.database,conf.database)
+        if isstruct(conf) && isfield(conf,'database') && ~strcmp(obj.database,conf.database)
             obj.database = conf.database;
             ri = true;
         end %if
         % collection
-        if ~strcmp(obj.host,conf.collection)
+        if isstruct(conf) && isfield(conf,'collection') && ~strcmp(obj.host,conf.collection)
             obj.collection = conf.collection;
             ri = true;
         end %if
     end %if
-        
+
+    % makes sure that port is numeric
+    if ischar(obj.port)
+        obj.port = str2num(obj.port);
+    end %if
+
+    
     % skip instantiation
     si = false;
     % instantiate connector class

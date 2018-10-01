@@ -428,6 +428,7 @@ classdef mdfConf < handle
         [arg1,arg2,arg3] = getCollectionConf(obj,selection);
         yaml = getCollectionYaml(obj,selection);
         data = getCollectionData(obj,selection);
+        res = isCollectionData(obj,value,selection);
     end
     
     methods (Static)

@@ -1,6 +1,8 @@
-classdef mdfObjConf3Test < matlab.unittest.TestCase
+classdef (Abstract) mdfObjConfTest < matlab.unittest.TestCase
     % 
     % unit tests for mdfObj
+    % this is an abstract class to make it easer to define 
+    % test specific for the different configurations
     %
     % creates an array of fake mdfObj for testing purposes
     %
@@ -10,16 +12,23 @@ classdef mdfObjConf3Test < matlab.unittest.TestCase
         xmlConfFile = '';
         uuidsFile = '';
         testFolder = '';
-        recordFolder = 'records/minimized';
+        recordFolder = '';
+        recordFiles = {};
+        jsonString = {};
         records = [];
         uuids = {};
         conf = [];
         db = [];
         manage = [];
+        testRecordIndex = 1;
         testObjIndex = -1;
         testOtherObjIndex = []; 
-        testMdfType = 'TestObj';
-        testConfiguration = 3;
+        testMdfType = '';
+        testConfiguration = 0;
+        confIndata = struct();
+        dbIndata = struct();
+        childProperty = '';
+        insertPosition = [];
     end %properties
     
     methods (TestClassSetup)
@@ -41,6 +50,9 @@ classdef mdfObjConf3Test < matlab.unittest.TestCase
             addpath(fullfile(cpfp,'..','..','core'));
             % add path to libs
             addpath(fullfile(cpfp,'..','..','libs','jsonlab'));
+            addpath(fullfile(cpfp,'..','..','libs','yaml'));
+            % run a yaml encoding, so we load the java libraries
+            t1 = WriteYaml('',struct('field','initialization'));
         end %function
 
         %
@@ -48,11 +60,11 @@ classdef mdfObjConf3Test < matlab.unittest.TestCase
             % prepare test environment
             %
             % set test configuration file, xml format
-            testCase.xmlConfFile = fullfile(testCase.testFolder, '..', 'conf', 'mdf.xml.conf');
-            testCase.uuidsFile = fullfile(testCase.testFolder, '..', 'conf', 'uuid.json');
+            %testCase.xmlConfFile = fullfile(testCase.testFolder, '..', 'conf', 'mdf.xml.conf');
+            %testCase.uuidsFile = fullfile(testCase.testFolder, '..', 'conf', 'uuid.json');
             % 
             % set up input configuration to conf object
-            % select a database data collection
+            % select the proper configuration
             testCase.confIndata = struct( ...
                     'fileName', testCase.xmlConfFile, ...
                     'automation', 'start', ...
@@ -71,12 +83,18 @@ classdef mdfObjConf3Test < matlab.unittest.TestCase
                     'database', C.DB.DATABASE, ...
                     'collection', C.DB.COLLECTION, ...
                     'connect', true);
-            testCase.db = mdfDb.getInstance(testCase.dbIndata);
+            testCase.db = mdfDB.getInstance(testCase.dbIndata);
             testCase.manage = mdfManage.getInstance();
 
             %
             % child property
             testCase.childProperty = 'test';
+
+            % load uuids
+            fid = fopen(testCase.uuidsFile,'r');
+            raw = fread(fid,inf);
+            jsonUuids = char(raw');
+            testCase.uuids = jsondecode(jsonUuids);
 
             %
             % pick the selected test object
@@ -86,10 +104,6 @@ classdef mdfObjConf3Test < matlab.unittest.TestCase
             tempIndex = randperm(length(testCase.uuids)-1);
             testCase.insertPosition = tempIndex(1);
 
-        end %function
-
-        %
-        function loadTestRecords(testCase)
             % prepare test values
             %
             % set test configuration
@@ -107,30 +121,18 @@ classdef mdfObjConf3Test < matlab.unittest.TestCase
             
             % load all the records
             for i = [1:length(testCase.recordFiles)]
-                jsonText = fileread(testCase.recordFiles{i});
-                testCase.records{i} = jsondecode(jsonText);
+                testCase.jsonString{i} = fileread(testCase.recordFiles{i});
+                testCase.records{i} = jsondecode(testCase.jsonString{i});
             end %for
 
-            % load uuids
-            fid = fopen(testCase.uuidsFile,'r');
-            jsonUuids = readlines(fid,inf);
-            testCase.uuids = jsonencode(jsonUuids);
-
         end %function
-
-        %
-        %function createTestUuids()
-        %    for i = 1:10
-        %        testCase.uuids{i} = char(java.util.UUID.randomUUID);
-        %    end %for
-        %end %function
 
     end %methods
 
     methods (TestClassTeardown)
         function destroyMdfConf(testCase)
             mdfManage.getInstance('release');
-            mdfDb.getInstance('release');
+            mdfDB.getInstance('release');
             mdfConf.getInstance('release');
             global omdfc;
             clear omdfc;
@@ -149,7 +151,7 @@ classdef mdfObjConf3Test < matlab.unittest.TestCase
             obj.type = record.mdf_def.mdf_type;
             obj.metadata = record.mdf_metadata;
             for i = 1:length(record.mdf_def.mdf_data.mdf_fields)
-                dataField = record.mdf_def.mdf_data.mdf_fields(i);
+                dataField = record.mdf_def.mdf_data.mdf_fields{i};
                 obj.data.(dataField) = record.(dataField);
             end %for
         end %function
@@ -158,10 +160,27 @@ classdef mdfObjConf3Test < matlab.unittest.TestCase
             uuid = testCase.records{testCase.testObjIndex}.mdf_def.mdf_uuid;
         end %function
 
-        function obj = createMdfObjFromUuid(uuid)
+        function filename = getFilenameFromUuid(testCase,uuid,type)
+            if nargin < 3
+                type = '';
+            end %if
+            switch lower(type)
+                case 'metadata'
+                    filename = fullfile( '<DATA_BASE>', [testCase.testMdfType '_' uuid '.md.yml'] );
+                case 'data'
+                    filename = fullfile( '<DATA_BASE>', [testCase.testMdfType '_' uuid '.data.mat'] );
+                otherwise
+                    filename = fullfile( '<DATA_BASE>', [testCase.testMdfType '_' uuid] );
+            end %switch
+        end %function
+
+        function obj = createMdfObjFromUuid(testCase,uuid)
             %
             % instantiate the object
-            obj = mdfObj(uuid,testCase.testMdfType);
+            obj = mdfObj(testCase.testMdfType,uuid);
+            %
+            % set files for this object
+            res = obj.setFiles( testCase.getFilenameFromUuid(uuid));
             %
             % add some metadata
             obj.metadata.name = [testCase.testMdfType ' ' uuid];
@@ -195,71 +214,27 @@ classdef mdfObjConf3Test < matlab.unittest.TestCase
             % populate object
             testCase.populateMdfObjFromRecord( ...
                 obj, ...
-                testCase.records{testCase.testObjIndex});
+                testCase.records{testCase.testRecordIndex});
             %
             % test that obj is populated correctly
-            testCase.verifyEqual(obj.uuid,testCase.records{testCase.testObjIndex}.mdf_def.mdf_uuid);
-            testCase.verifyEqual(obj.type,testCase.records{testCase.testObjIndex}.mdf_def.mdf_type);
-            testCase.verifyEqual(obj.metadata,testCase.records{testCase.testObjIndex}.mdf_metadata);
-            for i = 1:length(testCase.records{testCase.testObjIndex}.mdf_def.mdf_data.mdf_fields)
-                dataProp = testCase.records{testCase.testObjIndex}.mdf_def.mdf_data.mdf_fields{i};
+            testCase.verifyEqual( ...
+                obj.uuid, ...
+                testCase.records{testCase.testRecordIndex}.mdf_def.mdf_uuid);
+            testCase.verifyEqual( ...
+                obj.type, ...
+                testCase.records{testCase.testRecordIndex}.mdf_def.mdf_type);
+            testCase.verifyEqual( ...
+                obj.metadata, ...
+                testCase.records{testCase.testRecordIndex}.mdf_metadata);
+            for i = 1:length(testCase.records{testCase.testRecordIndex}.mdf_def.mdf_data.mdf_fields)
+                dataProp = testCase.records{testCase.testRecordIndex}.mdf_def.mdf_data.mdf_fields{i};
                 testCase.verifyEqual( ...
                     obj.data.(dataProp), ...
-                    testCase.records{testCase.testObjIndex}.(dataProp));
+                    testCase.records{testCase.testRecordIndex}.(dataProp));
             end %for
             % delete obj
             delete(obj);
         end % function
-
-        %
-        function testFromJson(testCase)
-            %
-            % test fromJson function
-            for i = 1:length(testCase.jsonString)
-                % create mdfObj from json string
-                obj1 = mdfObj.fromJson(testCase.jsonString{i} );
-                % create and populate from json file
-                obj2 = mdfObj();
-                testCase.populateMdfObjFromRecord( ...
-                    obj2, ...
-                    testCase.records{i});
-                %
-                % check results
-                testCase.verifyClass(obj1,'mdfObj');
-                testCase.verifyEqual(obj1,obj2);
-                %
-                % delete object
-                delete(obj1);
-                delete(obj2);
-            end %for
-            
-        end %function
-
-        %
-        function testToJson(testCase)
-            %
-            % test toJson function
-            for i = 1:length(testCase.jsonString)
-                % create mdfObj from json string
-                obj = mdfObj.fromJson(testCase.jsonString{i});
-                %
-                % goes back to json string
-                jsonString = obj.toJson();
-                %
-                % convert to struct and compares
-                jsonStruct = jsonencode(jsonString);
-                %
-                % check results
-                testCase.verifyClass(jsonString,'char');
-                testCase.verifyEqual( ...
-                    jsonStruct, ...
-                    testCase.records{i});
-                %
-                % delete object
-                delete(obj);
-            end %for
-
-        end %function
 
         %
         function testSetFiles(testCase)
@@ -268,12 +243,21 @@ classdef mdfObjConf3Test < matlab.unittest.TestCase
             obj = mdfObj();
             %
             % set files for this objects
-            res = obj.setFiles(testCase.records{testCase.testObjIndex}.mdf_def.mdf_files.mdf_base);
+            res = obj.setFiles(testCase.records{testCase.testRecordIndex}.mdf_def.mdf_files.mdf_base);
             %
             % check results
-            testCase.verifyEqual( res.base, '' );
-            testCase.verifyEqual( res.metadata, '');
-            testCase.verifyEqual( res.data, '');
+            testCase.verifyEqual( ...
+                res.base, ...
+                testCase.conf.filter( ...
+                    testCase.records{testCase.testRecordIndex}.mdf_def.mdf_files.mdf_base));
+            testCase.verifyEqual( ...
+                res.metadata, ...
+                testCase.conf.filter( ...
+                    testCase.records{testCase.testRecordIndex}.mdf_def.mdf_files.mdf_metadata));
+            testCase.verifyEqual( ...
+                res.data, ...
+                testCase.conf.filter( ...
+                    testCase.records{testCase.testRecordIndex}.mdf_def.mdf_files.mdf_data));
             %
             %
             delete(obj);
@@ -285,14 +269,23 @@ classdef mdfObjConf3Test < matlab.unittest.TestCase
             % set files for this objects
             res = obj.setFiles( ...
                 struct( ...
-                    'base', testCase.records{testCase.testObjIndex}.mdf_def.mdf_files.mdf_base, ...
-                    'metadata', testCase.records{testCase.testObjIndex}.mdf_def.mdf_files.mdf_metadata, ...
-                    'data', testCase.records{testCase.testObjIndex}.mdf_def.mdf_files.mdf_data));
+                    'base', testCase.records{testCase.testRecordIndex}.mdf_def.mdf_files.mdf_base, ...
+                    'metadata', testCase.records{testCase.testRecordIndex}.mdf_def.mdf_files.mdf_metadata, ...
+                    'data', testCase.records{testCase.testRecordIndex}.mdf_def.mdf_files.mdf_data));
             %
             % check results
-            testCase.verifyEqual( res.base, '' );
-            testCase.verifyEqual( res.metadata, '' );
-            testCase.verifyEqual( res.data, '' );
+            testCase.verifyEqual( ...
+                res.base, ...
+                testCase.conf.filter( ...
+                    testCase.records{testCase.testRecordIndex}.mdf_def.mdf_files.mdf_base));
+            testCase.verifyEqual( ...
+                res.metadata, ...
+                testCase.conf.filter( ...
+                    testCase.records{testCase.testRecordIndex}.mdf_def.mdf_files.mdf_metadata));
+            testCase.verifyEqual( ...
+                res.data, ...
+                testCase.conf.filter( ...
+                    testCase.records{testCase.testRecordIndex}.mdf_def.mdf_files.mdf_data));
             %
             %
             delete(obj);
@@ -314,18 +307,33 @@ classdef mdfObjConf3Test < matlab.unittest.TestCase
             res = obj.getFiles();
             %
             % check results
-            testCase.verifyEqual( res.base, '' );
-            testCase.verifyEqual( res.metadata, '' );
-            testCase.verifyEqual( res.data, '' );
+            testCase.verifyEqual( ...
+                res.base, ...
+                testCase.conf.filter( ...
+                    testCase.records{testCase.testObjIndex}.mdf_def.mdf_files.mdf_base));
+            testCase.verifyEqual( ...
+                res.metadata, ...
+                testCase.conf.filter( ...
+                    testCase.records{testCase.testObjIndex}.mdf_def.mdf_files.mdf_metadata));
+            testCase.verifyEqual( ...
+                res.data, ...
+                testCase.conf.filter( ...
+                    testCase.records{testCase.testObjIndex}.mdf_def.mdf_files.mdf_data));
 
             %
             % get files for this object
             res = obj.getFiles(false);
             %
             % check results
-            testCase.verifyEqual( res.base, '' );
-            testCase.verifyEqual( res.metadata, '' );
-            testCase.verifyEqual( res.data, '' );
+            testCase.verifyEqual( ...
+                res.base, ...
+                testCase.records{testCase.testObjIndex}.mdf_def.mdf_files.mdf_base);
+            testCase.verifyEqual( ...
+                res.metadata, ...
+                testCase.records{testCase.testObjIndex}.mdf_def.mdf_files.mdf_metadata);
+            testCase.verifyEqual( ...
+                res.data, ...
+                testCase.records{testCase.testObjIndex}.mdf_def.mdf_files.mdf_data);
 
             %
             %
@@ -349,26 +357,36 @@ classdef mdfObjConf3Test < matlab.unittest.TestCase
             res = obj.getDataFileName();
             %
             % check results
-            testCase.verifyEqual( res, false );
+            testCase.verifyEqual( ...
+                res, ...
+                testCase.conf.filter( ...
+                    testCase.records{testCase.testObjIndex}.mdf_def.mdf_files.mdf_data));
             %
             % get files for this object
             res = obj.getDFN();
             %
             % check results
-            testCase.verifyEqual( res, false );
+            testCase.verifyEqual( ...
+                res, ...
+                testCase.conf.filter( ...
+                    testCase.records{testCase.testObjIndex}.mdf_def.mdf_files.mdf_data));
 
             %
             % get files for this object
             res = obj.getDataFileName(false);
             %
             % check results
-            testCase.verifyEqual( res, false );
+            testCase.verifyEqual( ...
+                res, ...
+                testCase.records{testCase.testObjIndex}.mdf_def.mdf_files.mdf_data);
             %
             % get files for this object
             res = obj.getDFN(false);
             %
             % check results
-            testCase.verifyEqual( res, false );
+            testCase.verifyEqual( ...
+                res, ...
+                testCase.records{testCase.testObjIndex}.mdf_def.mdf_files.mdf_data);
 
             %
             %
@@ -393,26 +411,36 @@ classdef mdfObjConf3Test < matlab.unittest.TestCase
             res = obj.getMetadataFileName();
             %
             % check results
-            testCase.verifyEqual( res, false )
+            testCase.verifyEqual( ...
+                res, ...
+                testCase.conf.filter( ...
+                    testCase.records{testCase.testObjIndex}.mdf_def.mdf_files.mdf_metadata));
             %
             % get files for this object
             res = obj.getMFN();
             %
             % check results
-            testCase.verifyEqual( res, false );
+            testCase.verifyEqual( ...
+                res, ...
+                testCase.conf.filter( ...
+                    testCase.records{testCase.testObjIndex}.mdf_def.mdf_files.mdf_metadata));
 
             %
             % get files for this object
             res = obj.getMetadataFileName(false);
             %
             % check results
-            testCase.verifyEqual( res, false );
+            testCase.verifyEqual( ...
+                res, ...
+                testCase.records{testCase.testObjIndex}.mdf_def.mdf_files.mdf_metadata);
             %
             % get files for this object
             res = obj.getMFN(false);
             %
             % check results
-            testCase.verifyEqual( res, false );
+            testCase.verifyEqual( ...
+                res, ...
+                testCase.records{testCase.testObjIndex}.mdf_def.mdf_files.mdf_metadata);
 
             %
             %
@@ -423,30 +451,17 @@ classdef mdfObjConf3Test < matlab.unittest.TestCase
         %
         function testSaveObjects(testCase)
             % 
-            % create mdf objects and save them to db
-            for i = 1:length(testCase.uuids)
+            % test individual object save actions
+            % it depends from the type of storage that we are using
+            % so it calls a function defined in the inheriting class
 
-                %
-                % create test object
-                obj = testCase.createMdfObjFromUuid( ...
-                    testCase.uuids{j});
-
-                %
-                % save object
-                res = obj.save();
+            % calls local method for the child class
+            % overriding the method would not work
+            localTestSaveObjects(testCase);
             
-            end % for
-
-            % check that the number of objects in the database is correct
-            stats = testCase.db.getCollStat();
-            verifyEqual(length(stats),1);
-            verifyEqual(stats.mdfType,tesCase.testMdfType);
-            verifyEqual(stats.count,length(testCase.uuids));
-
-
             %
             %
-            omdfc.manage.clearAll(); 
+            testCase.manage.clearAll(); 
         end % function
 
         %
@@ -454,11 +469,9 @@ classdef mdfObjConf3Test < matlab.unittest.TestCase
             %
             % test loadFileInfo on yml and mat file
             % 
-            res = mdfObj.fileLoadInfo( ...
-                    testCase.conf.filter( ...
-                        testCase.getFilenameFromUuid( ...
-                            testCase.uuids{testCase.testObjIndex},'data')));
-            verifyEmpty( res );
+            
+            % calls locacl method in the child class
+            localTestLoadFileInfo(testCase);
 
         end %function
 
@@ -470,19 +483,19 @@ classdef mdfObjConf3Test < matlab.unittest.TestCase
                 % load by uuid
                 obj = mdfObj.load(testCase.uuids{i});
                 %
-                verifyClass(obj,mdfObj);
+                testCase.verifyClass(obj,'mdfObj');
               
                 %
                 % test that obj is populated correctly
                 testCase.verifyEqual( ...
                     obj.uuid, ...
-                    testCase.uuid{i});
+                    testCase.uuids{i});
                 testCase.verifyEqual( ...
                     obj.type, ...
                     testCase.testMdfType);
                 testCase.verifyEqual( ...
                     obj.metadata.name, ...
-                    [ testCase.testMdfType ' ' testCase.uuids{testCase.testObjIndex}]);
+                    [ testCase.testMdfType ' ' testCase.uuids{i}]);
             end % for
             %
             % remove objects from memory
@@ -493,27 +506,27 @@ classdef mdfObjConf3Test < matlab.unittest.TestCase
         function testLoadAll(testCase)
             % 
             % load the all objects individually by type
-            objs = mdf.load('mdf_type',testCase.testMdfType);
+            objs = mdfObj.load(struct('mdf_type',testCase.testMdfType));
             %
-            verifyEqual(length(objs),length(testCase.uuids));
+            testCase.verifyEqual(length(objs),length(testCase.uuids));
             %
             for i = 1:length(testCase.uuids)
                 %
                 % test that obj is populated correctly
                 testCase.verifyEqual( ...
-                    any(ismember(objs(i).uuid, testCase.uuids)), ...
-                    true);
+                    objs(i).uuid, ...
+                    testCase.uuids{i});
                 testCase.verifyEqual( ...
                     objs(i).type, ...
                     testCase.testMdfType);
                 testCase.verifyEqual( ...
                     objs(i).metadata.name, ...
-                    [ testCase.testMdfType ' ' obj.uuid]);
+                    [ testCase.testMdfType ' ' testCase.uuids{i}]);
             end % for
 
             %
             %
-            omdfc.manage.clearAll(); 
+            testCase.manage.clearAll(); 
         end % function
 
         %
@@ -530,7 +543,7 @@ classdef mdfObjConf3Test < matlab.unittest.TestCase
             for i = 1:length(dataProperties)
                 dataProp = dataProperties{i};
                 res = obj.dataLoad(dataProp);
-                testCase.verifyEqual( res, 1);
+                testCase.verifyEqual( res, 2);
             end %for
 
             res = obj.dataLoad('prop_not_exist');
@@ -605,7 +618,195 @@ classdef mdfObjConf3Test < matlab.unittest.TestCase
             testCase.manage.clearAll();
             
         end % function
+ 
+        %
+        % -------------------------------
+        function testAddMetadataProperty(testCase)
+            %
+            % test adding a new metadata property
+            %
+            % load object
+            obj = mdfObj.load(testCase.getTestObjUuid());
 
+            % add test metadata property
+            obj.metadata.(testCase.metadataPropertyName) = testCase.metadataPropertyValue;
+
+            % check if the property is accessible
+            testCase.verifyEqual( ...
+                obj.isProp(testCase.metadataPropertyValue,'metadata'),true);
+            testCase.verifyEqual( ...
+                obj.metadata.(testCase.metadataPropertyName), ...
+                testCase.metadataPropertyValue);
+            testCase.verifyEqual( ...
+                obj.md.(testCase.metadataPropertyName), ...
+                testCase.metadataPropertyValue);
+            testCase.verifyEqual( ...
+                obj.(testCase.metadataPropertyName), ...
+                testCase.metadataPropertyValue);
+
+            % save the object
+            obj.save();
+ 
+            % clear it from memory
+            testCase.manage.clear(obj);
+
+            % reload the object
+            obj = mdfObj.load(testCase.getTestObjUuid());
+
+            % check again
+            testCase.verifyEqual( ...
+                obj.isProp(testCase.metadataPropertyValue,'metadata'),true);
+            testCase.verifyEqual( ...
+                obj.metadata.(testCase.metadataPropertyName), ...
+                testCase.metadataPropertyValue);
+            testCase.verifyEqual( ...
+                obj.md.(testCase.metadataPropertyName), ...
+                testCase.metadataPropertyValue);
+            testCase.verifyEqual( ...
+                obj.(testCase.metadataPropertyName), ...
+                testCase.metadataPropertyValue);
+
+            %
+            % clear memory
+            testCase.manage.clearAll();
+        end % function
+
+        function testRemoveMetadataProperty(testCase)
+            %
+            % test removing the data property added
+            %
+            % load object
+            obj = mdfObj.load(testCase.getTestObjUuid());
+
+            % add test metadata property
+            obj.removeMetadataProperty(testCase.metadataPropertyName);
+
+            % check if the property is accessible
+            testCase.verifyEqual( ...
+                obj.isProp(testCase.metadataPropertyValue,'metadata'),false);
+
+            % load object
+            obj = mdfObj.load(testCase.getTestObjUuid());
+
+            % add test metadata property
+            obj.rmMdP(testCase.metadataPropertyName);
+
+            % check if the property is accessible
+            testCase.verifyEqual( ...
+                obj.isProp(testCase.metadataPropertyValue,'metadata'),false);
+            
+            % save the object
+            obj.save();
+
+            % clear it from memory
+            testCase.manage.clear(obj);
+
+            % reload the object
+            obj = mdfObj.load(testCase.getTestObjUuid());
+
+            % check again
+            testCase.verifyEqual( ...
+                obj.isProp(testCase.metadataPropertyValue,'metadata'),false);
+
+            %
+            % clear memory
+            testCase.manage.clearAll();
+        end % function
+
+        function testAddDataProperty(testCase)
+            %
+            % test adding a new data property
+            %
+            % load object
+            obj = mdfObj.load(testCase.getTestObjUuid());
+
+            % add test metadata property
+            obj.data.(testCase.dataPropertyName) = testCase.dataPropertyValue;
+
+            % check if the property is accessible
+            testCase.verifyEqual( ...
+                obj.isProp(testCase.metadataPropertyValue,'data'),true);
+            testCase.verifyEqual( ...
+                obj.data.(testCase.metadataPropertyName), ...
+                testCase.metadataPropertyValue);
+            testCase.verifyEqual( ...
+                obj.d.(testCase.metadataPropertyName), ...
+                testCase.metadataPropertyValue);
+            testCase.verifyEqual( ...
+                obj.(testCase.metadataPropertyName), ...
+                testCase.metadataPropertyValue);
+
+            % save the object
+            obj.save();
+
+            % clear it from memory
+            testCase.manage.clear(obj);
+
+            % reload the object
+            obj = mdfObj.load(testCase.getTestObjUuid());
+
+            % check again
+            testCase.verifyEqual( ...
+                obj.isProp(testCase.metadataPropertyValue,'data'),true);
+            testCase.verifyEqual( ...
+                obj.data.(testCase.metadataPropertyName), ...
+                testCase.metadataPropertyValue);
+            testCase.verifyEqual( ...
+                obj.d.(testCase.metadataPropertyName), ...
+                testCase.metadataPropertyValue);
+            testCase.verifyEqual( ...
+                obj.(testCase.metadataPropertyName), ...
+                testCase.metadataPropertyValue);
+
+            %
+            % clear memory
+            testCase.manage.clearAll();
+        end % function
+
+        function testRemoveDataProperty(testCase)
+            %
+            % test removing a the data property added
+            %
+            % load object
+            obj = mdfObj.load(testCase.getTestObjUuid());
+
+            % add test metadata property
+            obj.removeDataProperty(testCase.dataPropertyName);
+
+            % check if the property is accessible
+            testCase.verifyEqual( ...
+                obj.isProp(testCase.dataPropertyValue,'data'),false);
+
+            % load object
+            obj = mdfObj.load(testCase.getTestObjUuid());
+
+            % add test metadata property
+            obj.rmDP(testCase.dataPropertyName);
+
+            % check if the property is accessible
+            testCase.verifyEqual( ...
+                obj.isProp(testCase.dataPropertyValue,'data'),false);
+
+            % save the object
+            obj.save();
+
+            % clear it from memory
+            testCase.manage.clear(obj);
+
+            % reload the object
+            obj = mdfObj.load(testCase.getTestObjUuid());
+
+            % check again
+            testCase.verifyEqual( ...
+                obj.isProp(testCase.dataPropertyValue,'data'),false);
+
+            %
+            % clear memory
+            testCase.manage.clearAll();
+        end % function
+
+
+        % -------------------------------
         %
         function testAddChildren(testCase)
             %
@@ -658,7 +859,7 @@ classdef mdfObjConf3Test < matlab.unittest.TestCase
                 obj.mdf_def.mdf_children.(testCase.testProperty)(testCase.insertPosition));
 
             % this time save the object
-            res = obj.save()
+            res = obj.save();
             testCase.verifyEqual(res,true);
 
             %
@@ -892,7 +1093,7 @@ classdef mdfObjConf3Test < matlab.unittest.TestCase
                 obj.mdf_def.mdf_links.(testCase.testProperty)(testCase.insertPosition));
 
             % this time save the object
-            res = obj.save()
+            res = obj.save();
             testCase.verifyEqual(res,true);
 
             %
@@ -965,8 +1166,8 @@ classdef mdfObjConf3Test < matlab.unittest.TestCase
                 sort(uuids), ...
                 sort(lUuids));
             testCase.verifyEqual( ...
-                all(ismember(uuids,testCase.uuids(testCase.testOtherObjIndex))), ...
-                true);
+                all(ismember(uuids,testCase.uuids(testCase.testOtherObjIndex)), ...
+                true));
 
             %
             % get uuids of the unidirectional links
@@ -981,8 +1182,8 @@ classdef mdfObjConf3Test < matlab.unittest.TestCase
                 sort(uuids), ...
                 sort(lUuids));
             testCase.verifyEqual( ...
-                all(ismember(uuids,testCase.uuids(testCase.testOtherObjIndex))), ...
-                true);
+                all(ismember(uuids,testCase.uuids(testCase.testOtherObjIndex)), ...
+                true));
 
             %
             % get uuids of the bidirectional links
@@ -1130,7 +1331,7 @@ classdef mdfObjConf3Test < matlab.unittest.TestCase
                 length(obj.mdf_def.mdf_parents.(testCase.testProperty)));
 
             % this time save the object
-            res = obj.save()
+            res = obj.save();
             testCase.verifyEqual(res,true);
 
             %
@@ -1245,7 +1446,7 @@ classdef mdfObjConf3Test < matlab.unittest.TestCase
             % retrieve specific link by uuid
             pObjs = obj.getParent( ...
                 struct( ...
-                    'mdf_type', testCase.testMdfType));
+                    'mdf_type', 'TestObj'));
             %
             testCase.verifyClass(pObjs,'mdfObj');
             testCase.verifyEqual( ...
@@ -1305,6 +1506,7 @@ classdef mdfObjConf3Test < matlab.unittest.TestCase
 
         end % function
 
+        % ---------------------------------------
         %
         function testClone(testCase)
             %
@@ -1362,26 +1564,69 @@ classdef mdfObjConf3Test < matlab.unittest.TestCase
 
         end % function
 
+                %
+        function testFromJson(testCase)
+            %
+            % test fromJson function
+            for i = 1:length(testCase.jsonString)
+                % create mdfObj from json string
+                obj1 = mdfObj.fromJson(testCase.jsonString{i} );
+                % create and populate from json structure
+                obj2 = mdfObj();
+                testCase.populateMdfObjFromRecord( ...
+                    obj2, ...
+                    testCase.records{i});
+                %
+                % check results
+                testCase.verifyClass(obj1,'mdfObj');
+                testCase.verifyEqual(obj1.metadata,obj2.metadata);
+                testCase.verifyEqual(obj1.data,obj2.data);
+                testCase.verifyEqual(obj1.mdf_def,testCase.records{i}.mdf_def);
+                testCase.verifyEqual(obj1.metadata,testCase.records{i}.mdf_metadata);
+                %
+                dps = testCase.records{i}.mdf_def.mdf_data.mdf_fields;
+                for j = 1:length(dps)
+                    dp = dps{j};
+                    testCase.verifyEqual(obj1.data.(dp),testCase.records{i}.(dp));
+                end %for
+                %
+                % delete object
+                delete(obj1);
+                delete(obj2);
+            end %for
+            
+        end %function
+
+        %
+        function testToJson(testCase)
+            %
+            % test toJson function
+            for i = 1:length(testCase.jsonString)
+                % create mdfObj from json string
+                obj = mdfObj.fromJson(testCase.jsonString{i});
+                %
+                % goes back to json string
+                jsonString = obj.toJson();
+                %
+                % convert to struct and compares
+                jsonStruct = jsonencode(jsonString);
+                %
+                % check results
+                testCase.verifyClass(jsonString,'char');
+                testCase.verifyEqual( ...
+                    jsonStruct, ...
+                    testCase.records{i});
+                %
+                % delete object
+                delete(obj);
+            end %for
+            
+        end %function
+        
         %
         function testDeleteObjects()
-            %
-            % remove (aka delete) objects from this data collection
-            %
-            % load all objects and remove them
-            for i = 1:length(testCase.uuids)
-                %
-                % load object
-                obj = mdfObj.load(testCase.uuids{i});
-                %
-                % remove object
-                obj.remove();
-                % 
-                % check that the dbentry is removed
-                obj = mdfObj.load(testCase.uuids{i});
-                testCase.verifyEmpty(obj);
-            end %for
-
         end % function
+
 
     end % methods
     

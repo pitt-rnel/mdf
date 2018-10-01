@@ -40,7 +40,7 @@ function res = find(obj,query,projection,sort)
     fproj = false;
     if nargin > 2 && ~isempty(projection)
         % we got a projection too
-        iproj = obj.toBsonDocument(projection)
+        iproj = obj.toBsonDocument(projection);
         fproj = true;
     end %if
 
@@ -48,7 +48,7 @@ function res = find(obj,query,projection,sort)
     fsort = false;
     if nargin > 3 && ~isempty(sort)
         % we got the sorting 
-        isort = obj.toBsonDocument(sort)
+        isort = obj.toBsonDocument(sort);
         fsort = true;
     end %if        
     
@@ -78,7 +78,12 @@ function res = find(obj,query,projection,sort)
         % get next element in list
         ele = icur.next();
         % convert it to structure throught json
-        res{length(res)+1} = rmfield(mdf.fromJson(char(ele.toJson())),'x_id');
+        sele = mdf.fromJson(char(ele.toJson()));
+        % check if the id field needs to be removed
+        if isfield(sele,'x_id')
+            sele = rmfield(sele,'x_id');
+        end %if
+        res{length(res)+1} = sele;
     end %while
 
 end %function

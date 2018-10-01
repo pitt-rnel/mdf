@@ -50,9 +50,12 @@ function res = fileLoadInfo(file)
                 tmp1 = matfile(file);
                 % transfer what we need
                 res = struct( ...
-                    'mdf_version', tmp1.mdf_version, ...
+                    'mdf_version', 1, ...
                     'mdf_def', tmp1.mdf_def, ...
                     'mdf_metadata', tmp1.mdf_metadata );
+                if isfield(tmp1,'mdf_version')
+                    res.mdf_version = tmp1.mdf_version;
+                end %if
          end %switch
     catch
         % nothing to do

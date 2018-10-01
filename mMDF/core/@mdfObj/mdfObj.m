@@ -126,11 +126,11 @@ classdef mdfObj < handle
         res = getMFN(obj,filtered);
         res = remove(obj);
         res = getSize(obj,details);   
-        res = size(obj);
         outdata = getUuids(obj,group,property,format);
         len = getLen(obj,property,type);
-        res = listDataProperties(obj);
-        res = ldp(obj);
+        res = getListDataProperties(obj);
+        res = getLDP(obj);
+        res = populate(obj,data);
     end %methods
 
     % static methods defined here
@@ -196,6 +196,10 @@ classdef mdfObj < handle
         res = fileLoadInfo(file)
         % return info from "whos" command on inpput
         outdata = propInfo(indata)
+        
+        % create new obj and populates it from json string
+        obj = fromJson(jsonString)
+        
 
     end %methods
 end % classdef

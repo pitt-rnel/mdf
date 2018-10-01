@@ -5,7 +5,7 @@ function [res] = subsref(obj,S)
     % overload default subsref matlab function
 
     % check if the object itself is a single object or a vector
-    if ~isvector(obj) && max(builtin('size',obj)) > 1
+    if ~isvector(obj) && ( max(builtin('size',obj)) > 1 )
         % we got a matrix, and we do not know what to do with it
         throw(MException( ...
             'mdfObj:subsref', ...
@@ -13,7 +13,7 @@ function [res] = subsref(obj,S)
     elseif strcmp(S(1).type,'()')
         % check if the first operation is an array indexing
         % we assume that the user knows the length of the vector
-        #
+        %
         % if that's the case, we extract the element and apply the rest of the
         % subsref steps
         if length(S(1).subs) ~= 1
