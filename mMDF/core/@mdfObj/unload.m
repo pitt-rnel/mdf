@@ -9,6 +9,9 @@ function res = unload(indata)
     % output 
     %   res = 1 if successful, 0 otherwise
     
+    % initialize output value
+    res = false;
+    
     % get mdfManage object
     om = mdfManage.getInstance();
 
@@ -27,15 +30,13 @@ function res = unload(indata)
             throw(MException('mdfObj.unload','Invalid input. Must be uuid or mdfObj object.'));
     end %switch
     
-    
     % remove object from mdfManage
     res = om.remove(uuid);
     
     % delete object from memory
     if isvalid(obj) && isa(obj,'mdfObj')
         delete(obj);
-    else
-        res = 0;
+        res = res && true;
     end %if
     
 end %function

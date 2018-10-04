@@ -65,6 +65,7 @@ classdef mdfObj < handle
             obj.mdf_def.mdf_links.mdf_directions = {};
             obj.status.loaded.data = struct();
             obj.status.changed.data = struct();
+            obj.status.deleted.data = struct();
             obj.status.changed.metadata = 0;
             obj.status.changed.type = 0;
             obj.status.changed.uuid = 0;

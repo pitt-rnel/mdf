@@ -14,11 +14,11 @@ function start(obj)
         % add if we need to use json library within matlab or not
         % added for backward compatibility
         if (exist('jsondecode') == 5)
-            obj.confData.configurations.configuration{i}.constants.MDF_MATLAB_JSONAPI = true
-            obj.confData.configurations.configuration{i}.constants.MDF_JSONAPI = 'MATLAB'
+            obj.confData.configurations.configuration{i}.constants.MDF_MATLAB_JSONAPI = true;
+            obj.confData.configurations.configuration{i}.constants.MDF_JSONAPI = 'MATLAB';
         else
-            obj.confData.configurations.configuration{i}.constants.MDF_MATLAB_JSONAPI = false
-            obj.confData.configurations.configuration{i}.constants.MDF_JSONAPI = 'JSONLAB'
+            obj.confData.configurations.configuration{i}.constants.MDF_MATLAB_JSONAPI = false;
+            obj.confData.configurations.configuration{i}.constants.MDF_JSONAPI = 'JSONLAB';
         end %if
 
         % check if we have the collection configuration

@@ -88,7 +88,7 @@ function [res, message] = dataLoad(obj,dp)
             % updates def properties
             obj.setDataInfo(dp);
             % marked as loaded
-            obj.status.loaded.data.(dp) = 1;
+            obj.status.loaded.data.(dp) = true;
             res = 2;
         end %if
     catch e

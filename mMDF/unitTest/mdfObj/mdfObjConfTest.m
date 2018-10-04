@@ -29,6 +29,10 @@ classdef (Abstract) mdfObjConfTest < matlab.unittest.TestCase
         dbIndata = struct();
         childProperty = '';
         insertPosition = [];
+        metadataPropertyName = '';
+        metadataPropertyValue = '';
+        dataPropertyName = '';
+        dataPropertyValue = '';
     end %properties
     
     methods (TestClassSetup)
@@ -125,6 +129,13 @@ classdef (Abstract) mdfObjConfTest < matlab.unittest.TestCase
                 testCase.records{i} = jsondecode(testCase.jsonString{i});
             end %for
 
+            % define metadata property and value
+            testCase.metadataPropertyName = 'mdTest';
+            testCase.metadataPropertyValue = 'This is a metadata test property';
+
+            % define data property and value
+            testCase.dataPropertyName = 'dTest';
+            testCase.dataPropertyValue = sin([1:1000])+cos([1000:-1:1]);
         end %function
 
     end %methods
@@ -157,7 +168,7 @@ classdef (Abstract) mdfObjConfTest < matlab.unittest.TestCase
         end %function
 
         function uuid = getTestObjUuid(testCase)
-            uuid = testCase.records{testCase.testObjIndex}.mdf_def.mdf_uuid;
+            uuid = testCase.uuids{testCase.testObjIndex};
         end %function
 
         function filename = getFilenameFromUuid(testCase,uuid,type)
@@ -529,6 +540,31 @@ classdef (Abstract) mdfObjConfTest < matlab.unittest.TestCase
             testCase.manage.clearAll(); 
         end % function
 
+        function testListDataProperties(testCase)
+            %
+            % load  one of the test objects
+            obj = mdfObj.load(testCase.getTestObjUuid());
+            %
+            % get lis of data properties
+            ldp = obj.getListDataProperties();
+            %
+            testCase.verifyEqual( ...
+                ldp, ...
+                obj.mdf_def.mdf_data.mdf_fields);
+            
+            %
+            % get lis of data properties
+            ldp = obj.getLDP();
+            %
+            testCase.verifyEqual( ...
+                ldp, ...
+                obj.mdf_def.mdf_data.mdf_fields);
+            %
+            % remove objects from memory
+            testCase.manage.clearAll();
+            
+        end % function
+        
         %
         function testDataLoad(testCase)
             %
@@ -536,7 +572,7 @@ classdef (Abstract) mdfObjConfTest < matlab.unittest.TestCase
             % data properties
             %
             % load mdf object 
-            obj = mdfObj.load(testCase.uuids{testCase.testObjIndex});
+            obj = mdfObj.load(testCase.getTestObjUuid());
             %
             % load inidividually the data properties
             dataProperties = obj.getLDP();
@@ -582,42 +618,17 @@ classdef (Abstract) mdfObjConfTest < matlab.unittest.TestCase
         function testUnload(testCase)
             %
             % load  one of the test objects
-            obj = mdfObj.load(testCase.uuids(testCase.testObjIndex));
+            obj = mdfObj.load(testCase.getTestObjUuid());
             % 
             % unload object
             res = mdfObj.unload(obj);
-            testCase.verifyEqual(res,1);
+            testCase.verifyEqual(res,true);
 
             %
             % remove objects from memory
             testCase.manage.clearAll();
 
         end %function
-
-        function testListDataProperties(testCase)
-            %
-            % load  one of the test objects
-            obj = mdfObj.load(testCase.getTestObjUuid());
-            %
-            % get lis of data properties
-            ldp = obj.getListDataProperties();
-            %
-            testCase.verifyEqual( ...
-                ldp, ...
-                testCase.records(testCase.testObjIndex).mdf_def.mdf_data.mdf_fields);
-            
-            %
-            % get lis of data properties
-            ldp = obj.getLDP();
-            %
-            testCase.verifyEqual( ...
-                ldp, ...
-                testCase.records(testCase.testObjIndex).mdf_def.mdf_data.mdf_fields);
-            %
-            % remove objects from memory
-            testCase.manage.clearAll();
-            
-        end % function
  
         %
         % -------------------------------
@@ -633,7 +644,7 @@ classdef (Abstract) mdfObjConfTest < matlab.unittest.TestCase
 
             % check if the property is accessible
             testCase.verifyEqual( ...
-                obj.isProp(testCase.metadataPropertyValue,'metadata'),true);
+                obj.isProp(testCase.metadataPropertyName,'metadata'),true);
             testCase.verifyEqual( ...
                 obj.metadata.(testCase.metadataPropertyName), ...
                 testCase.metadataPropertyValue);
@@ -655,7 +666,7 @@ classdef (Abstract) mdfObjConfTest < matlab.unittest.TestCase
 
             % check again
             testCase.verifyEqual( ...
-                obj.isProp(testCase.metadataPropertyValue,'metadata'),true);
+                obj.isProp(testCase.metadataPropertyName,'metadata'),true);
             testCase.verifyEqual( ...
                 obj.metadata.(testCase.metadataPropertyName), ...
                 testCase.metadataPropertyValue);
@@ -684,6 +695,9 @@ classdef (Abstract) mdfObjConfTest < matlab.unittest.TestCase
             % check if the property is accessible
             testCase.verifyEqual( ...
                 obj.isProp(testCase.metadataPropertyValue,'metadata'),false);
+
+            % clear it from memory
+            testCase.manage.clear(obj);
 
             % load object
             obj = mdfObj.load(testCase.getTestObjUuid());
@@ -725,16 +739,16 @@ classdef (Abstract) mdfObjConfTest < matlab.unittest.TestCase
 
             % check if the property is accessible
             testCase.verifyEqual( ...
-                obj.isProp(testCase.metadataPropertyValue,'data'),true);
+                obj.isProp(testCase.dataPropertyName,'data'),true);
             testCase.verifyEqual( ...
-                obj.data.(testCase.metadataPropertyName), ...
-                testCase.metadataPropertyValue);
+                obj.data.(testCase.dataPropertyName), ...
+                testCase.dataPropertyValue);
             testCase.verifyEqual( ...
-                obj.d.(testCase.metadataPropertyName), ...
-                testCase.metadataPropertyValue);
+                obj.d.(testCase.dataPropertyName), ...
+                testCase.dataPropertyValue);
             testCase.verifyEqual( ...
-                obj.(testCase.metadataPropertyName), ...
-                testCase.metadataPropertyValue);
+                obj.(testCase.dataPropertyName), ...
+                testCase.dataPropertyValue);
 
             % save the object
             obj.save();
@@ -747,16 +761,16 @@ classdef (Abstract) mdfObjConfTest < matlab.unittest.TestCase
 
             % check again
             testCase.verifyEqual( ...
-                obj.isProp(testCase.metadataPropertyValue,'data'),true);
+                obj.isProp(testCase.dataPropertyName,'data'),true);
             testCase.verifyEqual( ...
-                obj.data.(testCase.metadataPropertyName), ...
-                testCase.metadataPropertyValue);
+                obj.data.(testCase.dataPropertyName), ...
+                testCase.dataPropertyValue);
             testCase.verifyEqual( ...
-                obj.d.(testCase.metadataPropertyName), ...
-                testCase.metadataPropertyValue);
+                obj.d.(testCase.dataPropertyName), ...
+                testCase.dataPropertyValue);
             testCase.verifyEqual( ...
-                obj.(testCase.metadataPropertyName), ...
-                testCase.metadataPropertyValue);
+                obj.(testCase.dataPropertyName), ...
+                testCase.dataPropertyValue);
 
             %
             % clear memory
@@ -775,8 +789,11 @@ classdef (Abstract) mdfObjConfTest < matlab.unittest.TestCase
 
             % check if the property is accessible
             testCase.verifyEqual( ...
-                obj.isProp(testCase.dataPropertyValue,'data'),false);
+                obj.isProp(testCase.dataPropertyName,'data'),false);
 
+            % clear it from memory
+            testCase.manage.clear(obj);
+            
             % load object
             obj = mdfObj.load(testCase.getTestObjUuid());
 
@@ -785,7 +802,7 @@ classdef (Abstract) mdfObjConfTest < matlab.unittest.TestCase
 
             % check if the property is accessible
             testCase.verifyEqual( ...
-                obj.isProp(testCase.dataPropertyValue,'data'),false);
+                obj.isProp(testCase.dataPropertyName,'data'),false);
 
             % save the object
             obj.save();
@@ -798,7 +815,7 @@ classdef (Abstract) mdfObjConfTest < matlab.unittest.TestCase
 
             % check again
             testCase.verifyEqual( ...
-                obj.isProp(testCase.dataPropertyValue,'data'),false);
+                obj.isProp(testCase.dataPropertyName,'data'),false);
 
             %
             % clear memory

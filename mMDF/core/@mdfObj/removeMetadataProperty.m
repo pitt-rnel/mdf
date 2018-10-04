@@ -1,7 +1,7 @@
-function res = removeMetadataField(obj,field)
-    % function res = obj.removeMetadataField(field)
+function res = removeMetadataProperty(obj,field)
+    % function res = obj.removeMetadataProperty(field)
     % 
-    % remove metadata field from object's metadata
+    % remove metadata property from object's metadata
     % it will remove only the first level field.
     % it does not work on nested fields
     
