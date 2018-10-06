@@ -33,6 +33,8 @@ classdef (Abstract) mdfObjConfTest < matlab.unittest.TestCase
         metadataPropertyValue = '';
         dataPropertyName = '';
         dataPropertyValue = '';
+        testProperty = '';
+        directions = {};
     end %properties
     
     methods (TestClassSetup)
@@ -136,6 +138,12 @@ classdef (Abstract) mdfObjConfTest < matlab.unittest.TestCase
             % define data property and value
             testCase.dataPropertyName = 'dTest';
             testCase.dataPropertyValue = sin([1:1000])+cos([1000:-1:1]);
+            
+            % define test property name
+            testCase.testProperty = 'pTest';
+            
+            % define test directionalities for links
+            testCase.directions = {'u'; 'b'};
         end %function
 
     end %methods
@@ -834,7 +842,7 @@ classdef (Abstract) mdfObjConfTest < matlab.unittest.TestCase
             %
             % add children
             res = true;
-            for i = tempCase.testOtherObjIndex
+            for i = testCase.testOtherObjIndex
                 res1 = obj.addChild(testCase.testProperty,testCase.uuids{i});
                 res = res & res1;
             end
@@ -845,17 +853,19 @@ classdef (Abstract) mdfObjConfTest < matlab.unittest.TestCase
                     obj.mdf_def.mdf_children.mdf_fields)), ...
                 true);
             testCase.verifyEqual( ...
-                length(testCase.uuids), ...
+                length(testCase.testOtherObjIndex), ...
                 length(obj.mdf_def.mdf_children.(testCase.testProperty)));
 
             %
             % clear memory and does note save it
             testCase.manage.clearAll();
 
+            % reload object 
+            obj = mdfObj.load(testCase.getTestObjUuid());
             % 
             % insert last child at a random place
             %
-            % add all children excepct last
+            % add all children except last
             for i = 1:length(testCase.testOtherObjIndex)-1
                 res = obj.addChild( ...
                     testCase.testProperty, ...
@@ -867,13 +877,14 @@ classdef (Abstract) mdfObjConfTest < matlab.unittest.TestCase
                 testCase.testProperty, ...
                 testCase.uuids{testCase.testOtherObjIndex(end)}, ...
                 testCase.insertPosition);
+            
             testCase.verifyEqual(res,true);
             testCase.verifyEqual( ...
                 length(testCase.testOtherObjIndex), ...
                 length(obj.mdf_def.mdf_children.(testCase.testProperty)));
             testCase.verifyEqual( ...
                 testCase.uuids{testCase.testOtherObjIndex(end)}, ...
-                obj.mdf_def.mdf_children.(testCase.testProperty)(testCase.insertPosition));
+                obj.mdf_def.mdf_children.(testCase.testProperty)(testCase.insertPosition).mdf_uuid);
 
             % this time save the object
             res = obj.save();
@@ -1017,7 +1028,7 @@ classdef (Abstract) mdfObjConfTest < matlab.unittest.TestCase
             %
             % 
             testCase.verifyEqual(res,true);
-            testCase.veirfyEqual( ...
+            testCase.verifyEqual( ...
                 length(obj.mdf_def.mdf_children.(testCase.testProperty)), ...
                 length(testCase.testOtherObjIndex)-1);
             %
@@ -1031,16 +1042,18 @@ classdef (Abstract) mdfObjConfTest < matlab.unittest.TestCase
             %
             % test for function rmChild, removing all children under property
             %
+            % load object
+            obj = mdfObj.load(testCase.getTestObjUuid());
             %
             % remove all children under the same property
             res = obj.rmChild(testCase.testProperty);
             testCase.verifyEqual(res,true);
             testCase.verifyEqual( ...
                 any(ismember(obj.mdf_def.mdf_children.mdf_fields,testCase.testProperty)), ...
-                0);
+                false);
             testCase.verifyEqual( ...
-                any(ismember(fields(obj.mdf_def.mdf_children.mdf_fields),testCase.testProperty)), ...
-                0);
+                any(ismember(fields(obj.mdf_def.mdf_children),testCase.testProperty)), ...
+                false);
 
             % save results
             res = obj.save();
@@ -1062,20 +1075,23 @@ classdef (Abstract) mdfObjConfTest < matlab.unittest.TestCase
             % load object 
             obj = mdfObj.load(testCase.getTestObjUuid());
             %
+            % select directionality
+            dir = testCase.directions{1+floor(rand(1)*2)};
+            %
             % add link
             res = true;
-            for i = tempCase.testOtherObjIndex
+            for i = testCase.testOtherObjIndex
                 res1 = obj.addLink( ...
                     testCase.testProperty, ...
-                    testCase.uuids{testCase.testOtherObjIndex(i)}, ...
-                    testCase.directions(1+floor(rand(1)*2)));
+                    testCase.uuids{i}, ...
+                    dir);
                 res = res & res1;
             end
             testCase.verifyEqual(res,true);
             testCase.verifyEqual( ...
                 any( ...
                     ismember(testCase.testProperty, ...
-                    obj.mdf_def.mdf_children.mdf_fields)), ...
+                    obj.mdf_def.mdf_links.mdf_fields)), ...
                 true);
             testCase.verifyEqual( ...
                 length(testCase.testOtherObjIndex), ...
@@ -1088,18 +1104,24 @@ classdef (Abstract) mdfObjConfTest < matlab.unittest.TestCase
             % 
             % insert last link at a random place
             %
+            % reload object 
+            obj = mdfObj.load(testCase.getTestObjUuid());
+            %
+            % select directionality
+            dir = testCase.directions{1+floor(rand(1)*2)};
+            %
             % add all link except last
             for i = 1:length(testCase.testOtherObjIndex)-1
-                res = obj.addChild( ...
+                res = obj.addLink( ...
                     testCase.testProperty, ...
                     testCase.uuids{testCase.testOtherObjIndex(i)}, ...
-                    testCase.directions(1+floor(rand(1)*2)));
+                    dir);
             end
             % add last link in predefined position
-            res = obj.addChild( ...
+            res = obj.addLink( ...
                 testCase.testProperty, ...
                 testCase.uuids{testCase.testOtherObjIndex(end)}, ...
-                testCase.directions(1+floor(rand(1)*2)), ...
+                dir, ...
                 testCase.insertPosition);
             testCase.verifyEqual(res,true);
             testCase.verifyEqual( ...
@@ -1107,7 +1129,7 @@ classdef (Abstract) mdfObjConfTest < matlab.unittest.TestCase
                 length(obj.mdf_def.mdf_links.(testCase.testProperty)));
             testCase.verifyEqual( ...
                 testCase.uuids{testCase.testOtherObjIndex(end)}, ...
-                obj.mdf_def.mdf_links.(testCase.testProperty)(testCase.insertPosition));
+                obj.mdf_def.mdf_links.(testCase.testProperty)(testCase.insertPosition).mdf_uuid);
 
             % this time save the object
             res = obj.save();
@@ -1171,36 +1193,48 @@ classdef (Abstract) mdfObjConfTest < matlab.unittest.TestCase
                 sort(testCase.uuids(testCase.testOtherObjIndex)));
 
             %
+            % prepare for directionality test
+            mask = strcmp(obj.mdf_def.mdf_links.mdf_fields,testCase.testProperty);
+            dir = obj.mdf_def.mdf_links.mdf_directions{mask};
+            temp = obj.mdf_def.mdf_links.(testCase.testProperty);
+            lUuids = {temp(:).mdf_uuid}';
+            
+            
+            %
             % get uuids of the bidirectional links
             uuids = obj.getUuids('blinks',testCase.testProperty,'default');
             %
             % find uuids of bidirectional links
-            mask = obj.mdf_def.mdf_links.mdf_direction == 'b';
-            lUuids = obj.mdf_def.mdf_links.(testCase.testProperty)(mask);
-            %
-            % check if the uuids are the same that we inserted
-            testCase.verifyEqual( ...
-                sort(uuids), ...
-                sort(lUuids));
-            testCase.verifyEqual( ...
-                all(ismember(uuids,testCase.uuids(testCase.testOtherObjIndex)), ...
-                true));
+            if strcmp(dir,'b')
+                %
+                % check if the uuids are the same that we inserted
+                testCase.verifyEqual( ...
+                    sort(uuids), ...
+                    sort(lUuids));
+                testCase.verifyEqual( ...
+                    all(ismember(uuids,testCase.uuids(testCase.testOtherObjIndex))), ...
+                    true);
+            else
+                testCase.verifyEqual(isempty(uuids),true);
+            end %if
 
             %
             % get uuids of the unidirectional links
             uuids = obj.getUuids('ulinks',testCase.testProperty,'default');
             %
-            % find uuids of bidirectional links
-            mask = obj.mdf_def.mdf_links.mdf_direction == 'u';
-            lUuids = obj.mdf_def.mdf_links.(testCase.testProperty)(mask);
-            %
-            % check if the uuids are the same that we inserted
-            testCase.verifyEqual( ...
-                sort(uuids), ...
-                sort(lUuids));
-            testCase.verifyEqual( ...
-                all(ismember(uuids,testCase.uuids(testCase.testOtherObjIndex)), ...
-                true));
+            % find uuids of unidirectional links
+            if strcmp(dir,'u')
+                %
+                % check if the uuids are the same that we inserted
+                testCase.verifyEqual( ...
+                    sort(uuids), ...
+                    sort(lUuids));
+                testCase.verifyEqual( ...
+                    all(ismember(uuids,testCase.uuids(testCase.testOtherObjIndex))), ...
+                    true);
+            else
+                testCase.verifyEqual(isempty(uuids),true);
+            end %if
 
             %
             % get uuids of the bidirectional links
@@ -1263,7 +1297,7 @@ classdef (Abstract) mdfObjConfTest < matlab.unittest.TestCase
             % retrieve specific link
             lObj = obj.links.(testCase.testProperty)(testCase.insertPosition);
             %
-            testCase.verifyClass(chObj,'mdfObj');
+            testCase.verifyClass(lObj,'mdfObj');
             testCase.verifyEqual( ...
                 lObj.uuid, ...
                 testCase.uuids{testCase.testOtherObjIndex(end)});

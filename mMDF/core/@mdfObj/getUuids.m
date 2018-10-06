@@ -33,7 +33,9 @@ function outdata = getUuids(obj,group,property,format)
     %            Possible values:
     %            * default, uuids = output is a cell array containing uuids
     %            * UuidWithPropName = structure with uuid and property
-    %                                 associated
+    %                     associated
+    %            * UuidWithPropNameNoEmpty = structure with uuid and
+    %                     property name, no empty is retruned
     %
     % output:
     %  - outdata: (cell array of strings or array of structs)
@@ -98,7 +100,7 @@ function outdata = getUuids(obj,group,property,format)
                     % extract array of references
                     temp = obj.mdf_def.mdf_children.(property);
                     % set lists
-                    ul = {temp.mdf_uuid};
+                    ul = {temp(:).mdf_uuid}';
                     pl = cell(size(ul));
                     pl(:) = {property};
                 elseif strcmpi(property,'all')
@@ -109,7 +111,7 @@ function outdata = getUuids(obj,group,property,format)
                         % extract array of references
                         temp = obj.mdf_def.mdf_children.(pn);
                         % set lists
-                        ult = {temp.mdf_uuid};
+                        ult = {temp(:).mdf_uuid}';
                         plt = cell(size(ult));
                         plt(:) = {pn};
                         % append values in complete list
@@ -123,15 +125,19 @@ function outdata = getUuids(obj,group,property,format)
             % check if we got a property or not
             if ~isempty(property)
                 % initialize the directionality list
+                % even if link directionality is defined at the property
+                % level, we transfer the directionality to each entry, so
+                % we can select afterward all the links with the selected
+                % directionality
                 dl = {};
                 if isfield(obj.mdf_def.mdf_links,property)
                     % extract array of references
                     temp = obj.mdf_def.mdf_links.(property);
                     % set lists
-                    ul = {temp.mdf_uuid};
+                    ul = {temp(:).mdf_uuid}';
                     pl = cell(size(ul));
                     pl(:) = {property};
-                    dl = {temp.mdf_direction};
+                    dl = {temp(:).mdf_direction}';
                 elseif strcmpi(property,'all')
                     % cycle on all the properties
                     for i = 1:length(obj.mdf_def.mdf_links.mdf_fields)
@@ -140,19 +146,19 @@ function outdata = getUuids(obj,group,property,format)
                         % extract array of references
                         temp = obj.mdf_def.mdf_links.(pn);
                         % set lists
-                        ult = {temp.mdf_uuid};
+                        ult = {temp(:).mdf_uuid}';
                         plt = cell(size(ult));
                         plt(:) = {pn};
-                        dlt = {temp.mdf_direction};
+                        dlt = {temp(:).mdf_direction}';
                         % append values in complete list
-                        ul = [ ul, ult];
-                        pl = [ pl, plt];
-                        dl = [ dl, dlt];
+                        ul = [ ul; ult];
+                        pl = [ pl; plt];
+                        dl = [ dl; dlt];
                     end %for
                 end %if
                 % filters accordingly to the request
                 mask = ones(size(ul));
-                switch group
+                switch fg
                     case 'ul'
                         % retains only the unidirectional links
                         mask = strcmp('u',dl);

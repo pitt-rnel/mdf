@@ -2,9 +2,19 @@ classdef (Sealed) mdf < handle
 
     methods (Static)
         
-        function res = getUAO(uuid)
-            res = mdfObj(uuid,'test');
-            res.setFiles(['<DATA_BASE>' 'test' uuid]);
+        function [uuid,obj] = getUAO(indata)
+            if isa(indata,'mdfObj')
+                uuid = indata.uuid;
+                obj = indata;
+            else
+                % get mdf manage andsee if we need to load it
+                om = mdfManage.getInstance();
+                uuid = indata;
+                obj = om.get(uuid);
+                if isempty(obj)
+                    obj =mdfObj.load(uuid);
+                end %if
+            end %if
         end %function
 
         function uuid = UUID()
