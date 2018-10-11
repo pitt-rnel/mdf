@@ -353,6 +353,10 @@ classdef mdfObjConf1Test < mdfObjConfTest
                 testCase.verifyEqual(res,0);
             end %for
 
+            % check that the number of objects in the database is correct
+            stats = testCase.db.getCollStats();
+            testCase.verifyEqual(length(stats),0);
+
         end % function
 
     end % methods

@@ -21,6 +21,6 @@ resultsMdfObj3 = testMdfObjConf3.run;
  
 
 % display results
-resultsMdfConf = [resultsMdfObj1, resultsMdfObj2, resultsMdfObj3]
+resultsMdfObj = [resultsMdfObj1, resultsMdfObj2, resultsMdfObj3]
 
 

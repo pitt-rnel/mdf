@@ -14,8 +14,10 @@ function res = remove(obj)
     om = mdfManage.getInstance();
     
     % remove mat file
-    dFile = obj.getDataFileName(true);
-    delete(dFile);
+    if oconf.isCollectionData('MATFILE')
+        dFile = obj.getDataFileName(true);
+        delete(dFile);
+    end %if
     
     % remove yml file, if needed
     if oconf.getCollectionYaml()

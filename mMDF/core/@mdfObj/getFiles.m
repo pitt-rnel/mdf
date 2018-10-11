@@ -16,6 +16,9 @@ function res = getFiles(obj,filtered)
     %    .metadata = path for .yaml metadata file
     %
     
+    % get conf singleton
+    oconf = mdfConf.getInstance();
+    
     % check if user specified filtered or we should use default value
     if nargin < 2 || ~isa(filtered,'logical')
         filtered = true;
@@ -25,10 +28,15 @@ function res = getFiles(obj,filtered)
     res = struct();
     res.data = obj.getDataFileName(filtered);
     res.metadata = obj.getMetadataFileName(filtered);
-    if filtered
-        res.base = mdfConf.sfilter(obj.mdf_def.mdf_files.mdf_base);
+    res.base = false;
+    if oconf.isCollectionData('MATFILE') || oconf.getCollectionYaml()
+        if filtered
+            res.base = mdfConf.sfilter(obj.mdf_def.mdf_files.mdf_base);
+        else
+            res.base = obj.mdf_def.mdf_files.mdf_base;
+        end %if
     else
-        res.base = obj.mdf_def.mdf_files.mdf_base;
+        obj.mdf_def.mdf_files.mdf_base = '';
     end %if
 
 end %function
