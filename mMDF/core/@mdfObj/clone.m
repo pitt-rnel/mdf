@@ -15,12 +15,19 @@ function res = clone(obj)
     res.uuid = mdf.UUID();
     res.metadata = obj.metadata;
     % get data properties
-    dpl = obj.listDataProperties();
+    dpl = obj.getListDataProperties();
     for i = 1:length(dpl)
         % get data property name
         dp = dpl{i};
-        % transfer data property
-        res.data.(dp) = obj.data.(dp);
+        % load data in source object
+        obj.dataLoad(dp);
+        % transfer data property calling directly subsasgn on target object
+        % otherwise matlab does not call the object method
+        res.subsasgn( ...
+            struct( ...
+                'type', { '.', '.' }, ...
+                'subs', { 'data', dp } ), ...
+            obj.data.(dp) );
         % updates property definition in new object
         res.setDataInfo(dp);
         % marked as loaded

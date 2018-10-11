@@ -175,7 +175,7 @@ function outdata = getUuids(obj,group,property,format)
             temp = obj.mdf_def.mdf_parents;
             % set lists
             if length(temp) > 0
-                ul = {temp.mdf_uuid};
+                ul = {temp(:).mdf_uuid}';
             end %if
           
         otherwise

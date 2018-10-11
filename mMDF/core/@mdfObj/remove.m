@@ -10,16 +10,18 @@ function res = remove(obj)
     
     % get db and manage singleton
     odb = mdfDB.getInstance();
-    % get mdfManage object
+    oconf = mdfConf.getInstance();
     om = mdfManage.getInstance();
     
     % remove mat file
     dFile = obj.getDataFileName(true);
     delete(dFile);
     
-    % remove yml file
-    mdFile = obj.getMetadataFileName(true);
-    delete(mdFile);
+    % remove yml file, if needed
+    if oconf.getCollectionYaml()
+        mdFile = obj.getMetadataFileName(true);
+        delete(mdFile);
+    end %if
     
     % remove db record
     uuid = obj.uuid;

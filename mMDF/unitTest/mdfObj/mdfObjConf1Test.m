@@ -43,6 +43,216 @@ classdef mdfObjConf1Test < mdfObjConfTest
 
     methods
         
+        function localTestSetFiles(testCase)
+            %
+            % instantiate the object
+            obj = mdfObj();
+            %
+            % set files for this objects
+            res = obj.setFiles(testCase.records{testCase.testRecordIndex}.mdf_def.mdf_files.mdf_base);
+            %
+            % check results
+            testCase.verifyEqual( ...
+                res.base, ...
+                testCase.conf.filter( ...
+                    testCase.records{testCase.testRecordIndex}.mdf_def.mdf_files.mdf_base));
+            testCase.verifyEqual( ...
+                res.metadata, ...
+                testCase.conf.filter( ...
+                    testCase.records{testCase.testRecordIndex}.mdf_def.mdf_files.mdf_metadata));
+            testCase.verifyEqual( ...
+                res.data, ...
+                testCase.conf.filter( ...
+                    testCase.records{testCase.testRecordIndex}.mdf_def.mdf_files.mdf_data));
+            %
+            %
+            delete(obj);
+
+            %
+            % instantiate the object
+            obj = mdfObj();
+            %
+            % set files for this objects
+            res = obj.setFiles( ...
+                struct( ...
+                    'base', testCase.records{testCase.testRecordIndex}.mdf_def.mdf_files.mdf_base, ...
+                    'metadata', testCase.records{testCase.testRecordIndex}.mdf_def.mdf_files.mdf_metadata, ...
+                    'data', testCase.records{testCase.testRecordIndex}.mdf_def.mdf_files.mdf_data));
+            %
+            % check results
+            testCase.verifyEqual( ...
+                res.base, ...
+                testCase.conf.filter( ...
+                    testCase.records{testCase.testRecordIndex}.mdf_def.mdf_files.mdf_base));
+            testCase.verifyEqual( ...
+                res.metadata, ...
+                testCase.conf.filter( ...
+                    testCase.records{testCase.testRecordIndex}.mdf_def.mdf_files.mdf_metadata));
+            testCase.verifyEqual( ...
+                res.data, ...
+                testCase.conf.filter( ...
+                    testCase.records{testCase.testRecordIndex}.mdf_def.mdf_files.mdf_data));
+            %
+            %
+            delete(obj);
+        end % function
+
+        %
+        function localTestGetFiles(testCase)
+            %
+            % instantiate the object
+            obj = mdfObj();
+            %
+            % set files for this object
+            obj.mdf_def.mdf_files.mdf_base = ...
+                testCase.records{testCase.testRecordIndex}.mdf_def.mdf_files.mdf_base;
+            obj.mdf_def.mdf_files.mdf_data = ...
+                testCase.records{testCase.testRecordIndex}.mdf_def.mdf_files.mdf_data;
+            obj.mdf_def.mdf_files.mdf_metadata = ...
+                testCase.records{testCase.testRecordIndex}.mdf_def.mdf_files.mdf_metadata;
+            
+            %
+            % get files for this object
+            res = obj.getFiles();
+            %
+            % check results
+            testCase.verifyEqual( ...
+                res.base, ...
+                testCase.conf.filter( ...
+                    testCase.records{testCase.testRecordIndex}.mdf_def.mdf_files.mdf_base));
+            testCase.verifyEqual( ...
+                res.metadata, ...
+                testCase.conf.filter( ...
+                    testCase.records{testCase.testRecordIndex}.mdf_def.mdf_files.mdf_metadata));
+            testCase.verifyEqual( ...
+                res.data, ...
+                testCase.conf.filter( ...
+                    testCase.records{testCase.testRecordIndex}.mdf_def.mdf_files.mdf_data));
+
+            %
+            % get files for this object
+            res = obj.getFiles(false);
+            %
+            % check results
+            testCase.verifyEqual( ...
+                res.base, ...
+                testCase.records{testCase.testRecordIndex}.mdf_def.mdf_files.mdf_base);
+            testCase.verifyEqual( ...
+                res.metadata, ...
+                testCase.records{testCase.testRecordIndex}.mdf_def.mdf_files.mdf_metadata);
+            testCase.verifyEqual( ...
+                res.data, ...
+                testCase.records{testCase.testRecordIndex}.mdf_def.mdf_files.mdf_data);
+
+            %
+            %
+            delete(obj);
+            
+        end %function
+
+        %
+        function localTestGetDFN(testCase)
+            %
+            % instantiate the object
+            obj = mdfObj();
+            %
+            % set files for this object
+            obj.mdf_def.mdf_files.mdf_data = ...
+                testCase.records{testCase.testRecordIndex}.mdf_def.mdf_files.mdf_data;
+            %
+            % get files for this object
+            res = obj.getDataFileName();
+            %
+            % check results
+            testCase.verifyEqual( ...
+                res, ...
+                testCase.conf.filter( ...
+                    testCase.records{testCase.testRecordIndex}.mdf_def.mdf_files.mdf_data));
+            %
+            % get files for this object
+            res = obj.getDFN();
+            %
+            % check results
+            testCase.verifyEqual( ...
+                res, ...
+                testCase.conf.filter( ...
+                    testCase.records{testCase.testRecordIndex}.mdf_def.mdf_files.mdf_data));
+
+            %
+            % get files for this object
+            res = obj.getDataFileName(false);
+            %
+            % check results
+            testCase.verifyEqual( ...
+                res, ...
+                testCase.records{testCase.testRecordIndex}.mdf_def.mdf_files.mdf_data);
+            %
+            % get files for this object
+            res = obj.getDFN(false);
+            %
+            % check results
+            testCase.verifyEqual( ...
+                res, ...
+                testCase.records{testCase.testRecordIndex}.mdf_def.mdf_files.mdf_data);
+
+            %
+            %
+            delete(obj);
+            
+        end %function
+
+        %
+        function localTestGetMFN(testCase)
+            %
+            % instantiate the object
+            obj = mdfObj();
+            %
+            % set files for this object
+            obj.mdf_def.mdf_files.mdf_metadata = ...
+                testCase.records{testCase.testRecordIndex}.mdf_def.mdf_files.mdf_metadata;
+            %
+            % get files for this object
+            res = obj.getMetadataFileName();
+            %
+            % check results
+            testCase.verifyEqual( ...
+                res, ...
+                testCase.conf.filter( ...
+                    testCase.records{testCase.testRecordIndex}.mdf_def.mdf_files.mdf_metadata));
+            %
+            % get files for this object
+            res = obj.getMFN();
+            %
+            % check results
+            testCase.verifyEqual( ...
+                res, ...
+                testCase.conf.filter( ...
+                    testCase.records{testCase.testRecordIndex}.mdf_def.mdf_files.mdf_metadata));
+
+            %
+            % get files for this object
+            res = obj.getMetadataFileName(false);
+            %
+            % check results
+            testCase.verifyEqual( ...
+                res, ...
+                testCase.records{testCase.testRecordIndex}.mdf_def.mdf_files.mdf_metadata);
+            %
+            % get files for this object
+            res = obj.getMFN(false);
+            %
+            % check results
+            testCase.verifyEqual( ...
+                res, ...
+                testCase.records{testCase.testRecordIndex}.mdf_def.mdf_files.mdf_metadata);
+
+            %
+            %
+            delete(obj);
+            
+        end %function
+
+        %
         function localTestSaveObjects(testCase)
             % 
             % create mdf objects and save them to db
@@ -129,7 +339,8 @@ classdef mdfObjConf1Test < mdfObjConfTest
                 mFile = obj.getMFN();
                 %
                 % remove object
-                obj.remove();
+                res = obj.remove();
+                testCase.verifyEqual(res,true);
                 % 
                 % check that the dbentry is removed
                 obj = mdfObj.load(testCase.uuids{i});
@@ -143,7 +354,6 @@ classdef mdfObjConf1Test < mdfObjConfTest
             end %for
 
         end % function
-
 
     end % methods
     

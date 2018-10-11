@@ -38,18 +38,19 @@ function len = getLen(obj,property,type)
         end %try/catch
     else
         % user specified type of property
-        % check type
-        switch (type) 
-            case {'c', 'children'}
-                type = 'mdf_children';
-            case {'l', 'links'}
-                type = 'mdf_links';
-            otherwise
-                return
-        end %switch
-        % get uuids
         try
-            pv = {obj.mdf_def.(type).(property).mdf_uuid};
+            % get uuids
+            % check type
+            switch (type)
+                case {'c', 'children'}
+                    pv = {obj.mdf_def.mdf_children.(property).mdf_uuid};
+                case {'l', 'links'}
+                    pv = {obj.mdf_def.mdf_links.(property).mdf_uuid};
+                case {'p','parents'}
+                    pv = {obj.mdf_def.mdf_parents.mdf_uuid};
+                otherwise
+                    return
+            end %switch
         catch
             return
         end %try/catch

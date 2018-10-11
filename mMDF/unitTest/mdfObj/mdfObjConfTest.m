@@ -256,216 +256,28 @@ classdef (Abstract) mdfObjConfTest < matlab.unittest.TestCase
         end % function
 
         %
-        function testSetFiles(testCase)
-            %
-            % instantiate the object
-            obj = mdfObj();
-            %
-            % set files for this objects
-            res = obj.setFiles(testCase.records{testCase.testRecordIndex}.mdf_def.mdf_files.mdf_base);
-            %
-            % check results
-            testCase.verifyEqual( ...
-                res.base, ...
-                testCase.conf.filter( ...
-                    testCase.records{testCase.testRecordIndex}.mdf_def.mdf_files.mdf_base));
-            testCase.verifyEqual( ...
-                res.metadata, ...
-                testCase.conf.filter( ...
-                    testCase.records{testCase.testRecordIndex}.mdf_def.mdf_files.mdf_metadata));
-            testCase.verifyEqual( ...
-                res.data, ...
-                testCase.conf.filter( ...
-                    testCase.records{testCase.testRecordIndex}.mdf_def.mdf_files.mdf_data));
-            %
-            %
-            delete(obj);
-
-            %
-            % instantiate the object
-            obj = mdfObj();
-            %
-            % set files for this objects
-            res = obj.setFiles( ...
-                struct( ...
-                    'base', testCase.records{testCase.testRecordIndex}.mdf_def.mdf_files.mdf_base, ...
-                    'metadata', testCase.records{testCase.testRecordIndex}.mdf_def.mdf_files.mdf_metadata, ...
-                    'data', testCase.records{testCase.testRecordIndex}.mdf_def.mdf_files.mdf_data));
-            %
-            % check results
-            testCase.verifyEqual( ...
-                res.base, ...
-                testCase.conf.filter( ...
-                    testCase.records{testCase.testRecordIndex}.mdf_def.mdf_files.mdf_base));
-            testCase.verifyEqual( ...
-                res.metadata, ...
-                testCase.conf.filter( ...
-                    testCase.records{testCase.testRecordIndex}.mdf_def.mdf_files.mdf_metadata));
-            testCase.verifyEqual( ...
-                res.data, ...
-                testCase.conf.filter( ...
-                    testCase.records{testCase.testRecordIndex}.mdf_def.mdf_files.mdf_data));
-            %
-            %
-            delete(obj);
-        end % function
-
-        %
-        function testGetFiles(testCase)
-            %
-            % test record used
-            testCase.testObjIndex = 1;
-            %
-            % instantiate the object
-            obj = mdfObj();
-            %
-            % set files for this object
-            res = obj.setFiles(testCase.records{testCase.testObjIndex}.mdf_def.mdf_files.mdf_base);
-            %
-            % get files for this object
-            res = obj.getFiles();
-            %
-            % check results
-            testCase.verifyEqual( ...
-                res.base, ...
-                testCase.conf.filter( ...
-                    testCase.records{testCase.testObjIndex}.mdf_def.mdf_files.mdf_base));
-            testCase.verifyEqual( ...
-                res.metadata, ...
-                testCase.conf.filter( ...
-                    testCase.records{testCase.testObjIndex}.mdf_def.mdf_files.mdf_metadata));
-            testCase.verifyEqual( ...
-                res.data, ...
-                testCase.conf.filter( ...
-                    testCase.records{testCase.testObjIndex}.mdf_def.mdf_files.mdf_data));
-
-            %
-            % get files for this object
-            res = obj.getFiles(false);
-            %
-            % check results
-            testCase.verifyEqual( ...
-                res.base, ...
-                testCase.records{testCase.testObjIndex}.mdf_def.mdf_files.mdf_base);
-            testCase.verifyEqual( ...
-                res.metadata, ...
-                testCase.records{testCase.testObjIndex}.mdf_def.mdf_files.mdf_metadata);
-            testCase.verifyEqual( ...
-                res.data, ...
-                testCase.records{testCase.testObjIndex}.mdf_def.mdf_files.mdf_data);
-
-            %
-            %
-            delete(obj);
-            
-        end %function
-
-        %
         function testGetDFN(testCase)
             %
-            % test record used
-            testCase.testObjIndex = 1;
-            %
-            % instantiate the object
-            obj = mdfObj();
-            %
-            % set files for this object
-            res = obj.setFiles(testCase.records{testCase.testObjIndex}.mdf_def.mdf_files.mdf_base);
-            %
-            % get files for this object
-            res = obj.getDataFileName();
-            %
-            % check results
-            testCase.verifyEqual( ...
-                res, ...
-                testCase.conf.filter( ...
-                    testCase.records{testCase.testObjIndex}.mdf_def.mdf_files.mdf_data));
-            %
-            % get files for this object
-            res = obj.getDFN();
-            %
-            % check results
-            testCase.verifyEqual( ...
-                res, ...
-                testCase.conf.filter( ...
-                    testCase.records{testCase.testObjIndex}.mdf_def.mdf_files.mdf_data));
-
-            %
-            % get files for this object
-            res = obj.getDataFileName(false);
-            %
-            % check results
-            testCase.verifyEqual( ...
-                res, ...
-                testCase.records{testCase.testObjIndex}.mdf_def.mdf_files.mdf_data);
-            %
-            % get files for this object
-            res = obj.getDFN(false);
-            %
-            % check results
-            testCase.verifyEqual( ...
-                res, ...
-                testCase.records{testCase.testObjIndex}.mdf_def.mdf_files.mdf_data);
-
-            %
-            %
-            delete(obj);
-            
+            localTestGetDFN(testCase);
         end %function
-
 
         %
         function testGetMFN(testCase)
             %
-            % test record used
-            testCase.testObjIndex = 1;
-            %
-            % instantiate the object
-            obj = mdfObj();
-            %
-            % set files for this object
-            res = obj.setFiles(testCase.records{testCase.testObjIndex}.mdf_def.mdf_files.mdf_base);
-            %
-            % get files for this object
-            res = obj.getMetadataFileName();
-            %
-            % check results
-            testCase.verifyEqual( ...
-                res, ...
-                testCase.conf.filter( ...
-                    testCase.records{testCase.testObjIndex}.mdf_def.mdf_files.mdf_metadata));
-            %
-            % get files for this object
-            res = obj.getMFN();
-            %
-            % check results
-            testCase.verifyEqual( ...
-                res, ...
-                testCase.conf.filter( ...
-                    testCase.records{testCase.testObjIndex}.mdf_def.mdf_files.mdf_metadata));
-
-            %
-            % get files for this object
-            res = obj.getMetadataFileName(false);
-            %
-            % check results
-            testCase.verifyEqual( ...
-                res, ...
-                testCase.records{testCase.testObjIndex}.mdf_def.mdf_files.mdf_metadata);
-            %
-            % get files for this object
-            res = obj.getMFN(false);
-            %
-            % check results
-            testCase.verifyEqual( ...
-                res, ...
-                testCase.records{testCase.testObjIndex}.mdf_def.mdf_files.mdf_metadata);
-
-            %
-            %
-            delete(obj);
-            
+            localTestGetMFN(testCase);
         end %function
+
+        %
+        function testGetFiles(testCase)
+            %
+            localTestGetFiles(testCase);
+        end %function
+
+        %
+        function testSetFiles(testCase)
+            %
+            localTestSetFiles(testCase);
+        end % function
 
         %
         function testSaveObjects(testCase)
@@ -1319,7 +1131,7 @@ classdef (Abstract) mdfObjConfTest < matlab.unittest.TestCase
             %
             % 
             testCase.verifyEqual(res,true);
-            testCase.veirfyEqual( ...
+            testCase.verifyEqual( ...
                 length(obj.mdf_def.mdf_links.(testCase.testProperty)), ...
                 length(testCase.testOtherObjIndex)-1);
             %
@@ -1333,16 +1145,18 @@ classdef (Abstract) mdfObjConfTest < matlab.unittest.TestCase
             %
             % test for function rmLink, removing all children under property
             %
+            % load object
+            obj = mdfObj.load(testCase.getTestObjUuid());
             %
             % remove all children under the same property
             res = obj.rmLink(testCase.testProperty);
             testCase.verifyEqual(res,true);
             testCase.verifyEqual( ...
                 any(ismember(obj.mdf_def.mdf_links.mdf_fields,testCase.testProperty)), ...
-                0);
+                false);
             testCase.verifyEqual( ...
-                any(ismember(fields(obj.mdf_def.mdf_links.mdf_fields),testCase.testProperty)), ...
-                0);
+                any(ismember(fields(obj.mdf_def.mdf_links),testCase.testProperty)), ...
+                false);
 
             % save results
             res = obj.save();
@@ -1366,20 +1180,15 @@ classdef (Abstract) mdfObjConfTest < matlab.unittest.TestCase
             %
             % add parents
             res = true;
-            for i = tempCase.testOtherObjIndex
-                res1 = obj.addLink( ...
-                    testCase.uuids{testCase.testOtherObjIndex(i)});
+            for i = testCase.testOtherObjIndex
+                res1 = obj.addParent( ...
+                    testCase.uuids{i});
                 res = res & res1;
             end
             testCase.verifyEqual(res,true);
             testCase.verifyEqual( ...
-                any( ...
-                    ismember(testCase.testProperty, ...
-                    obj.mdf_def.mdf_parents.mdf_fields)), ...
-                true);
-            testCase.verifyEqual( ...
                 length(testCase.testOtherObjIndex), ...
-                length(obj.mdf_def.mdf_parents.(testCase.testProperty)));
+                length(obj.mdf_def.mdf_parents));
 
             % this time save the object
             res = obj.save();
@@ -1419,7 +1228,7 @@ classdef (Abstract) mdfObjConfTest < matlab.unittest.TestCase
             % verify that we got the right thing
             testCase.verifyEqual( ...
                 iter, ...
-                [length(obj.mdf_def.mdf_links.(testCase.testProperty)):-1:1]);
+                [length(obj.mdf_def.mdf_parents):-1:1]);
 
             %
             % clear memory
@@ -1475,12 +1284,12 @@ classdef (Abstract) mdfObjConfTest < matlab.unittest.TestCase
             obj = mdfObj.load(testCase.getTestObjUuid());
             %
             % retrieve specific link
-            pObj = obj.getParent(testCase.insertPosition);
+            pObj = obj.getParent(1);
             %
             testCase.verifyClass(pObj,'mdfObj');
             testCase.verifyEqual( ...
                 pObj.uuid, ...
-                testCase.uuids{testCase.testOtherObjIndex(end)});
+                testCase.uuids{testCase.testOtherObjIndex(1)});
 
             %
             % retrieve specific link by uuid
@@ -1498,11 +1307,12 @@ classdef (Abstract) mdfObjConfTest < matlab.unittest.TestCase
             pObjs = obj.getParent( ...
                 struct( ...
                     'mdf_type', 'TestObj'));
+            uuids = pObjs.uuid;
             %
             testCase.verifyClass(pObjs,'mdfObj');
             testCase.verifyEqual( ...
-                sort(pObjs.uuid), ...
-                sort(testCase.uuids{testCase.testOtherObjIndex}));
+                sort(uuids), ...
+                sort({testCase.uuids{testCase.testOtherObjIndex}}));
 
             %
             % clear memory
@@ -1523,7 +1333,7 @@ classdef (Abstract) mdfObjConfTest < matlab.unittest.TestCase
             %
             % 
             testCase.verifyEqual(res,true);
-            testCase.veirfyEqual( ...
+            testCase.verifyEqual( ...
                 length(obj.mdf_def.mdf_parents), ...
                 length(testCase.testOtherObjIndex)-1);
             %
@@ -1593,20 +1403,20 @@ classdef (Abstract) mdfObjConfTest < matlab.unittest.TestCase
             % check that is a positive integer
             testCase.verifyClass(totalSize,'double');
             testCase.verifyEqual(totalSize,floor(totalSize));
-            testCase.verifyGreatThan(totalSize,0);
+            testCase.verifyGreaterThan(totalSize,0);
 
             %
             % get detailed size
             sizes = obj.getSize(true);
             %
             % check that is a positive integer
-            testCase.verifyClass(totalSize,'struct');
+            testCase.verifyClass(sizes,'struct');
             sizeFields = fields(sizes);
             for i = 1:length(sizeFields)
                 fn = sizeFields{i};
                 testCase.verifyClass(sizes.(fn),'double');
                 testCase.verifyEqual(sizes.(fn),floor(sizes.(fn)));
-                testCase.verifyGreatThan(sizes.(fn),0);
+                testCase.verifyGreaterThan(sizes.(fn),0);
             end %for
 
             %
@@ -1632,12 +1442,22 @@ classdef (Abstract) mdfObjConfTest < matlab.unittest.TestCase
                 testCase.verifyClass(obj1,'mdfObj');
                 testCase.verifyEqual(obj1.metadata,obj2.metadata);
                 testCase.verifyEqual(obj1.data,obj2.data);
-                testCase.verifyEqual(obj1.mdf_def,testCase.records{i}.mdf_def);
+                testCase.verifyEqual(obj1.mdf_def.mdf_type,testCase.records{i}.mdf_def.mdf_type);
+                testCase.verifyEqual(obj1.mdf_def.mdf_uuid,testCase.records{i}.mdf_def.mdf_uuid);
+                testCase.verifyEqual(obj1.mdf_def.mdf_vuuid,testCase.records{i}.mdf_def.mdf_vuuid);
+                testCase.verifyEqual(obj1.mdf_def.mdf_created,testCase.records{i}.mdf_def.mdf_created);
+                testCase.verifyEqual(obj1.mdf_def.mdf_modified,testCase.records{i}.mdf_def.mdf_modified);
                 testCase.verifyEqual(obj1.metadata,testCase.records{i}.mdf_metadata);
                 %
                 dps = testCase.records{i}.mdf_def.mdf_data.mdf_fields;
                 for j = 1:length(dps)
                     dp = dps{j};
+                    testCase.verifyEqual( ...
+                        obj1.mdf_def.mdf_data.(dp).mdf_class, ...
+                        testCase.records{i}.mdf_def.mdf_data.(dp).mdf_class);
+                    testCase.verifyEqual( ...
+                        obj1.mdf_def.mdf_data.(dp), ...
+                        obj2.mdf_def.mdf_data.(dp));
                     testCase.verifyEqual(obj1.data.(dp),testCase.records{i}.(dp));
                 end %for
                 %
@@ -1659,14 +1479,27 @@ classdef (Abstract) mdfObjConfTest < matlab.unittest.TestCase
                 % goes back to json string
                 jsonString = obj.toJson();
                 %
-                % convert to struct and compares
-                jsonStruct = jsonencode(jsonString);
+                % convert json string to struct (which is better for
+                % testing)
+                jsonStruct = mdf.fromJson(jsonString);
                 %
                 % check results
                 testCase.verifyClass(jsonString,'char');
-                testCase.verifyEqual( ...
-                    jsonStruct, ...
-                    testCase.records{i});
+                testCase.verifyEqual(jsonStruct.mdf_metadata,testCase.records{i}.mdf_metadata);
+                testCase.verifyEqual(jsonStruct.mdf_def.mdf_type,testCase.records{i}.mdf_def.mdf_type);
+                testCase.verifyEqual(jsonStruct.mdf_def.mdf_uuid,testCase.records{i}.mdf_def.mdf_uuid);
+                testCase.verifyEqual(jsonStruct.mdf_def.mdf_vuuid,testCase.records{i}.mdf_def.mdf_vuuid);
+                testCase.verifyEqual(jsonStruct.mdf_def.mdf_created,testCase.records{i}.mdf_def.mdf_created);
+                testCase.verifyEqual(jsonStruct.mdf_def.mdf_modified,testCase.records{i}.mdf_def.mdf_modified);
+                %
+                dps = testCase.records{i}.mdf_def.mdf_data.mdf_fields;
+                for j = 1:length(dps)
+                    dp = dps{j};
+                    testCase.verifyEqual( ...
+                        jsonStruct.mdf_def.mdf_data.(dp).mdf_class, ...
+                        testCase.records{i}.mdf_def.mdf_data.(dp).mdf_class);
+                    testCase.verifyEqual(jsonStruct.(dp),testCase.records{i}.(dp));
+                end %for
                 %
                 % delete object
                 delete(obj);
@@ -1675,7 +1508,12 @@ classdef (Abstract) mdfObjConfTest < matlab.unittest.TestCase
         end %function
         
         %
-        function testDeleteObjects()
+        function testDeleteObjects(testCase)
+            %
+            % test delete the objects
+            %
+            
+            localTestDeleteObjects(testCase);
         end % function
 
 

@@ -29,7 +29,7 @@ function res = rmLink(obj, prop, link)
         % get link uuid an dobject
         [uLink, oLink] = mdf.getUAO(link);
         % find link in list
-        pos = find(strcmp(obj.mdf_def.mdf_links.(prop).mdf_uuid,uLink));
+        pos = find(strcmp({obj.mdf_def.mdf_links.(prop).mdf_uuid},uLink));
         if isempty(pos)
            throw(MException('mdfObj:rmLink','Link uuid not found in links property.')); 
         end %if
@@ -41,9 +41,14 @@ function res = rmLink(obj, prop, link)
     end %if
     % remove type and directionality if necessary
     if length(obj.mdf_def.mdf_links.(prop)) == 0
-        obj.mdf_def.mdf_links.mdf_types{ip} = [];
-        obj.mdf_def.mdf_links.mdf_directions{ip} = [];
-        obj.mdf_def.mdf_links.(prop) = [];
+        % remove associated type
+        obj.mdf_def.mdf_links.mdf_types(ip) = [];
+        % remove associated direction
+        obj.mdf_def.mdf_links.mdf_directions(ip) = [];
+        % remove field name from list
+        obj.mdf_def.mdf_links.mdf_fields(ip) = [];
+        % remove property
+        obj.mdf_def.mdf_links = rmfield(obj.mdf_def.mdf_links,prop);
     end %if
     
     res = true;

@@ -29,6 +29,10 @@ function res = populate(obj,data)
         % we dump the content loaded and we assign an empty struct
         obj.metadata = struct();
     end %if
+    %
+    % fixes vectors dimensions, as matlab can not provide a coherent
+    % behaviour across platforms and/or versions
+    obj.mdf_def.mdf_data.mdf_fields = {obj.mdf_def.mdf_data.mdf_fields{:}};
     % create place marks for data properties
     for q = 1:length(data.mdf_def.mdf_data.mdf_fields)
         field = data.mdf_def.mdf_data.mdf_fields{q};
@@ -36,9 +40,18 @@ function res = populate(obj,data)
             obj.mdf_def.mdf_data.(field).mdf_mem = ...
                 str2double(data.mdf_def.mdf_data.(field).mdf_mem.x0x24_numberLong);
         end %if
-        obj.data.(field) = [];
-        obj.status.loaded.data.(field) = 0;
-        obj.status.size.data.(field) = 0;
+        % check if input structure has data fields in it
+        if isfield(data,field)
+            obj.data.(field) = data.(field);
+            % update data property info
+            obj.setDataInfo(field);
+            % set that this dat aproperty is loaded and has changed
+            obj.status.loaded.data.(field) = 1;
+        else
+            obj.data.(field) = [];
+            obj.status.loaded.data.(field) = 0;
+        end %if
+        obj.status.changed.data.(field) = 0;
     end %if
     % convert mdf_parent if needed
     obj.mdf_def.mdf_parents = mdf.c2s(obj.mdf_def.mdf_parents);

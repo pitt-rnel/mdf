@@ -47,7 +47,7 @@ function parents = getParent(obj, selector)
         % runs query and hopes for the best
         mdf_data = odb.find(query);
         % extract uuids
-        selUuids = {mdf_data.mdf_def.mdf_uuid};
+        selUuids = cellfun(@(item)(item.mdf_def.mdf_uuid),mdf_data,'UniformOutput',0)';
         clear mdf_data;
 
         % get parents uuid

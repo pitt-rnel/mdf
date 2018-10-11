@@ -33,7 +33,7 @@ classdef (Sealed) mdf < handle
             % convert according
             switch (oc.getConstant('MDF_JSONAPI'))
                 case 'MATLAB'
-                    outdata = jsonencode(indata);
+                    outdata = char(jsonencode(indata));
                 case 'JSONLAB'
                     outdata = savejson('',indata);
             end %switch    
