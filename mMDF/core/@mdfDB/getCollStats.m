@@ -40,7 +40,9 @@ function outdata = getCollStats(obj,varargin)
     end %while
     % convert cell array to struct array
     outdata = cell2mat(outdata);
-    if ~isempty(outdata) 
+    if isempty(outdata) 
+        outdata = false;
+    else 
         % rename _id field to mdf_type
         [outdata.mdf_type] = outdata.x_id;
         outdata = rmfield(outdata,'x_id');

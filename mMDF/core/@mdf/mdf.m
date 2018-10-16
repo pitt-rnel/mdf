@@ -9,23 +9,51 @@ classdef (Sealed) mdf < handle
     methods (Static)
         % all static methods defined here
 
-        function singleObj = getInstance()
+        function singleObj = getInstance(varargin)
             % function singleObj = mdf.getInstance()
             %
             % return singleton instance of mdf class
-
-            % lock function in memory
-            mlock;
-            % use a persistent variable to mantain the instance
-            persistent localObj
-            % check if the persisten object is actually an object and is
-            % valid
-            if isempty(localObj) || ~isvalid(localObj)
-                % instantiate new object
-                localObj = mdf;
+            
+            %
+            % see if we got an input
+            action = '';
+            if nargin > 0
+                action = varargin{1};
             end %if
-            % return object
-            singleObj = localObj;
+            
+            % 
+            % we check if the global place maker for mdf exists and if it has a valid mdfConf in it
+            global omdfc;
+            if ~isstruct(omdfc)
+                omdfc = struct();
+            end %if
+
+            if ~isfield(omdfc,'mdf')
+                omdfc.mdf  = [];
+            end %if
+
+            % check if we need to release the current singleton
+            if isa(action,'char') && strcmp('release',lower(action))
+                % we need to clear the current unique instance 
+                % (aka singleton)
+                if isa(omdfc.mdf,'mdf')
+                    % delete isntance
+                    delete(omdfc.mdf);
+                    omdfc.mdf = [];
+                    % we are done
+                    return
+                end %if
+            % check if the singleton is already instantiated or not
+            elseif ( isempty(omdfc.mdf) || ~isa(omdfc.mdf,'mdf') ) && nargin > 0
+                % singleton needs to be instantiated
+                obj = mdf();
+                % save it in persistent variable
+                omdfc.mdf = obj;
+            else
+                % returned singleton object
+                obj = omdfc.mdf;
+            end %if
+
         end %function
 
         function res = init(varargin)

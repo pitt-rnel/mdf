@@ -16,6 +16,7 @@ function res = unload(indata)
     om = mdfManage.getInstance();
 
     % check input parameter
+    % switch to OAU
     switch class(indata)
         case 'char'
             % we got uuid

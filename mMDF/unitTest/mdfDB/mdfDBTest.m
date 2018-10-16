@@ -410,6 +410,13 @@ classdef mdfDBTest < matlab.unittest.TestCase
             % delete all entries
             res = obj.remove('{}');
             %
+            % run coll stats
+            res = obj.getCollStats();
+            %
+            % check results
+            testCase.verifyClass(res,'logical');
+            testCase.verifyEqual(res,false);
+            %
             % insert records
             res = obj.insert(testCase.records);
             %
