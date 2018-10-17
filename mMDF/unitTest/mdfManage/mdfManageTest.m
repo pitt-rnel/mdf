@@ -97,7 +97,9 @@ classdef mdfManageTest < matlab.unittest.TestCase
     methods (TestClassTeardown)
         function destroyMdfConf(testCase)
             global omdfc;
-            delete(omdfc.manage);
+            mdfConf.getInstance('release');
+            mdfDB.getInstance('release');
+            mdfManage.getInstance('release');
             clear omdfc;
         end %function
     end %methods

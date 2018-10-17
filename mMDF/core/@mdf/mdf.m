@@ -9,7 +9,7 @@ classdef (Sealed) mdf < handle
     methods (Static)
         % all static methods defined here
 
-        function singleObj = getInstance(varargin)
+        function obj = getInstance(varargin)
             % function singleObj = mdf.getInstance()
             %
             % return singleton instance of mdf class
@@ -44,7 +44,7 @@ classdef (Sealed) mdf < handle
                     return
                 end %if
             % check if the singleton is already instantiated or not
-            elseif ( isempty(omdfc.mdf) || ~isa(omdfc.mdf,'mdf') ) && nargin > 0
+            elseif ( isempty(omdfc.mdf) || ~isa(omdfc.mdf,'mdf') )
                 % singleton needs to be instantiated
                 obj = mdf();
                 % save it in persistent variable

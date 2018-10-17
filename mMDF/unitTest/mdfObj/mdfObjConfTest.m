@@ -68,6 +68,12 @@ classdef (Abstract) mdfObjConfTest < matlab.unittest.TestCase
             % set test configuration file, xml format
             %testCase.xmlConfFile = fullfile(testCase.testFolder, '..', 'conf', 'mdf.xml.conf');
             %testCase.uuidsFile = fullfile(testCase.testFolder, '..', 'conf', 'uuid.json');
+            %
+            % makes sure that there is no class instantiated
+            mdfConf.getInstance('release');
+            mdfDB.getInstance('release');
+            mdfManage.getInstance('release');
+            
             % 
             % set up input configuration to conf object
             % select the proper configuration

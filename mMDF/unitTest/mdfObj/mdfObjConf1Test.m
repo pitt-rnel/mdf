@@ -355,7 +355,8 @@ classdef mdfObjConf1Test < mdfObjConfTest
 
             % check that the number of objects in the database is correct
             stats = testCase.db.getCollStats();
-            testCase.verifyEqual(length(stats),0);
+            testCase.verifyClass(stats,'logical');
+            testCase.verifyEqual(stats,false);
 
         end % function
 

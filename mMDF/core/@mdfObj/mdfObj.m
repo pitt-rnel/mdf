@@ -32,6 +32,7 @@ classdef mdfObj < handle
         status = struct( ...
             'loaded', struct() , ...
             'changed', struct() );
+        uuidPattern = '^[0-9A-F]{8}-[0-9A-F]{4}-[0-9A-F]{4}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$';
     end %properties
    
     % methods defined here 
@@ -106,7 +107,6 @@ classdef mdfObj < handle
                 obj.uuid = mdf.UUID();
             end %if
 
-            
             % set creation
             obj.created = datestr(now,'yyyy-mm-dd HH:MM:SS');
         end %function
@@ -132,6 +132,9 @@ classdef mdfObj < handle
         res = getListDataProperties(obj);
         res = getLDP(obj);
         res = populate(obj,data);
+        % return the object converted to the matching json string
+        jsonString = toJson(obj);
+
     end %methods
 
     % static methods defined here
@@ -200,7 +203,6 @@ classdef mdfObj < handle
         
         % create new obj and populates it from json string
         obj = fromJson(jsonString)
-        
 
     end %methods
 end % classdef

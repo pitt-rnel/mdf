@@ -31,7 +31,7 @@ function res = connect(obj,conf)
     % check input and that it is of the correct type
     if ~obj.isConfSet()
         
-        if nargin == 1 && ~isstruct(conf)
+        if nargin == 2 && ~isstruct(conf)
             % get reference to configuration class
             oc = mdfConf.getInstance();
     
@@ -53,7 +53,7 @@ function res = connect(obj,conf)
             ri = true;
         end %if
         % port
-        if isstruct(conf) && isfield(conf,'port') && obj.port ~= conf.port 
+        if isstruct(conf) && isfield(conf,'port') && (isempty(obj.port) || obj.port ~= conf.port)
             obj.port = conf.port;
             ri = true;
         end %if
@@ -68,12 +68,6 @@ function res = connect(obj,conf)
             ri = true;
         end %if
     end %if
-
-    % makes sure that port is numeric
-    if ischar(obj.port)
-        obj.port = str2num(obj.port);
-    end %if
-
     
     % skip instantiation
     si = false;

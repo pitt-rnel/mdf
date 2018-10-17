@@ -9,6 +9,7 @@ classdef mdfTest < matlab.unittest.TestCase
     properties
         testFolder = '';
         xmlConfFile = '';
+        confStruct = struct();
         uuidsFile = '';
         jsonTestFile = '';
         matTestFile = '';
@@ -18,9 +19,10 @@ classdef mdfTest < matlab.unittest.TestCase
         jsonStructure = [];
         testStruct = [];
         objType= 'mdfTest';
-        uuidPattern = '^[0-9A-F]{8}-[0-9A-F]{4}-4[0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$';
+        uuidPattern = '^[0-9A-F]{8}-[0-9A-F]{4}-[0-9A-F]{4}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$';
         testUuid1 = '';
         testUuid2 = '';
+        testProperty = 'testprop';
     end %properties
     
     methods (TestClassSetup)
@@ -92,10 +94,13 @@ classdef mdfTest < matlab.unittest.TestCase
     end %methods
 
     methods (TestClassTeardown)
-        function destroyMdfConf(testCase)
+        function destroyMdf(testCase)
             global omdfc;
-            delete(omdfc.conf);
-            clear omdfc;
+            mdfConf.getInstance('release');
+            mdfManage.getInstance('release');
+            mdfDB.getInstance('release');
+            mdf.getInstance('release');
+            clear global omdfc;
         end %function
     end %methods
     
@@ -106,6 +111,7 @@ classdef mdfTest < matlab.unittest.TestCase
             mdfManage.getInstance('release');
             mdfDB.getInstance('release');
             mdf.getInstance('release');
+            clear global omdfc;
         end %function
     end %methods
 
@@ -115,6 +121,9 @@ classdef mdfTest < matlab.unittest.TestCase
         function testInstantiate(testCase)
             % 
             % just test instantiation of mdfDB
+            % first it clearold instances
+            testCase.releaseOmdfc();
+            % instantiate new mdf class
             obj = mdf.getInstance();
             % test that we got the correct object
             testCase.verifyClass(obj,'mdf');
@@ -167,7 +176,7 @@ classdef mdfTest < matlab.unittest.TestCase
             % get a uuid and check that the string is structured as one
             uuid = mdf.UUID();
             testCase.verifyEqual( ...
-                regexp( uuid, testCase.uuidPattern ), ...
+                regexpi( uuid, testCase.uuidPattern ), ...
                 1 ...
             );
 
@@ -190,9 +199,12 @@ classdef mdfTest < matlab.unittest.TestCase
             % verify
             testCase.verifyClass(res,'struct');
             testCase.verifyEqual(length(res),length(cos));
-            testcase.verifyEqual( ...
-                length(intersect(fields(res),fields(testCase.testStrut))), ...
-                0);
+            testCase.verifyEqual( ...
+                length( ...
+                    intersect( ...
+                        fields(res), ...
+                        fields(testCase.testStruct))), ...
+                length(fields(testCase.testStruct)));
         end % function
         
         %
@@ -205,9 +217,9 @@ classdef mdfTest < matlab.unittest.TestCase
             testCase.verifyClass(total1,'double');
             testCase.verifyClass(used1,'double');
             testCase.verifyClass(free1,'double');
-            testCase.verifyGreaterEqual(total1,0);
-            testCase.verifyGreaterEqual(used1,0);
-            testCase.verifyGreaterEqual(free1,0);
+            testCase.verifyGreaterThanOrEqual(total1,0);
+            testCase.verifyGreaterThanOrEqual(used1,0);
+            testCase.verifyGreaterThanOrEqual(free1,0);
             
             %
             % calls abreviated name function
@@ -217,9 +229,9 @@ classdef mdfTest < matlab.unittest.TestCase
             testCase.verifyClass(total2,'double');
             testCase.verifyClass(used2,'double');
             testCase.verifyClass(free2,'double');
-            testCase.verifyGreaterEqual(total2,0);
-            testCase.verifyGreaterEqual(used2,0);
-            testCase.verifyGreaterEqual(free2,0);
+            testCase.verifyGreaterThanOrEqual(total2,0);
+            testCase.verifyGreaterThanOrEqual(used2,0);
+            testCase.verifyGreaterThanOrEqual(free2,0);
             
         end % function
 
@@ -246,6 +258,9 @@ classdef mdfTest < matlab.unittest.TestCase
             fid = fopen(testCase.jsonTestFile,'r');
             temp = fread(fid,inf);
             testJsonString2 = char(temp');
+            
+            % remove new lines, just in case
+            testJsonString2(strfind(testJsonString2,char(10))) = [];
             
             % check if the 2 of them are the same
             testCase.verifyEqual(testJsonString1,testJsonString2);
@@ -293,7 +308,7 @@ classdef mdfTest < matlab.unittest.TestCase
             res = 0;
             for i = 1:length(testCase.uuids)
                 % instantiate mdf object
-                obj = mdfObj(testCase.uuids{i},testCase.objType);
+                obj = mdfObj(testCase.objType,testCase.uuids{i});
                 % add some metadata
                 obj.metadata.name = ['Object ' num2str(i)];
                 % save it to database
@@ -350,7 +365,7 @@ classdef mdfTest < matlab.unittest.TestCase
             %
             % verify that we get all the objects and they are of the
             % correct class
-            testCase.verifyEqual(isempty(obj),True);
+            testCase.verifyEqual(isvalid(obj),false);
             
             % delete singleton)
             testCase.releaseOmdfc();            
@@ -368,9 +383,9 @@ classdef mdfTest < matlab.unittest.TestCase
             %
             % verify that we get back a uuid and an mdfObj
             testCase.verifyClass(uuid,'char');
-            testcase.verifyClass(obj,'mdfObj');
+            testCase.verifyClass(obj,'mdfObj');
             testCase.verifyEqual( ...
-                regexp( uuid, testCase.uuidPattern ), ...
+                regexpi( uuid, testCase.uuidPattern ), ...
                 1);
             testCase.verifyEqual(uuid,testCase.testUuid1);
 
@@ -380,9 +395,9 @@ classdef mdfTest < matlab.unittest.TestCase
             %
             % verify that we get back a uuid and an mdfObj
             testCase.verifyClass(uuid,'char');
-            testcase.verifyClass(obj,'mdfObj');
+            testCase.verifyClass(obj,'mdfObj');
             testCase.verifyEqual( ...
-                regexp( uuid, testCase.uuidPattern ), ...
+                regexpi( uuid, testCase.uuidPattern ), ...
                 1);
             testCase.verifyEqual(uuid,testCase.testUuid1);
 
@@ -394,9 +409,9 @@ classdef mdfTest < matlab.unittest.TestCase
             %
             % verify that we get back a uuid and an mdfObj
             testCase.verifyClass(uuid,'char');
-            testcase.verifyClass(obj,'mdfObj');
+            testCase.verifyClass(obj,'mdfObj');
             testCase.verifyEqual( ...
-                regexp( uuid, testCase.uuidPattern ), ...
+                regexpi( uuid, testCase.uuidPattern ), ...
                 1);
             testCase.verifyEqual(uuid,testCase.testUuid1);
 
@@ -406,9 +421,9 @@ classdef mdfTest < matlab.unittest.TestCase
             %
             % verify that we get back a uuid and an mdfObj
             testCase.verifyClass(uuid,'char');
-            testcase.verifyClass(obj,'mdfObj');
+            testCase.verifyClass(obj,'mdfObj');
             testCase.verifyEqual( ...
-                regexp( uuid, testCase.uuidPattern ), ...
+                regexpi( uuid, testCase.uuidPattern ), ...
                 1);
             testCase.verifyEqual(uuid,testCase.testUuid1);            
 
@@ -433,14 +448,14 @@ classdef mdfTest < matlab.unittest.TestCase
             testCase.verifyEqual(res,true);
             testCase.verifyEqual( ...
                 ismember(testCase.testProperty,obj1.mdf_def.mdf_children.mdf_fields),true);
-            testCase.verifyEqual(lenght(obj1.mdf_def.mdf_children.(testCase.testProperty)),1);
+            testCase.verifyEqual(length(obj1.mdf_def.mdf_children.(testCase.testProperty)),1);
             testCase.verifyEqual( ...
                 obj1.mdf_def.mdf_children.(testCase.testProperty).mdf_uuid, ...
                 obj2.uuid);
             testCase.verifyEqual( ...
                 obj1.mdf_def.mdf_children.(testCase.testProperty).mdf_type, ...
                 testCase.objType);
-            testCase.verifyEqual(lenght(obj2.mdf_def.mdf_parents),1);
+            testCase.verifyEqual(length(obj2.mdf_def.mdf_parents),1);
             testCase.verifyEqual( ...
                 obj2.mdf_def.mdf_parents.mdf_uuid, ...
                 obj1.uuid);
@@ -463,14 +478,14 @@ classdef mdfTest < matlab.unittest.TestCase
             testCase.verifyEqual(res,true);
             testCase.verifyEqual( ...
                 ismember(testCase.testProperty,obj1.mdf_def.mdf_children.mdf_fields),true);
-            testCase.verifyEqual(lenght(obj1.mdf_def.mdf_children.(testCase.testProperty)),1);
+            testCase.verifyEqual(length(obj1.mdf_def.mdf_children.(testCase.testProperty)),1);
             testCase.verifyEqual( ...
                 obj1.mdf_def.mdf_children.(testCase.testProperty).mdf_uuid, ...
                 obj2.uuid);
             testCase.verifyEqual( ...
                 obj1.mdf_def.mdf_children.(testCase.testProperty).mdf_type, ...
                 testCase.objType);
-            testCase.verifyEqual(lenght(obj2.mdf_def.mdf_parents),1);
+            testCase.verifyEqual(length(obj2.mdf_def.mdf_parents),1);
             testCase.verifyEqual( ...
                 obj2.mdf_def.mdf_parents.mdf_uuid, ...
                 obj1.uuid);
@@ -505,7 +520,7 @@ classdef mdfTest < matlab.unittest.TestCase
             testCase.verifyEqual( ...
                 ismember(testCase.testProperty,obj1.mdf_def.mdf_children.mdf_fields),false);
             testCase.verifyEqual(isfield(obj1.mdf_def.mdf_children,'testCase.testProperty'),false);
-            testCase.verifyEqual(lenght(obj2.mdf_def.mdf_parents),0);
+            testCase.verifyEqual(length(obj2.mdf_def.mdf_parents),0);
             
             % clear
             om = mdfManage.getInstance();
@@ -523,7 +538,7 @@ classdef mdfTest < matlab.unittest.TestCase
             testCase.verifyEqual( ...
                 ismember(testCase.testProperty,obj1.mdf_def.mdf_children.mdf_fields),false);
             testCase.verifyEqual(isfield(obj1.mdf_def.mdf_children,'testCase.testProperty'),false);
-            testCase.verifyEqual(lenght(obj2.mdf_def.mdf_parents),0);
+            testCase.verifyEqual(length(obj2.mdf_def.mdf_parents),0);
             
             % save objects so we can use them when removing relationship
             obj1.save();
@@ -549,9 +564,9 @@ classdef mdfTest < matlab.unittest.TestCase
             
             % verify that the relationship has been created
             testCase.verifyEqual(res,true);
-            testCase.verifyEqual(lenght(obj1.mdf_def.mdf_links.(testCase.testProperty)),1);
+            testCase.verifyEqual(length(obj1.mdf_def.mdf_links.(testCase.testProperty)),1);
             testCase.verifyEqual( ...
-                ismember(testCase.testProperty,obj1.mdf_def.mdf_links.mdf_fields),true);
+                any(ismember(testCase.testProperty,obj1.mdf_def.mdf_links.mdf_fields)),true);
             testCase.verifyEqual( ...
                 testCase.testProperty,obj1.mdf_def.mdf_links.mdf_fields{1});
             testCase.verifyEqual( ...
@@ -566,7 +581,7 @@ classdef mdfTest < matlab.unittest.TestCase
                 obj1.mdf_def.mdf_links.(testCase.testProperty).mdf_direction, ...
                 'u');
             testCase.verifyEqual( ...
-                ismember(testCase.testProperty,obj2.mdf_def.mdf_links.mdf_fields),false);
+                any(ismember(testCase.testProperty,obj2.mdf_def.mdf_links.mdf_fields)),false);
             testCase.verifyEqual( ...
                 isfield(obj2.mdf_def.mdf_links,testCase.testProperty),false);
             
@@ -583,9 +598,9 @@ classdef mdfTest < matlab.unittest.TestCase
             
             % verify that the relationship has been created
             testCase.verifyEqual(res,true);
-            testCase.verifyEqual(lenght(obj1.mdf_def.mdf_links.(testCase.testProperty)),1);
+            testCase.verifyEqual(length(obj1.mdf_def.mdf_links.(testCase.testProperty)),1);
             testCase.verifyEqual( ...
-                ismember(testCase.testProperty,obj1.mdf_def.mdf_links.mdf_fields),true);
+                any(ismember(testCase.testProperty,obj1.mdf_def.mdf_links.mdf_fields)),true);
             testCase.verifyEqual( ...
                 testCase.testProperty,obj1.mdf_def.mdf_links.mdf_fields{1});
             testCase.verifyEqual( ...
@@ -600,7 +615,7 @@ classdef mdfTest < matlab.unittest.TestCase
                 obj1.mdf_def.mdf_links.(testCase.testProperty).mdf_direction, ...
                 'u');
             testCase.verifyEqual( ...
-                ismember(testCase.testProperty,obj2.mdf_def.mdf_links.mdf_fields),false);
+                any(ismember(testCase.testProperty,obj2.mdf_def.mdf_links.mdf_fields)),false);
             testCase.verifyEqual( ...
                 isfield(obj2.mdf_def.mdf_links,testCase.testProperty),false);
             
@@ -633,7 +648,7 @@ classdef mdfTest < matlab.unittest.TestCase
                 length(obj1.mdf_def.mdf_links.mdf_fields),0);
             testCase.verifyEqual( ...
                 length(obj1.mdf_def.mdf_links.mdf_directions),0);
-            testCase.verifyEqual(isfield(obj2.mdf_def.def_links,'testCase.testProperty'),false);
+            testCase.verifyEqual(isfield(obj2.mdf_def.mdf_links,'testCase.testProperty'),false);
             testCase.verifyEqual( ...
                 length(obj2.mdf_def.mdf_links.mdf_fields),0);
             testCase.verifyEqual( ...
@@ -649,7 +664,7 @@ classdef mdfTest < matlab.unittest.TestCase
             obj2 = mdf.load('mdf_uuid',testCase.testUuid2);
             
             % create relationship
-            res = mdf.rpcr(obj1,obj2,testCase.testProperty);
+            res = mdf.rul(obj1,obj2,testCase.testProperty);
             
             % verify that the relationship has been created
             testCase.verifyEqual(res,true);
@@ -658,7 +673,7 @@ classdef mdfTest < matlab.unittest.TestCase
                 length(obj1.mdf_def.mdf_links.mdf_fields),0);
             testCase.verifyEqual( ...
                 length(obj1.mdf_def.mdf_links.mdf_directions),0);
-            testCase.verifyEqual(isfield(obj2.mdf_def.def_links,'testCase.testProperty'),false);
+            testCase.verifyEqual(isfield(obj2.mdf_def.mdf_links,'testCase.testProperty'),false);
             testCase.verifyEqual( ...
                 length(obj2.mdf_def.mdf_links.mdf_fields),0);
             testCase.verifyEqual( ...
@@ -688,7 +703,7 @@ classdef mdfTest < matlab.unittest.TestCase
             
             % verify that the relationship has been created
             testCase.verifyEqual(res,true);
-            testCase.verifyEqual(lenght(obj1.mdf_def.mdf_links.(testCase.testProperty)),1);
+            testCase.verifyEqual(length(obj1.mdf_def.mdf_links.(testCase.testProperty)),1);
             testCase.verifyEqual( ...
                 ismember(testCase.testProperty,obj1.mdf_def.mdf_links.mdf_fields),true);
             testCase.verifyEqual( ...
@@ -704,7 +719,7 @@ classdef mdfTest < matlab.unittest.TestCase
             testCase.verifyEqual( ...
                 obj1.mdf_def.mdf_links.(testCase.testProperty).mdf_direction, ...
                 'b');
-            testCase.verifyEqual(lenght(obj2.mdf_def.mdf_links.(testCase.testProperty)),1);
+            testCase.verifyEqual(length(obj2.mdf_def.mdf_links.(testCase.testProperty)),1);
             testCase.verifyEqual( ...
                 ismember(testCase.testProperty,obj2.mdf_def.mdf_links.mdf_fields),true);
             testCase.verifyEqual( ...
@@ -730,11 +745,11 @@ classdef mdfTest < matlab.unittest.TestCase
             obj2 = mdf.load('mdf_uuid',testCase.testUuid2);
             
             % create relationship
-            res = mdf.aul(obj1,obj2,testCase.testProperty);
+            res = mdf.abl(obj1,obj2,testCase.testProperty,testCase.testProperty);
             
             % verify that the relationship has been created
             testCase.verifyEqual(res,true);
-            testCase.verifyEqual(lenght(obj1.mdf_def.mdf_links.(testCase.testProperty)),1);
+            testCase.verifyEqual(length(obj1.mdf_def.mdf_links.(testCase.testProperty)),1);
             testCase.verifyEqual( ...
                 ismember(testCase.testProperty,obj1.mdf_def.mdf_links.mdf_fields),true);
             testCase.verifyEqual( ...
@@ -750,7 +765,7 @@ classdef mdfTest < matlab.unittest.TestCase
             testCase.verifyEqual( ...
                 obj1.mdf_def.mdf_links.(testCase.testProperty).mdf_direction, ...
                 'b');
-            testCase.verifyEqual(lenght(obj2.mdf_def.mdf_links.(testCase.testProperty)),1);
+            testCase.verifyEqual(length(obj2.mdf_def.mdf_links.(testCase.testProperty)),1);
             testCase.verifyEqual( ...
                 ismember(testCase.testProperty,obj2.mdf_def.mdf_links.mdf_fields),true);
             testCase.verifyEqual( ...
@@ -787,7 +802,7 @@ classdef mdfTest < matlab.unittest.TestCase
             obj2 = mdf.load('mdf_uuid',testCase.testUuid2);
             
             % create relationship
-            res = mdf.rmUnidirectionalLink(obj1,obj2,testCase.testProperty);
+            res = mdf.rmBidirectionalLink(obj1,obj2,testCase.testProperty,testCase.testProperty);
             
             % verify that the relationship has been removed
             testCase.verifyEqual(res,true);
@@ -796,7 +811,7 @@ classdef mdfTest < matlab.unittest.TestCase
                 length(obj1.mdf_def.mdf_links.mdf_fields),0);
             testCase.verifyEqual( ...
                 length(obj1.mdf_def.mdf_links.mdf_directions),0);
-            testCase.verifyEqual(isfield(obj2.mdf_def.def_links,'testCase.testProperty'),false);
+            testCase.verifyEqual(isfield(obj2.mdf_def.mdf_links,'testCase.testProperty'),false);
             testCase.verifyEqual( ...
                 length(obj2.mdf_def.mdf_links.mdf_fields),0);
             testCase.verifyEqual( ...
@@ -812,7 +827,7 @@ classdef mdfTest < matlab.unittest.TestCase
             obj2 = mdf.load('mdf_uuid',testCase.testUuid2);
             
             % create relationship
-            res = mdf.rpcr(obj1,obj2,testCase.testProperty);
+            res = mdf.rbl(obj1,obj2,testCase.testProperty,testCase.testProperty);
             
             % verify that the relationship has been created
             testCase.verifyEqual(res,true);
@@ -821,7 +836,7 @@ classdef mdfTest < matlab.unittest.TestCase
                 length(obj1.mdf_def.mdf_links.mdf_fields),0);
             testCase.verifyEqual( ...
                 length(obj1.mdf_def.mdf_links.mdf_directions),0);
-            testCase.verifyEqual(isfield(obj2.mdf_def.def_links,'testCase.testProperty'),false);
+            testCase.verifyEqual(isfield(obj2.mdf_def.mdf_links,'testCase.testProperty'),false);
             testCase.verifyEqual( ...
                 length(obj2.mdf_def.mdf_links.mdf_fields),0);
             testCase.verifyEqual( ...

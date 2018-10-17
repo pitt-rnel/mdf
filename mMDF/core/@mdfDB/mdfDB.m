@@ -45,12 +45,12 @@ classdef (Sealed) mdfDB < handle
                     'type', 'char'), ...
                 'connect', struct( ...
                     'required', 0, ...
-                    'type', 'boolean') ...
+                    'type', 'logical') ...
             );
             % list of required fields
             t1 = boolean(cell2mat(cellfun(@(f) obj.fieldInfo.(f).required, fields(obj.fieldInfo),'UniformOutput',0)));
             t2 = fields(obj.fieldInfo);
-            obj.fieldsRequired = t2{t1};
+            obj.fieldsRequired = {t2{t1}}';
         end
     end
     methods (Static)
@@ -74,6 +74,8 @@ classdef (Sealed) mdfDB < handle
             
             conf = '';
             if nargin == 1 && isstruct(varargin{1})
+                conf = varargin{1};
+            elseif nargin == 1 && islogical(varargin{1})
                 conf = varargin{1};
             elseif nargin >= 4
                 conf = struct( ...
@@ -100,10 +102,12 @@ classdef (Sealed) mdfDB < handle
                 if isa(omdfc.db,'mdfDB')
                     % delete isntance
                     delete(omdfc.db);
-                    omdfc.db = [];
-                    % we are done
-                    return
                 end %if
+                % clear entry in global place holder
+                omdfc.db = [];                
+                % we are done
+                obj = false;
+                return
             % check if the singleton is already instantiated or not
             elseif ( isempty(omdfc.db) || ~isa(omdfc.db,'mdfDB') )
                 % singleton needs to be instantiated
@@ -117,6 +121,11 @@ classdef (Sealed) mdfDB < handle
             
             % if conf has been given, make sure to memorize it
             if isstruct(conf) && ~isempty(conf)
+                % makes sure that port is numeric
+                if isfield(conf,'port') && ischar(conf.port)
+                	conf.port = str2num(conf.port);
+                end %if
+
                 if obj.isValidConf(conf)
                     obj.setDbUri(conf);
                 end %if
@@ -124,6 +133,9 @@ classdef (Sealed) mdfDB < handle
                 if conf.connect
                     obj.connect(conf);
                 end %if
+            elseif islogical(conf) && conf
+                % connect to database
+                obj.connect(conf);
             end %if
             
             % load the javascript code to get the collection schema

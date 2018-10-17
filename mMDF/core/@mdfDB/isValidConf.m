@@ -27,22 +27,23 @@ function [res, messages] = isValidConf(obj,conf)
     % find which field is missing
     missingFields = setdiff(obj.fieldsRequired,fields(conf));
     if ~isempty(missingFields)
-        messages{end+1} = ['Missing ' length(field) ' fields'];
+        messages{end+1} = ['Missing ' length(missingFields) ' fields'];
         res = false;
     end %if
     
-    for field = fields(obj.fieldInfo)
-        field = field{1};
+    fl = fields(obj.fieldInfo);
+    for fi = 1:length(fl)
+        field = fl{fi};
         if ~isfield(conf,field) 
             if obj.fieldInfo.(field).required
-                messages{end+1} = [
+                messages{end+1} = [ ...
                     'Field ' field ' missing'];
                 res = false;
             end %if
         elseif ~isa(conf.(field),obj.fieldInfo.(field).type)
-            messages{end+1} = [
-                'Field ' field 
-                ' not of the correct type (Current:' class(conf.field) 
+            messages{end+1} = [ ...
+                'Field ' field ...
+                ' not of the correct type (Current:' class(conf.(field)) ...
                 ' - Expected:' obj.fieldInfo.(field).type ')'];
             res = false;
         end %if

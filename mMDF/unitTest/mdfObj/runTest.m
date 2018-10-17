@@ -23,4 +23,5 @@ resultsMdfObj3 = testMdfObjConf3.run;
 % display results
 resultsMdfObj = [resultsMdfObj1, resultsMdfObj2, resultsMdfObj3]
 
+clear resultsMdfObj1 resultsMdfObj2 resultsMdfObj3
 
