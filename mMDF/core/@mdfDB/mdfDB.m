@@ -140,7 +140,12 @@ classdef (Sealed) mdfDB < handle
             
             % load the javascript code to get the collection schema
             if ~isempty(obj.collection)
-                fid = fopen(obj.SchemaFunctionFile);
+                % get current folder
+                [cf,~,~] = fileparts(mfilename('fullpath'));
+                % build full path to schema file
+                fp = fullfile(cf,obj.SchemaFunctionFile);
+                % loads file
+                fid = fopen(fp);
                 obj.jsSchemaFunction = strrep(char(fread(fid,inf)'),'<COLLECTION>',obj.collection);
                 fclose(fid);
             end %if

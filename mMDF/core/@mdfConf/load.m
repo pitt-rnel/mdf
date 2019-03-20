@@ -27,7 +27,7 @@ function load(obj)
             catch ME
                 % no luck with any type
                 % set type to unkown
-                obj.fileType = 'unkown'
+                obj.fileType = 'unknown'
                 % pass the Error above
                 throw(ME);
             end
