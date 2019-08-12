@@ -27,9 +27,9 @@ function extractXml(obj)
     
     % initialize auxiliary data structure
     % tokens = values availables for relative_path_to
-    obj.temp.tokens = struct;
+    %obj.temp.tokens = struct;
     % presents = values that needs to be renamed in a different element
-    obj.temp.presents = struct;
+    %obj.temp.presents = struct;
     
     % get configuration tree
     % we can have multiple
@@ -43,6 +43,12 @@ function extractXml(obj)
     end
     % cycle on each configuration element
     for i = 0:(conf.getLength-1)
+        % initialize auxiliary data structure
+        % tokens = values availables for relative_path_to
+        obj.temp.tokens = struct;
+        % presents = values that needs to be renamed in a different element
+        obj.temp.presents = struct;
+    
         % extract single configuration element
         item = conf.item(i);
         % find name of this configuration

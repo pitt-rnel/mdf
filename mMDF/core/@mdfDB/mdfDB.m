@@ -4,7 +4,7 @@ classdef (Sealed) mdfDB < handle
         Jar =  '../../../java/mongo-java-driver-3.8.0.jar';
         SchemaFunctionFile = '../../../javascript/mdfDbSchema.js';
         DEFAULT_HOST = 'localhost';
-        DEFAULT_PORT = 27017;
+        DEFAULT_PORT = '27017';
         DEFAULT_DATABASE = 'mdf';
         DEFAULT_COLLECTION = 'mdf';
     end  
