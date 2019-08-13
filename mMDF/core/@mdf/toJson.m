@@ -3,16 +3,17 @@ function outdata = toJson(indata)
     %
     % convert matlab structure to json
     %
-
-    % we need to get the configuration object
-    oc = mdfConf.getInstance(); 
+    omdf = mdf.getInstance();
 
     % convert according
-    switch (oc.getConstant('MDF_JSONAPI'))
+    switch (omdf.WHICH_JSON)
         case 'MATLAB'
             outdata = jsonencode(indata);
         case 'JSONLAB'
             outdata = savejson('',indata);
+        otherwise
+            throw(MException('mdf:toJson',...
+                ['1: invalid json library!!!']));
     end %switch    
 
 end %function

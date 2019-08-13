@@ -3,7 +3,12 @@ classdef (Sealed) mdf < handle
     properties (Constant)
         libraries = '../../libs';
         pattern = '/[@\w]+/\.\./';
-        version = '1.6'
+        version = '1.6';
+    end %properties
+
+    properties
+        WHICH_JSON = 'NONE';
+        VALIDATION = [];
     end %properties
 
     methods (Static)
@@ -53,6 +58,41 @@ classdef (Sealed) mdf < handle
                 % returned singleton object
                 obj = omdfc.mdf;
             end %if
+
+            % define run time constants
+            obj.WHICH_JSON = mdf.whichJson();
+            obj.VALIDATION = struct( ...
+                'MDF_COLLECTION', struct( ...
+                    'DATABASE', struct( ... 
+                        'DATABASE' , 'MONGODB'  , ...
+                        'MONGODB'  , 'MONGODB' ), ...
+                    'DATA', struct( ...
+                        'MAT_FILE' , 'MAT_FILE'  , ...
+                        'MATFILE'  , 'MAT_FILE'  , ...
+                        'FILE'     , 'MAT_FILE'  , ...
+                        'MAT'      , 'MAT_FILE'  , ...
+                        'M'        , 'MAT_FILE'  , ...
+                        'MONGODB'  , 'MONGODB'   , ... 
+                        'DATABASE' , 'MONGODB'   , ...
+                        'DB'       , 'MONGODB'   , ...
+                        'D'        , 'MONGODB'   , ...
+                        'MONGODB_GRIDFS' , 'MONGODB_GRIDFS'  , ... 
+                        'GRIDFS'         , 'MONGODB_GRIDFS'  , ...
+                        'GFS'            , 'MONGODB_GRIDFS'  , ...
+                        'G'              , 'MONGODB_GRIDFS' )), ...
+                'MDF_COLLECTION_TYPE', struct( ...
+                    'MAT_FILE' , 'MAT_FILE' , ...
+                    'MIXED'    , 'MAT_FILE' , ...
+                    'M'        , 'MAT_FILE' , ...
+                    'V_1_4'    , 'MAT_FILE' , ...
+                    'MONGODB'  , 'MONGODB' , ...
+                    'DATABASE' , 'MONGODB' , ...
+                    'DB'       , 'MONGODB' , ...
+                    'V_1_5'    , 'MONGODB' , ...
+                    'MONGODB_GRIDFS' , 'MONGODB_GRIDFS' , ...
+                    'GRIDFS'         , 'MONGODB_GRIDFS' , ...
+                    'GFS'            , 'MONGODB_GRIDFS' ) ...
+             );
 
         end %function
 
@@ -179,60 +219,58 @@ classdef (Sealed) mdf < handle
             end %if
             % check if we have the collection configuration
             if ( isfield(C,'MDF_COLLECTION') && ...
+                isfield(C.MDF_COLLECTION,'DB') && ...
                 isfield(C.MDF_COLLECTION,'YAML') && ...
                 isfield(C.MDF_COLLECTION,'DATA') )
                 % newer configuration
                 % 
-                % set the database to mongodb
-                C.MDF_COLLECTION.DB = "MONGODB";
+                % set the database type
+                if isfield(omdf.VALIDATION.MDF_COLLECTION.DATABASE,C.MDF_COLLECTION.DB)
+                   C.MDF_COLLECTION.DB = omdf.VALIDATION.MDF_COLLECTION.DATABASE;
+                else
+                   throw(MException('mdfConf:start',...
+                       ['3: Invalid MDF collection database!!!']));
+                end %if
                 %
                 % check yaml
                 C.MDF_COLLECTION.YAML = ( C.MDF_COLLECTION.YAML == true );
                 %
                 %
-                switch C.MDF_COLLECTION.DATA
-                    case {'MATFILE', 'FILE', 'MAT', 'M'}
-                        C.MDF_COLLECTION.DATA = 'MATFILE';
-  
-                    case {'DATABASE', 'DB', 'D'}
-                        C.MDF_COLLECTION.DATA = 'DATABASE';
-  
-                    otherwise
-                        throw(MException('mdfConf:start',...
-                            ['4: Invalid MDF collection data!!!']));
+                % set where to save the data
+                if isfield(omdf.VALIDATION.MDF_COLLECTION.DATA,C.MDF_COLLECTION.DATA)
+                   C.MDF_COLLECTION.DATA = omdf.VALIDATION.MDF_COLLECTION.DATA;
+                else
+                   throw(MException('mdfConf:start',...
+                       ['4: Invalid MDF collection data!!!']));
                 end %case
 
             elseif ( isfield(C,'MDF_COLLECTION_TYPE') )
                 % <MDF_COLLECTION_TYPE>MIXED, M, V_1_4</MDF_COLLECTION_TYPE>
                 % <MDF_COLLECTION_TYPE>DATABASE, DB, V_1_5</MDF_COLLECTION_TYPE>
                 % check if type is correct and convert to standard format
-                switch C.MDF_COLLECTION_TYPE
-                    case {'MIXED', 'M', 'V_1_4'}
-                        C.MDF_COLLECTION_TYPE = 'MIXED';
 
-                    case {'DATABASE', 'DB', 'V_1_5'}
-                        C.MDF_COLLECTION_TYPE = 'DATABASE';
-
-                    otherwise
-                        throw(MException('mdfConf:start',...
-                            ['4: Invalid MDF collection type!!!']));
+                if isfield(omdf.VALIDATION.MDF_COLLECTION_TYPE,C.MDF_COLLECTION_TYPE)
+                    C.MDF_COLLECTION_TYPE = omdf.VALIDATION.MDF_COLLECTION_TYPE;
+                else
+                    throw(MException('mdfConf:start',...
+                        ['5: Invalid MDF collection type!!!']));
                         
                 end %switch
 
             else
                 % we cannot proceed
                 throw(MException('mdfConf:start',...
-                    ['3: Configuration missing MDF collection configuration!!!']));
+                    ['6: Configuration missing MDF collection configuration!!!']));
             end %if
 
 
             % check if we have mdf data base if we operates in mixed mode (v1.4.x)
-            if ( strcmp(C.MDF_COLLECTION_TYPE,'M') == 1 && ...
+            if ( strcmp(C.MDF_COLLECTION_TYPE,'MAT_FILE') == 1 && ...
                 ( ~isfield(C,'DATA_BASE') || ...
                   ~exist(C.DATA_BASE,'dir') ) )
                 % we cannot proceed
                 throw(MException('mdfConf:start',...
-                    ['5: Configuration missing MDF data folder (' C.DATA_BASE ')!!!']));
+                    ['7: Configuration missing MDF data folder (' C.DATA_BASE ')!!!']));
             end %if
 
             % first of all needs to add functions root
@@ -294,6 +332,20 @@ classdef (Sealed) mdf < handle
             mdf.terminate();
             res = mdf.init(varargin{:});
         end
+        
+	function res = whichJson() {
+            % function res = mdf.whichJson()
+            %
+            % returns which json library we should use
+            % added for backward compatibility
+            
+            if (exist('jsondecode') == 5)
+                res = 'MATLAB';
+            else
+                res = 'JSONLAB';
+            end %if
+        end %if
+
     end %methods
 
     % static methods defined in external files

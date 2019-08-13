@@ -5,14 +5,17 @@ function outdata = fromJson(indata)
     %
 
     % we need to get the configuration object
-    oc = mdfConf.getInstance(); 
+    omdf = mdf.getInstance();
 
     % convert according
-    switch (oc.getConstant('MDF_JSONAPI'))
+    switch (omdf.WHICH_JSON)
         case 'MATLAB'
             outdata = jsondecode(indata);
         case 'JSONLAB'
             outdata = loadjson(indata);
+        otherwise
+            throw(MException('mdf:fromJson',...
+                ['1: invalid json library!!!']));
     end %switch    
 
 end %function
