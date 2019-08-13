@@ -138,9 +138,9 @@ function res = save(obj, tf)
     om.insert(uuid,mdFile,obj);
     if collect
         res.timing.exit = datestr(now,'yyyy-mm-dd HH:MM:SS.FFF');
-        res.res = true;
+        res.res = true && (res2 == 1);
     else
-        res = true;
+        res = true && (res2 == 1);
     end %if
 
 end %function
