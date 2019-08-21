@@ -1,5 +1,5 @@
-function C = getConf(obj,selection)
-    % C = rneldbconf.getConf(obj,selection)
+function C = getConfiguration(obj,selection)
+    % C = rneldbconf.getConfiguration(obj,selection)
     %
     % return the selected configuration
     %
