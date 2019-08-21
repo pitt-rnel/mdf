@@ -86,8 +86,8 @@ function start(obj)
 
     end % for
 
-    % first get the configuration
-    C = obj.getC;    
+    % first get the configuration constants
+    C = obj.getConstants();    
  
     % run startup functions
     %

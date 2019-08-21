@@ -302,7 +302,7 @@ classdef (Sealed) mdf < handle
                 'manage', om);
         end %function
 
-        function res = whichJson() {
+        function res = whichJson()
             % function res = mdf.whichJson()
             %
             % returns which json library we should use

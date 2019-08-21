@@ -23,6 +23,7 @@ classdef mdfTest < matlab.unittest.TestCase
         testUuid1 = '';
         testUuid2 = '';
         testProperty = 'testprop';
+        versionForJson = {'2018a','2019a'}
     end %properties
     
     methods (TestClassSetup)
@@ -233,6 +234,29 @@ classdef mdfTest < matlab.unittest.TestCase
             testCase.verifyGreaterThanOrEqual(used2,0);
             testCase.verifyGreaterThanOrEqual(free2,0);
             
+        end % function
+
+        %
+        function testWhichJson(testCase)
+            %
+            % test whichJson function
+            %
+            %
+            % check if whichJson returns the correct lib location
+            res1 = mdf.whichJson();
+
+            % instantiate the object and check if json function returns
+            % the correct lib for json
+            res2 = mdf.init( testCase.confStruct );
+            
+            if any( strcmp(version('-release')) )
+                testCase.verifyEqual(res1,'MATLAB');
+                testCase.verifyEqual(res2.WHICH_JSON,'MATLAB');
+            else
+                testCase.verifyEqual(res1,'JSONLAB');
+                testCase.verifyEqual(res1.WHICH_JSON,'JSONLAB');
+            end %if
+
         end % function
 
         %
