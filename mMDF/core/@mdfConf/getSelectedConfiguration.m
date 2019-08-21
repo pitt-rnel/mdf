@@ -1,5 +1,5 @@
-function [n, varargout]  = getSelection(obj)
-    % [n, m, i] = mdfConf.getSelection(obj)
+function [n, varargout]  = getSelectedConfiguration(obj)
+    % [n, m, i] = mdfConf.getSelectedConfiguration(obj)
     %
     % return the current configuration selected
     %

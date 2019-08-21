@@ -124,7 +124,7 @@ classdef mdfConf < handle
                 end %if
             end %if
     
-            % check if user would like to automaticallyt search for conf file
+            % check if user would like to automatically search for conf file
             if strcmp(lower(obj.fileName),'auto') || ...
                     strcmp(lower(obj.fileName),'<auto>')
                 % add path to libraries that we need to use to start
@@ -295,8 +295,8 @@ classdef mdfConf < handle
         
         % return the Constants for the selected configuration
         % if signleton is instantiated
-        function C = sGetC()
-            % C = mdfConf::sGetC()
+        function C = sGetConstants()
+            % C = mdfConf::sGetConstants()
             %
             % Static class method that return TRUE if the class
             % instantiated or not. FALSE otherwise
@@ -309,9 +309,31 @@ classdef mdfConf < handle
             % check if it is a valid class
             if ( ~isempty(obj) )
                 % get current configuration
-                C = obj.getC();
+                C = obj.getConstants();
             end
         end
+
+        % return the requested constant for the selected configuration
+        % if signleton is instantiated
+        function C = sGetConstant(constant)
+            % C = mdfConf::sGetConstant(constant)
+            %
+            % Static class method that return TRUE if the class
+            % instantiated or not. FALSE otherwise
+            %
+            
+            % initialize output
+            C = [];
+            % get singleton instance
+            obj = mdfConf.getInstance();
+            % check if it is a valid class
+            if ( ~isempty(obj) )
+                % get current configuration
+                C = obj.getConstant(constant);
+            end
+        end
+
+
     end
     
     methods           
@@ -395,31 +417,34 @@ classdef mdfConf < handle
         select(obj,selection);
 
         % if name is provided, it return data for that specific configuration,
+        % start database with selected configuration
+        start(obj);
+        
         % otherwise returns current selected configuration if any
-        C = getConf(obj,selection);
+        C = getConfiguration(obj,selection);
         
         % returns just the constants tree of the selected configuration
         % if a selection name is provided, it will return that
         % configuration
-        C = getC(obj,selection);
+        C = getConstants(obj,selection);
+
+        % returns the value of the selected constant within the configuration
+        C = getConstant(obj,constant,selection);
         
         % get all data
-        D = getData(obj);
+        D = getAllConfigurations(obj);
         
         % get list of the name of all the configurations available
-        [L, varargout] = getList(obj);
+        [L, varargout] = getConfigurationNames(obj);
         
         % get current selection
-        [n, varargout] = getSelection(obj);
-        
-        % start database with selcted configuration
-        start(obj);
+        [n, varargout] = getSelectedConfiguration(obj);
         
         % filter and substituted constants in string
         outstring = filter(obj,inString);
         
         % return value of multi level key
-        C = getNCV(obj,selection,level)
+        C = getNestedConstantValue(obj,selection);
 
         % return the type of the selected collection
         ct = getCollectionType(obj,selection)

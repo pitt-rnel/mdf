@@ -1,5 +1,5 @@
-function C = getC(obj,selection)
-    % C = rneldbconf.getC(obj,selection)
+function C = getConstants(obj,selection)
+    % C = rneldbconf.getConstants(obj,selection)
     %
     % return the selected configuration constants
     %
@@ -13,9 +13,9 @@ function C = getC(obj,selection)
     % use getConf
     tC = struct();
     if ( nargin < 2 ) 
-        tC = obj.getConf();
+        tC = obj.getConfiguration();
     else
-        tC = obj.getConf(selection);
+        tC = obj.getConfiguration(selection);
     end
     
     C = struct;

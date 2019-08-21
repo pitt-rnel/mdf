@@ -1,5 +1,5 @@
-function D = getData(obj)
-    % D = mdfConf.getData(obj)
+function D = getAllConfigurations(obj)
+    % D = mdfConf.getAllConfigurations(obj)
     %
     % returns the complete configuration structure
     %

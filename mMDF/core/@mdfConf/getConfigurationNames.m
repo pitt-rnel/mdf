@@ -1,5 +1,5 @@
-function [L, varargout] = getList(obj)
-    % [L, M] = mdfConf.getList(obj)
+function [L, varargout] = getConfigurationNames(obj)
+    % [L, M] = mdfConf.getConfigurationNames(obj)
     %
     % return the list of available configurations
     %

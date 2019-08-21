@@ -7,7 +7,7 @@ function extractJson(obj)
     json = obj.fileData;
     
     % check if we have a json string with the correct begin
-    if ( ~strncmp(regexprep(obj.fileData,'[\n ]',''),'{"configurations":{"configuration":',35) )
+    if ( ~strncmp(regexprep(obj.fileData,'[\n ]',''),'{"configurations":[',35) )
         throw(MException('mdfConf:extractJson:1',...
                 'JSON data structure incorrect!!!'));
     end
@@ -15,45 +15,36 @@ function extractJson(obj)
     % initialize configuration data to empty cell array
     obj.confData = struct;
     
-    % initialize auxiliary data structure
-    % tokens = values availables for relative_path_to
-    obj.temp.tokens = struct;
-    % presents = values that needs to be renamed in a different element
-    obj.temp.presents = struct;
     
     % parse json string and create structure
-    [D J] = obj.parseJsonValue(json);
-    % check if we got only one element
-    % if more, there is an error in the conf file
-    if ( length(D) ~= 1 )
-        throw(MException('mdfConf:extractJson:2',...
-                'JSON data structure incorrect!!!'));
-    end
-    % transfer data to confData
-    % if D is a struct, extract only the first one
-    if ( isa(D,'cell') )
-        obj.confData = D{1};
-    else
-        obj.confData = D;
-    end
+    obj.confData = jsonDecode(json);
     % check if we have the right structure
     if ( ~isfield(obj.confData,'configurations') )
         throw(MException('mdfConf:extractJson:3',...
                 'JSON data structure incorrect!!! No configurations.'));
     end
+    obj.confData.configurations = struct( ...
+        'configuration', obj.confData.configurations );
     if ( ~isfield(obj.confData.configurations,'configuration') )
         throw(MException('mdfConf:extractJson:4',...
                 'JSON data structure incorrect!!! No configuration.'));
     end
     
     % initialize user names and machine names
-	obj.confData.configurations.names = {};
-	obj.confData.configurations.machines = {};
+    obj.confData.configurations.names = {};
+    obj.confData.configurations.machines = {};
     
     % cycle on each configuration element to extract names
     for i = 1:length(obj.confData.configurations.configuration)
+        % initialize auxiliary data structure
+        % tokens = values availables for relative_path_to
+        obj.temp.tokens = struct;
+        % presents = values that needs to be renamed in a different element
+        obj.temp.presents = struct;
+
         % extract single configuration element
         item = obj.confData.configurations.configuration{i};
+
         % initialize user basename
         basename = '';
         % check if we found at least one
