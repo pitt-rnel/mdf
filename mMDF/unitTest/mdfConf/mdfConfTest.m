@@ -108,7 +108,7 @@ classdef mdfConfTest < matlab.unittest.TestCase
             obj.extract();
 
             % get selection
-            sel = obj.getSelection();
+            sel = obj.getSelectedConfiguration();
             % test if all of them has been unselected
             testCase.verifyEqual(sel,0);
             %
@@ -117,7 +117,7 @@ classdef mdfConfTest < matlab.unittest.TestCase
                 % select configuration
                 obj.select(collId);
                 % get selection
-                [n, m, i] = obj.getSelection();
+                [n, m, i] = obj.getSelectedConfiguration();
                 % test that we have 1 collection selected
                 testCase.verifyEqual(i,collId);
                 % test that the collection selected is the right one
@@ -139,7 +139,7 @@ classdef mdfConfTest < matlab.unittest.TestCase
                 % check that the conf has been read
                 testCase.verifyClass(obj.confData,'struct');
                 % check that selection is correct
-                [~, ~, i] = obj.getSelection();
+                [~, ~, i] = obj.getSelectedConfiguration();
                 testCase.verifyEqual(i,collId);
                 % delete singleton
                 mdfConf.getInstance('release');
@@ -156,7 +156,7 @@ classdef mdfConfTest < matlab.unittest.TestCase
             for collId = [1:length(testCase.indata)]
                 %
                 % request the current full configuration structure
-                conf = obj.getConf(collId);
+                conf = obj.getConfiguration(collId);
                 %
                 % test that env is a struct
                 testCase.verifyClass(conf,'struct');
@@ -225,13 +225,13 @@ classdef mdfConfTest < matlab.unittest.TestCase
                 obj.select(collId);
                 %
                 % get the complete configuration
-                conf = obj.getConf();
+                constants1 = obj.getConstants();
                 %
                 % get constants directly from struct
-                const2 = obj.confData.configurations.configuration{collId}.constants;
+                constants2 = obj.confData.configurations.configuration{collId}.constants;
                 %
                 % constants names
-                cl = fields(conf.constants);
+                cl = fields(constants1);
                 %
                 % test all the constants
                 for i = 1:length(cl)
@@ -243,7 +243,7 @@ classdef mdfConfTest < matlab.unittest.TestCase
                     cv = obj.getConstant(cn);
                     %
                     % test that habitat is a struct
-                    testCase.verifyEqual(cv,const2.(cn));
+                    testCase.verifyEqual(cv,constants2.(cn));
                 end %for
                 
             end %for

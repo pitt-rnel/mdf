@@ -19,7 +19,9 @@ function [arg1,arg2,arg3] = getCollectionConf(obj,selection)
     %   obj = this object
     %   selection = (string,integer) (optional) selected configuration
     %
-    
+   
+    arg1 = [];
+ 
     % check if we got selection
     if nargin > 1
         % set selection
