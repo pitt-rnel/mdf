@@ -15,7 +15,7 @@ function res = setFiles(obj,indata,reset)
     %            Data is the file name for the .mat data file, 
     %            while metadata is the file name of the yaml metadata file
     %
-    % - reset : (boolean) is indata is a string, indicate that the file
+    % - reset : (boolean) if indata is a string, indicate that the file
     %           names should be cleared before performing the assignment.
     %           it is ignored owtherwise
     
