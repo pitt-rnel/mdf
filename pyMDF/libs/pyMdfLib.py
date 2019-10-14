@@ -224,6 +224,29 @@ def getChildrenUuids(mdfObj,prop,default='error'):
 def getChildrenObjs(mdfObj,prop):
     return getMdfObjectsByUuids(getChildrenUuids(mdfObj,prop))
 
+def getParentUuids(mdfObj,default='error'):
+    """
+    returns all the uuids linked to this object as parents
+    
+    Parameters:
+    - default: behavior if the property does not exists
+    """
+    
+    if not mdfObj['mdf_def']['mdf_parents'] and default != 'error':
+        if type(default) is str and default.lower() == "none":
+            # returns empty if the property does not exists
+            return None
+        elif type(default) is str and default.lower() == "empty":
+            return []
+        else:
+            return default
+    
+    # default behavior
+    return [item['mdf_uuid'] for item in toList(mdfObj['mdf_def']['mdf_parents'])]
+
+def getParentObjs(mdfObj):
+    return getMdfObjectsByUuids(getParentUuids(mdfObj),default='empty')
+
 def getMdfObjectByUuid(objUuid):
     #
     # retrieve the mdf Object given the uuid
