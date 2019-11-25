@@ -224,6 +224,38 @@ def getChildrenUuids(mdfObj,prop,default='error'):
 def getChildrenObjs(mdfObj,prop):
     return getMdfObjectsByUuids(getChildrenUuids(mdfObj,prop))
 
+def isLink(mdfObj,prop):
+    """
+    returns true if the property given is a child of the object
+    false otherwise
+    """
+    return True if prop in mdfObj['mdf_def']['mdf_links']['mdf_fields'] else False;
+
+
+def getLinksUuids(mdfObj,prop,default='error'):
+    """
+    returns all the uuids linked to this object under the link property prop
+    
+    Parameters:
+    - default: behavior if the property does not exists
+    """
+    
+    if not isLink(mdfObj,prop) and default != 'error':
+        if default.lower() == "none":
+            # returns empty if the property does not exists
+            return None
+        elif default.lower() == "empty":
+            return []
+        else:
+            return default
+    
+    # default behavior
+    return [item['mdf_uuid'] for item in toList(mdfObj['mdf_def']['mdf_links'][prop])]
+
+def getLinksObjs(mdfObj,prop):
+    return getMdfObjectsByUuids(getLinksUuids(mdfObj,prop))
+
+
 def getParentUuids(mdfObj,default='error'):
     """
     returns all the uuids linked to this object as parents
