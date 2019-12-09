@@ -64,13 +64,13 @@ classdef (Sealed) mdfDB < handle
         res = isValidCollection(obj)
         res = isValidConnection(obj)
         res = isValidDatabase(obj)
-        res = isValid(obj)
+        res = isValid.m(obj)
         res = find(obj,query,projection,sort)
         res = delete(obj,query)
         res = insert(obj,query)
         res = update(obj,query,values)
         res = getCollStats(obj,varargin)
-        res = aggregate(obj)
+        res = aggregate(obj, pipeline)
     end
     
     methods (Static)
