@@ -28,7 +28,7 @@ function outdata = load(varargin)
             % array of chars
             key = char(varargin{i});
             value = varargin{i+1};
-            if isstring(value)
+            if isstr(value)
                 value = char(value);
             end %if
             indata.(key) = value;
