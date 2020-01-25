@@ -57,7 +57,7 @@ function res = aggregate(obj,pipeline)
     % than from json to cell array 
     % and finally we go from cell to matrix
     if jsonapi
-        res = cell2mat(jsondecode(char(oaggr.results)));
+        res = jsondecode(char(oaggr.results));
     else
         res = cell2mat(loadjson(char(oaggr.results)));
     end %if
