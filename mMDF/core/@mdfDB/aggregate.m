@@ -46,4 +46,5 @@ function res = aggregate(obj,pipeline)
         % convert it to structure throught json
         res{length(res)+1} = mdf.fromJson(char(ele.toJson()));
     end %while
+    
 end %function
