@@ -263,6 +263,36 @@ classdef (Sealed) mdf < handle
                 'db', odb, ...
                 'manage', om);
         end %function
+
+        function res = terminate()
+            % function res = terminate()
+	    %
+	    % release and destroy all the core components of the mdf data collection
+	    %
+	    res = 0;
+
+	    % release all the memory
+	    % clear all the mdf objects
+            om = mdfManage.getInstance();
+	    om.ClearAll();
+            
+	    % release all the classes
+	    mdfManage.getInstance('release');
+	    mdfDb.getInstance('release');
+	    mdfConf.getInstance('release');
+	    mdf.getInstance('release');
+
+	    res = 1;
+        end % terminate
+
+        function res = reinit(varargin)
+	    % function res=reinit(vargargin)
+	    %
+	    % close current data collection
+	    % and restart with a new one
+            mdf.terminate();
+	    res = mdf.init(varargin);
+        end
     end %methods
 
     % static methods defined in external files

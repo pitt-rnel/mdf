@@ -9,7 +9,8 @@ classdef mdfTest < matlab.unittest.TestCase
     properties
         testFolder = '';
         xmlConfFile = '';
-        confStruct = struct();
+        confStruct3 = struct();
+        confStruct4 = struct();
         uuidsFile = '';
         jsonTestFile = '';
         matTestFile = '';
@@ -56,9 +57,12 @@ classdef mdfTest < matlab.unittest.TestCase
             testCase.matTestFile = fullfile(testCase.testFolder, '..', 'conf', 'testJson.mat');
             
             % select database only configuration
-            testCase.confStruct = struct( ...
+            testCase.confStruct3 = struct( ...
                 'confFile', testCase.xmlConfFile, ...
                 'confSel', 3 );
+            testCase.confStruct4 = struct( ...
+                'confFile', testCase.xmlConfFile, ...
+                'confSel', 4 );
             
             %
             % load obj uuids
@@ -135,7 +139,7 @@ classdef mdfTest < matlab.unittest.TestCase
         function testInit(testCase)
             %
             % instantiate the object and load the test configuration file
-            res = mdf.init( testCase.confStruct );
+            res = mdf.init( testCase.confStruct3 );
                 
             % test that the configuration is a structure
             testCase.verifyClass(res,'struct');
@@ -165,6 +169,57 @@ classdef mdfTest < matlab.unittest.TestCase
             testCase.verifyClass(omdfc.db,'mdfDB');
             testCase.verifyClass(omdfc.conf,'mdfConf');
             
+
+            % delete singleton)
+            testCase.releaseOmdfc();
+        end % function
+
+	%
+	function testTerminate(testCase)
+            %
+            % instantiate the object and load the test configuration file
+            res = mdf.init( testCase.confStruct3 );
+            % 
+	    % terminate mdf instance
+	    res = mdf.terminate();
+
+	    % check that the teminate returned 1
+	    testCase.verifyEqual(res,1);
+ 
+            % check global variable
+            global omdfc;
+            % test that the configuration is a structure
+            testCase.verifyClass(omdfc,'struct');
+            % check fields
+            testCase.verifyEqual(isfield(omdfc,'mdf'),true);
+            testCase.verifyEqual(isfield(omdfc,'manage'),true);
+            testCase.verifyEqual(isfield(omdfc,'conf'),true);
+            testCase.verifyEqual(isfield(omdfc,'db'),true);
+            % test that we got the right type of objects
+            testCase.verifyEqual(omdfc.mdf,[]);
+            testCase.verifyEqual(omdfc.manage,[]);
+            testCase.verifyEqual(omdfc.db,[]);
+            testCase.verifyEqual(omdfc.conf,[]);
+	    
+        end % function
+
+	%
+	function testReinit(testCase)
+            %
+	    % instantiate the object
+            res = mdf.init( testCase.confStruct3 );
+
+	    % test that the configuration selected is the third one
+	    global omdfc
+	    testCase.verifyEqual(omdfc.conf.selected,3);
+	    testCase.verifyEqual(omdfc.db.collection,omdfc.conf.confData.configurations.configuration(testCase.confStruct3.confSel).constants.DB.COLLECTION);
+	    
+	    % now reinit
+	    res = mdf.init( testCase.confStruct4 );
+
+	    % and test that the configurationselected is the fourth one
+	    testCase.verifyEqual(omdfc.conf.selected,4);
+	    testCase.verifyEqual(omdfc.db.collection,omdfc.conf.confData.configurations.configuration(testCase.confStruct4.confSel).constants.DB.COLLECTION);
 
             % delete singleton)
             testCase.releaseOmdfc();
@@ -242,7 +297,7 @@ classdef mdfTest < matlab.unittest.TestCase
             %
             % instantiate the object and load the test configuration file
             % we need the configuration class instantiated
-            res = mdf.init( testCase.confStruct );
+            res = mdf.init( testCase.confStruct3 );
             
             % load test structure from mat file
             temp = load(testCase.matTestFile);
@@ -273,7 +328,7 @@ classdef mdfTest < matlab.unittest.TestCase
         function testFromJson(testCase)
             %
             % instantiate the object and load the test configuration file
-            res = mdf.init( testCase.confStruct );
+            res = mdf.init( testCase.confStruct3 );
 
             % load json string
             fid = fopen(testCase.jsonTestFile,'r');
@@ -302,7 +357,7 @@ classdef mdfTest < matlab.unittest.TestCase
         function testCreateObjects(testCase)
             %
             % instantiate the object and load the test configuration file
-            res = mdf.init( testCase.confStruct );
+            res = mdf.init( testCase.confStruct3 );
             
             % create few mdf objects to test the relationship creation
             res = 0;
@@ -327,7 +382,7 @@ classdef mdfTest < matlab.unittest.TestCase
         function testLoad(testCase)
             %
             % instantiate the object and load the test configuration file
-            res = mdf.init( testCase.confStruct );
+            res = mdf.init( testCase.confStruct3 );
             
             % load all the objects
             objs1 = mdf.load('mdf_type',testCase.objType);
@@ -353,7 +408,7 @@ classdef mdfTest < matlab.unittest.TestCase
         function testUnload(testCase)
             %
             % instantiate the object and load the test configuration file
-            res = mdf.init( testCase.confStruct );
+            res = mdf.init( testCase.confStruct3 );
 
             % load just one object
             objs = mdf.load('mdf_uuid',testCase.testUuid1);
@@ -375,7 +430,7 @@ classdef mdfTest < matlab.unittest.TestCase
         function testGetUAO(testCase)
             %
             % instantiate the object and load the test configuration file
-            res = mdf.init( testCase.confStruct );
+            res = mdf.init( testCase.confStruct3 );
             
             %
             % get object from uuid
@@ -435,7 +490,7 @@ classdef mdfTest < matlab.unittest.TestCase
         function testApcr(testCase)
             %
             % instantiate the object and load the test configuration file
-            res = mdf.init( testCase.confStruct );
+            res = mdf.init( testCase.confStruct3 );
             
             % load 2 objects and create parent child relationship
             obj1 = mdf.load('mdf_uuid',testCase.testUuid1);
@@ -506,7 +561,7 @@ classdef mdfTest < matlab.unittest.TestCase
         function testRpcr(testCase)
             %
             % instantiate the object and load the test configuration file
-            res = mdf.init( testCase.confStruct );
+            res = mdf.init( testCase.confStruct3 );
             
             % load 2 objects and create parent child relationship
             obj1 = mdf.load('mdf_uuid',testCase.testUuid1);
@@ -553,7 +608,7 @@ classdef mdfTest < matlab.unittest.TestCase
         function testAul(testCase)
             %
             % instantiate the object and load the test configuration file
-            res = mdf.init( testCase.confStruct );
+            res = mdf.init( testCase.confStruct3 );
             
             % load 2 objects and create parent child relationship
             obj1 = mdf.load('mdf_uuid',testCase.testUuid1);
@@ -632,7 +687,7 @@ classdef mdfTest < matlab.unittest.TestCase
         function testRul(testCase)
             %
             % instantiate the object and load the test configuration file
-            res = mdf.init( testCase.confStruct );
+            res = mdf.init( testCase.confStruct3 );
 
             % load 2 objects and create parent child relationship
             obj1 = mdf.load('mdf_uuid',testCase.testUuid1);
@@ -692,7 +747,7 @@ classdef mdfTest < matlab.unittest.TestCase
         function testAbl(testCase)
             %
             % instantiate the object and load the test configuration file
-            res = mdf.init( testCase.confStruct );
+            res = mdf.init( testCase.confStruct3 );
             
             % load 2 objects and create parent child relationship
             obj1 = mdf.load('mdf_uuid',testCase.testUuid1);
@@ -795,7 +850,7 @@ classdef mdfTest < matlab.unittest.TestCase
         function testRbl(testCase)
             %
             % instantiate the object and load the test configuration file
-            res = mdf.init( testCase.confStruct );
+            res = mdf.init( testCase.confStruct3 );
 
                         % load 2 objects and create parent child relationship
             obj1 = mdf.load('mdf_uuid',testCase.testUuid1);

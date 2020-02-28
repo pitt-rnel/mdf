@@ -33,6 +33,12 @@ function outstring = filter(obj,instring)
         try
             % try to get the value for the constant
             sv = eval(['C.' cn]);
+	    % if we are on windows, makes sure that the paths are properly excaped
+	    % so we avoid issues with the backslash
+            if ispc
+                % fix back slashes in path
+                sv = regexprep(sv,'(?<!\\)\\(?!\\)','\\\\');
+            end %if
             % constant found
             %
             % substitute in output string
