@@ -1,0 +1,2 @@
+/home/nitrosx/repos/git/mdf-v1.6.x/mMDF/libs/yaml/external/snakeyaml-1.9.jar                 
+/home/nitrosx/repos/git/mdf-v1.6.x/java/mongo-java-driver-3.12.1.jar

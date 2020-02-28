@@ -140,7 +140,8 @@ classdef (Sealed) mdf < handle
             % convert a test yaml string to load the java library
             %tmp1 = ParseYaml('action: "Loading java library"');
             % load yaml java library
-            LoadLibYaml();
+	    % yaml java lib is loaded through static java path
+            %LoadLibYaml();
             
             % instantiate configuration class
             oconf = mdfConf.getInstance( ...
@@ -266,32 +267,32 @@ classdef (Sealed) mdf < handle
 
         function res = terminate()
             % function res = terminate()
-	    %
-	    % release and destroy all the core components of the mdf data collection
-	    %
-	    res = 0;
-
-	    % release all the memory
-	    % clear all the mdf objects
-            om = mdfManage.getInstance();
-	    om.ClearAll();
+            %
+            % release and destroy all the core components of the mdf data collection
+            %
+            res = 0;
             
-	    % release all the classes
-	    mdfManage.getInstance('release');
-	    mdfDb.getInstance('release');
-	    mdfConf.getInstance('release');
-	    mdf.getInstance('release');
-
-	    res = 1;
+            % release all the memory
+            % clear all the mdf objects
+            om = mdfManage.getInstance();
+            om.clearAll();
+            
+            % release all the classes
+            mdfManage.getInstance('release');
+            mdfDB.getInstance('release');
+            mdfConf.getInstance('release');
+            mdf.getInstance('release');
+            
+            res = 1;
         end % terminate
 
         function res = reinit(varargin)
-	    % function res=reinit(vargargin)
-	    %
-	    % close current data collection
-	    % and restart with a new one
+            % function res=reinit(vargargin)
+            %
+            % close current data collection
+            % and restart with a new one
             mdf.terminate();
-	    res = mdf.init(varargin);
+            res = mdf.init(varargin{:});
         end
     end %methods
 

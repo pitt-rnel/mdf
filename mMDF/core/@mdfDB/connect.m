@@ -10,16 +10,16 @@ function res = connect(obj,conf)
     %  .coll = mongodb collection for mdf
     %
 
-    % get current folder
-    [cf,~,~] = fileparts(mfilename('fullpath'));
-    % build full path to library
-    fp = fullfile(cf,obj.Jar);
+    %% get current folder
+    %[cf,~,~] = fileparts(mfilename('fullpath'));
+    %% build full path to library
+    %fp = fullfile(cf,obj.Jar);
 
     % check if it is already in path
-    if not(ismember(fp, javaclasspath ('-dynamic')))
-        % load java library
-        javaaddpath(fp);
-    end %if
+    %if not(ismember(fp, javaclasspath ('-dynamic')))
+    %    % load java library
+    %    javaaddpath(fp);
+    %end %if
 
     % import java library and classes
     % at start up time, this appear to not work

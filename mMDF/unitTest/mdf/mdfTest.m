@@ -203,23 +203,29 @@ classdef mdfTest < matlab.unittest.TestCase
 	    
         end % function
 
-	%
-	function testReinit(testCase)
+	    %
+	    function testReinit(testCase)
             %
-	    % instantiate the object
+            % instantiate the object
             res = mdf.init( testCase.confStruct3 );
-
-	    % test that the configuration selected is the third one
-	    global omdfc
-	    testCase.verifyEqual(omdfc.conf.selected,3);
-	    testCase.verifyEqual(omdfc.db.collection,omdfc.conf.confData.configurations.configuration(testCase.confStruct3.confSel).constants.DB.COLLECTION);
-	    
-	    % now reinit
-	    res = mdf.init( testCase.confStruct4 );
-
-	    % and test that the configurationselected is the fourth one
-	    testCase.verifyEqual(omdfc.conf.selected,4);
-	    testCase.verifyEqual(omdfc.db.collection,omdfc.conf.confData.configurations.configuration(testCase.confStruct4.confSel).constants.DB.COLLECTION);
+            
+            % test that the configuration selected is the third one
+            global omdfc
+            [uname,mname,index]= omdfc.conf.getSelection();
+            testCase.verifyEqual(index,3);
+            testCase.verifyEqual( ...
+                omdfc.db.collection, ...
+                omdfc.conf.confData.configurations.configuration{testCase.confStruct3.confSel}.constants.DB.COLLECTION);
+            
+            % now reinit
+            res = mdf.reinit( testCase.confStruct4 );
+            
+            % and test that the configurationselected is the fourth one
+            [uname,mname,index]= omdfc.conf.getSelection();
+            testCase.verifyEqual(index,4);
+            testCase.verifyEqual( ...
+                omdfc.db.collection, ...
+                omdfc.conf.confData.configurations.configuration{testCase.confStruct4.confSel}.constants.DB.COLLECTION);
 
             % delete singleton)
             testCase.releaseOmdfc();
