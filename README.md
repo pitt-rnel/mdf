@@ -18,29 +18,35 @@ There is no limitation of what goes in metadata and in data, it is up to the use
 One difference defined by designed is that metadata are loaded when the object is retrieved and created in memory, while data follow the lazy-loading paradigm: they are loaded in memory only when they are accessed.
 Metadata and object definition can be queried by means of the mongodb instance that the MDF uses transparently.
 
-There are currently 2 major version of the MDF: 
+Current active branch is 1.6.x.
+Latest/Current version is 1.6.2
+
+Deprecated versions (please do not use them):
 * 1.4.x
->In version 1.4.x, data are saved exclusively in mat files together with object definition hiddden structure and metadata. Object definition and metadata is also saved as documents in the associated mongodb database and in yaml text file. Therefore, only object definition and metadata can be queried through the mongodb instance. This choice was been made to offer queries capabilities through metadata and keep mongodb documents relatively small, reducing sys admin managament costs related to database instance.
 * 1.5.x
->In branch v1.5.x, everything is saved exclusively in documents in Mongodb instance. Objects behave the same as v1.4.x, the source of everything are documents in Mongodb. This version is suitable for projects with small objects, aka small data sections. The advantages are: increased speed in saving and load objects, use of templates when creating new objects
 
-## Versions available ##
 
-### Version 1.4.x ###
-### Set up? ###
+## Set-up ##
+This section contains instructions on how to set up the latest/current versionof MDF
+
 * Requirements / Dependencies
-  This version works on any version of Matlab from r2014a and up. All dependencies are included in the source code that you find in this repository.
+  You need to have oneof the latest versionof Matlab installed and mongodb, which could be installed locally, in a docker container (please check mdf-db project) or on a remote machine.
+  The current version has been tested on:
+  * Matlab R2019b, mdf-db v2.0 (Mongodb 4.2)
+  * Matlab R2018a, mdf-db v2.0 (Mongodb 4.2)
 
 * Install MDF
-  Clone dev-1.4 branch or download the zip file. Place the code in a folder that is accessible to matlab
+  Clone prod-v1.6 branch or download the zip file for tag v1.6.2. Place the code in a folder that is accessible to matlab. We suggest C:/GIT/mdf under windows, or /opt/mdf under linux
 
 * Configuration
   Start matlab, make sure to add mdf/mMdf/core folder to your matlab path.
-  Make sure that you have an instance of MongoDB running and that it is accessible fromt he machine where you are running matlab.
+  Also make sure that you have an instance of MongoDB running and that it is accessible fromt he machine where you are running matlab.
+  If you do not want to add permanently mdf to your matlab path, you can use the function StartMdf that you can find under mdf/mMdf/templates. Copy it in your MATLAB folder and personalize it to your setup
 
-* Database configuration
-  MDF uses an xml configuration file where to configure the location where the .mat and .yml files are located and the connection string to be able to reach the database. The xml file should be called mdb.conf.xml, an example is found under mdf/mMDF/templates/mdf.xml.conf.
-  Multiple configurations can be used on the same machine. Just copy everything within the configuration tags and change as it is needed.
+* Data Collection configuration
+  MDF uses an xml configuration file to define which data collections are accessible. 
+  Please check under mdf/templates for confiuguration examples.
+  By default, when mdf.init or StartMdf is called, mdf looks for the file mdf.conf.xml. Multiple configurations can be used on the same machine. Just copy everything within the configuration tags and change as it is needed.
   MDF will automatically check the following folders in the user home (Linux: /home/<username>, OS X: /Users/<username>, Windows: /Users/<username>) for the mdf.conf.xml file:
   * .mdf
   * mdf
@@ -53,9 +59,10 @@ There are currently 2 major version of the MDF:
   * MATLAB
   * Documents/MATLAB
  
-  If the user would like to store the configuration file in other locations or wants to use an alternative one, just pass the full path to the conf fiel as it is specified in the next section
+  If the user would like to store the configuration file in other locations or wants to use an alternative one, just pass the full path to the conf file as it is specified in the next section
 
-* Startup
+
+* Matlab Startup
   In order to start using mdf, the user has to instantiate the core classes. The main class mdf provides a static method to set up the correct environment.
   Here are the different method that mdf environment can be initialized:
   * let mdf check the standard location and ask which configuration we would like to use
