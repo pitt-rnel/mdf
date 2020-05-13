@@ -11,14 +11,28 @@ classdef (Sealed) mdfDB < handle
 
     properties
         % connection info
+        % main database
         host = '';
         port = [];
         database = [];
         collection = [];
-        % connection objects
-        m = [];
-        db = [];
-        coll = [];
+        % gridfs database
+        gridfs_host = '';
+        gridfs_port = [];
+        gridfs_database = '';
+        gridfs_bucket = '';
+        % connection objects for def and metadata
+        main = struct( ...
+            'mongo', [], ...
+            'database', [], ...
+            'collection', []...
+        );
+        % connection objects for data
+        data = struct( ...
+            'mongo', [], ...
+            'database', [], ...
+            'bucket', [] ...
+        );
         % variables used in checking configuration
         fieldsRequired = {};
         fieldInfo = struct();

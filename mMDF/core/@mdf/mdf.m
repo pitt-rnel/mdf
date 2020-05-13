@@ -198,7 +198,7 @@ classdef (Sealed) mdf < handle
             oconf.start();
 
             % get complete configuration structure
-            C = oconf.getC();
+            C = oconf.getConstants();
             % check if I have all the basic constants defined and if they
             % are valid
             %
@@ -218,14 +218,14 @@ classdef (Sealed) mdf < handle
             end %if
             % check if we have the collection configuration
             if ( isfield(C,'MDF_COLLECTION') && ...
-                isfield(C.MDF_COLLECTION,'DB') && ...
+                isfield(C.MDF_COLLECTION,'DATABASE') && ...
                 isfield(C.MDF_COLLECTION,'YAML') && ...
                 isfield(C.MDF_COLLECTION,'DATA') )
                 % newer configuration
                 % 
                 % set the database type
-                if isfield(omdf.VALIDATION.MDF_COLLECTION.DATABASE,C.MDF_COLLECTION.DB)
-                   C.MDF_COLLECTION.DB = omdf.VALIDATION.MDF_COLLECTION.DATABASE;
+                if isfield(omdf.VALIDATION.MDF_COLLECTION.DATABASE,C.MDF_COLLECTION.DATABASE)
+                   C.MDF_COLLECTION.DATABASE = omdf.VALIDATION.MDF_COLLECTION.DATABASE;
                 else
                    throw(MException('mdfConf:start',...
                        ['3: Invalid MDF collection database!!!']));
@@ -264,12 +264,22 @@ classdef (Sealed) mdf < handle
 
 
             % check if we have mdf data base if we operates in mixed mode (v1.4.x)
-            if ( strcmp(C.MDF_COLLECTION_TYPE,'MAT_FILE') == 1 && ...
+            if ( strcmp(C.MDF_COLLECTION.DATA,'MAT_FILE') == 1 && ...
                 ( ~isfield(C,'DATA_BASE') || ...
                   ~exist(C.DATA_BASE,'dir') ) )
                 % we cannot proceed
                 throw(MException('mdfConf:start',...
                     ['7: Configuration missing MDF data folder (' C.DATA_BASE ')!!!']));
+            elseif ( strcmp(C.MDF_COLLECTION.DATA,'MONGODB_GRIDFS') == 1 )
+                if ( ~isfield(C,'GRIDFS') || ~isfield(C.GRIDFS,'DATABASE') )
+                    throw(MException('mdfConf:start',...
+                        ['8: Cnfiguration missing mongo database for mdf data!!!']));
+                end %if
+    
+                if ( ~isfield(C,'GRIDFS') || ~isfield(C.GRIDFS,'COLLECTION') )
+                    throw(MException('mdfConf:start',...
+                        ['9: Configuration missing mongo collection for mdf data!!!']));
+                end %if
             end %if
 
             % first of all needs to add functions root
