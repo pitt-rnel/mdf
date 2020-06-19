@@ -1,8 +1,8 @@
 version: '3'
 services:
-  mdf_mongodb_dev:
-    container_name: mdf_mongodb_dev
-    image: mdf_mongodb_test:2.0
+  mdf_mongodb_test_v1_7:
+    container_name: mdf_mongodb_test_v1_7
+    image: mdf_mongodb_test_v1_7:2.0
     command:
         - '--noauth'
         - '-f'

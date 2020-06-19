@@ -46,14 +46,27 @@ classdef mdfDBTest < matlab.unittest.TestCase
             % prepare test values
             %
             % set test configuration
-            testCase.configuration = struct( ...
-                 'human_name', 'mdfDB test collection 1', ...
-                 'machine_name', 'metadata_test_collection_1', ...
-                 'host' ,'127.0.0.1', ...
-                 'port', 15213, ...
-                 'database', 'mdfDbTest', ...
-                 'collection', 'mdfDbTest', ...
-                 'connect', false);
+            testCase.configuration = struct(...
+                'MONGODB', struct( ...
+                    'human_name', 'mdfDB test collection 1', ...
+                    'machine_name', 'metadata_test_collection_1', ...
+                    'host' ,'127.0.0.1', ...
+                    'port', 15213, ...
+                    'database', 'mdfDbTest', ...
+                    'collection', 'mdfDbTest', ...
+                    'connect', false), ...
+                'MONGODB_GRIDFS', struct( ...
+                    'human_name', 'mdfDB test collection 2', ...
+                    'machine_name', 'metadata_test_collection_2', ...
+                    'host' ,'127.0.0.1', ...
+                    'port', 15213, ...
+                    'database', 'mdfMetadataDbTest', ...
+                    'collection', 'mdfMetadataDbTest', ...
+                    'gridfs_host' ,'127.0.0.1', ...
+                    'gridfs_port', 15213, ...
+                    'gridfs_database', 'mdfDataDbTest', ...
+                    'gridfs_bucket', 'mdfDataDbTest', ...
+                    'connect', false));
             %
             % add dull path to folder where test records are located
             testCase.recordFolder = fullfile(testCase.testFolder,testCase.recordFolder);
@@ -132,30 +145,81 @@ classdef mdfDBTest < matlab.unittest.TestCase
         end % function
 
         %
-        function testConfiguration(testCase)
+        function testConfigurationMongoDB(testCase)
             %
             % instantiate the object and load the test configuration file
-            obj = mdfDB.getInstance(testCase.configuration);
+            obj = mdfDB.getInstance(testCase.configuration.MONGODB);
             % test that the configuration is a structure
             testCase.verifyClass(obj.host,'char');
             testCase.verifyClass(obj.port,'double');
             testCase.verifyClass(obj.database,'char');
             testCase.verifyClass(obj.collection,'char');
             % test that the db object has the test configuration 
-            testCase.verifyEqual(obj.host,testCase.configuration.host);
-            testCase.verifyEqual(obj.port,testCase.configuration.port);
-            testCase.verifyEqual(obj.database,testCase.configuration.database);
-            testCase.verifyEqual(obj.collection,testCase.configuration.collection);
+            testCase.verifyEqual(obj.host,testCase.configuration.MONGODB.host);
+            testCase.verifyEqual(obj.port,testCase.configuration.MONGODB.port);
+            testCase.verifyEqual(obj.database,testCase.configuration.MONGODB.database);
+            testCase.verifyEqual(obj.collection,testCase.configuration.MONGODB.collection);
+
+            % delete singleton)
+            mdfDB.getInstance('release');
+        end % function
+
+        function testConfigurationMonoDBGridFS(testCase)
+            %
+            % instantiate the object and load the test configuration file
+            obj = mdfDB.getInstance(testCase.configuration.MONGODB_GRIDFS);
+            % test that the configuration is a structure
+            testCase.verifyClass(obj.host,'char');
+            testCase.verifyClass(obj.port,'double');
+            testCase.verifyClass(obj.database,'char');
+            testCase.verifyClass(obj.collection,'char');
+            testCase.verifyClass(obj.gridfs_host,'char');
+            testCase.verifyClass(obj.gridfs_port,'double');
+            testCase.verifyClass(obj.gridfs_database,'char');
+            testCase.verifyClass(obj.gridfs_collection,'char');
+            % test that the db object has the test configuration 
+            testCase.verifyEqual(obj.host,testCase.configuration.MONGODB_GRIDFS.host);
+            testCase.verifyEqual(obj.port,testCase.configuration.MONGODB_GRIDFS.port);
+            testCase.verifyEqual(obj.database,testCase.configuration.MONGODB_GRIDFS.database);
+            testCase.verifyEqual(obj.collection,testCase.configuration.MONGODB_GRIDFS.collection);
+            testCase.verifyEqual(obj.gridfs_host,testCase.configuration.MONGODB_GRIDFS.gridfs_host);
+            testCase.verifyEqual(obj.gridfs_port,testCase.configuration.MONGODB_GRIDFS.gridfs_port);
+            testCase.verifyEqual(obj.gridfs_database,testCase.configuration.MONGODB_GRIDFS.gridfs_database);
+            testCase.verifyEqual(obj.gridfs_bucket,testCase.configuration.MONGODB_GRIDFS.gridfs_backet);
 
             % delete singleton)
             mdfDB.getInstance('release');
         end % function
 
         %
-        function testConnect(testCase)
+        function testConnectMongoDB(testCase)
             %
             % instantiate the object and load the configuration
-            obj = mdfDB.getInstance(testCase.configuration);
+            obj = mdfDB.getInstance(testCase.configuration.MONGODB);
+            %
+            % connect to container db object using index
+            obj.connect();
+            %
+            % test that there is one container, that's what the test configuration says
+            testCase.verifyClass(obj.db,'com.mongodb.client.internal.MongoDatabaseImpl');
+            testCase.verifyClass(obj.coll,'com.mongodb.client.internal.MongoCollectionImpl');
+            %
+            % test that the uuid is the same
+            testCase.verifyEqual(obj.isValidConnection,true);
+
+            % delete singleton
+            mdfDB.getInstance('release');
+        end % function
+
+                %
+        function testConnectMongoDBGridFS(testCase)
+            %
+            % instantiate the object and load the configuration
+            obj = mdfDB.getInstance(testCase.configuration.MONGODB_GRIDFS);
+            %
+            % set fake mdfConf class to MongoDB GriFS
+            oc = mdfConf.getInstance();
+            oc.setCollectionToMongodbGridfs();
             %
             % connect to container db object using index
             obj.connect();
@@ -175,7 +239,7 @@ classdef mdfDBTest < matlab.unittest.TestCase
         function testDeleteAllEmpty(testCase)
             % 
             % instantiate the object and load configuration
-            obj = mdfDB.getInstance(testCase.configuration);
+            obj = mdfDB.getInstance(testCase.configuration.MONGODB);
             %
             % connect to container db object using index
             obj.connect();
@@ -196,7 +260,7 @@ classdef mdfDBTest < matlab.unittest.TestCase
         function testInsert(testCase)
             %
             % instantiate class and connect to db
-            obj = mdfDB.getInstance(testCase.configuration);
+            obj = mdfDB.getInstance(testCase.configuration.MONGODB);
             obj.connect();
             %
             % delete all entries
@@ -216,7 +280,7 @@ classdef mdfDBTest < matlab.unittest.TestCase
         function testInsertMany(testCase)
             %
             % instantiate class and connect to db
-            obj = mdfDB.getInstance(testCase.configuration);
+            obj = mdfDB.getInstance(testCase.configuration.MONGODB);
             obj.connect();
             %
             % delete all entries
@@ -236,7 +300,7 @@ classdef mdfDBTest < matlab.unittest.TestCase
         function testFind(testCase)
             %
             % instantiate class and connect to db
-            obj = mdfDB.getInstance(testCase.configuration);
+            obj = mdfDB.getInstance(testCase.configuration.MONGODB);
             obj.connect();
             %
             % delete all entries
@@ -265,7 +329,7 @@ classdef mdfDBTest < matlab.unittest.TestCase
         function testUpdate(testCase)
             %
             % instantiate class and connect to db
-            obj = mdfDB.getInstance(testCase.configuration);
+            obj = mdfDB.getInstance(testCase.configuration.MONGODB);
             obj.connect();
             %
             % prepare query
@@ -311,7 +375,7 @@ classdef mdfDBTest < matlab.unittest.TestCase
         function testDelete(testCase)
             %
             % instantiate class and connect to db
-            obj = mdfDB.getInstance(testCase.configuration);
+            obj = mdfDB.getInstance(testCase.configuration.MONGODB);
             obj.connect();
             %
             % delete all entries
@@ -335,7 +399,7 @@ classdef mdfDBTest < matlab.unittest.TestCase
         function testAggregation(testCase)
             %
             % instantiate class and connect to db
-            obj = mdfDB.getInstance(testCase.configuration);
+            obj = mdfDB.getInstance(testCase.configuration.MONGODB);
             obj.connect();
             %
             % delete all entries
@@ -367,7 +431,7 @@ classdef mdfDBTest < matlab.unittest.TestCase
         function testMapReduce(testCase)
             %
             % instantiate class and connect to db
-            obj = mdfDB.getInstance(testCase.configuration);
+            obj = mdfDB.getInstance(testCase.configuration.MONGODB);
             obj.connect();
             %
             % delete all entries
@@ -404,7 +468,7 @@ classdef mdfDBTest < matlab.unittest.TestCase
         function testCollStats(testCase)
             %
             % instantiate class and connect to db
-            obj = mdfDB.getInstance(testCase.configuration);
+            obj = mdfDB.getInstance(testCase.configuration.MONGODB);
             obj.connect();
             %
             % delete all entries
@@ -440,7 +504,7 @@ classdef mdfDBTest < matlab.unittest.TestCase
         function testValidateRelationships(testCase)
             %
             % instantiate class and connect to db
-            obj = mdfDB.getInstance(testCase.configuration);
+            obj = mdfDB.getInstance(testCase.configuration.MONGODB);
             obj.connect();
             %
             % delete all entries
@@ -477,7 +541,7 @@ classdef mdfDBTest < matlab.unittest.TestCase
         function testValidationUuids(testCase)
             %
             % instantiate class and connect to db
-            obj = mdfDB.getInstance(testCase.configuration);
+            obj = mdfDB.getInstance(testCase.configuration.MONGODB);
             obj.connect();
             %
             % delete all entries
@@ -509,7 +573,7 @@ classdef mdfDBTest < matlab.unittest.TestCase
         %
         function testValidationSchema(testCase)            %
             % instantiate class and connect to db
-            obj = mdfDB.getInstance(testCase.configuration);
+            obj = mdfDB.getInstance(testCase.configuration.MONGODB);
             obj.connect();
             %
             % delete all entries

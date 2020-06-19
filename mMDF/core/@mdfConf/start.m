@@ -28,7 +28,15 @@ function start(obj)
             % newer configuration
             %
             % set the database to mongodb
-            obj.confData.configurations.configuration{i}.constants.MDF_COLLECTION.DB = 'MONGODB';
+            %obj.confData.configurations.configuration{i}.constants.MDF_COLLECTION.DB = 'MONGODB';
+            try
+                obj.confData.configurations.configuration{i}.constants.MDF_COLLECTION.DB = ...
+                    obj.dcValidation.VALUES.MDF_COLLECTION.DATABASE.(...
+                        upper(obj.confData.configurations.configuration{i}.constants.MDF_COLLECTION.DB));
+            catch
+                throw(MException('mdfConf:start',...
+                    ['1: Invalid MDF collection database configuration!!!']));
+            end %try/catch
             %
             % check if we need to write yaml metadata file
             YAML = obj.confData.configurations.configuration{i}.constants.MDF_COLLECTION.YAML;
@@ -38,50 +46,71 @@ function start(obj)
                   ( ischar(YAML) &&  strcmp(upper(YAML),'TRUE') ) );
             %
             % check if we need to save the data to file or database and
-            % which
-            switch upper(obj.confData.configurations.configuration{i}.constants.MDF_COLLECTION.DATA)
-                case {'MATFILE', 'FILE', 'MAT', 'M'}
-                    obj.confData.configurations.configuration{i}.constants.MDF_COLLECTION.DATA = 'MATFILE';
-
-                case {'DATABASE', 'DB', 'D'}
-                	obj.confData.configurations.configuration{i}.constants.MDF_COLLECTION.DATA = 'DATABASE';
-
-                otherwise
-                	throw(MException('mdfConf:start',...
-                        ['1: Invalid MDF collection data!!!']));
-            end %case
+            % which database
+            try
+                obj.confData.configurations.configuration{i}.constants.MDF_COLLECTION.DATA = ...
+                    obj.dcValidation.VALUES.MDF_COLLECTION.DATA.(...
+                        upper(obj.confData.configurations.configuration{i}.constants.MDF_COLLECTION.DATA));
+            catch
+                throw(MException('mdfConf:start',...
+                    ['2: Invalid MDF collection data configuration!!!']));
+            end %try/catch
+%             switch upper(obj.confData.configurations.configuration{i}.constants.MDF_COLLECTION.DATA)
+%                 case {'MATFILE', 'FILE', 'MAT', 'M'}
+%                     obj.confData.configurations.configuration{i}.constants.MDF_COLLECTION.DATA = 'MATFILE';
+% 
+%                 case {'DATABASE', 'DB', 'D'}
+%                 	obj.confData.configurations.configuration{i}.constants.MDF_COLLECTION.DATA = 'DATABASE';
+% 
+%                 otherwise
+%                 	throw(MException('mdfConf:start',...
+%                         ['1: Invalid MDF collection data!!!']));
+%             end %case
 
         elseif ( isfield(obj.confData.configurations.configuration{i}.constants,'MDF_COLLECTION_TYPE') )
             % <MDF_COLLECTION_TYPE>MIXED, M, V_1_4</MDF_COLLECTION_TYPE>
             % <MDF_COLLECTION_TYPE>DATABASE, DB, V_1_5</MDF_COLLECTION_TYPE>
             % check if type is correct and convert to standard format
-            switch upper(obj.confData.configurations.configuration{i}.constants.MDF_COLLECTION_TYPE)
-                case {'MIXED', 'M', 'V_1_4'}
-                    obj.confData.configurations.configuration{i}.constants.MDF_COLLECTION_TYPE = 'MIXED';
-                    obj.confData.configurations.configuration{i}.constants.MDF_COLLECTION = struct( ...
-                        'DB' , 'MONGODB', ...
-                        'YAML' , true, ...
-                        'DATA' , 'MATFILE' ...
-                    );
-
-                case {'DATABASE', 'DB', 'V_1_5'}
-                    obj.confData.configurations.configuration{i}.constants.MDF_COLLECTION_TYPE = 'DATABASE';
-                    obj.confData.configurations.configuration{i}.constants.MDF_COLLECTION = struct( ...
-                        'DB' , 'MONGODB', ...
-                        'YAML' , false, ...
-                        'DATA' , 'DATABASE' ...
-                    );
-                    
-                otherwise
-                    throw(MException('mdfConf:start',...
-                            ['2: Invalid MDF collection type!!!']));
-
-                end %switch
+            try
+                % validate the data collection type
+                obj.confData.configurations.configuration{i}.constants.MDF_COLLECTION_TYPE = ...
+                    obj.dcValidation.VALUES.MDF_COLLECTION_TYPE.( ...
+                    upper(obj.confData.configurations.configuration{i}.constants.MDF_COLLECTION_TYPE));
+                % expand the configuration for each component
+                obj.confData.configurations.configuration{i}.constants.MDF_COLLECTION = ...
+                    obj.dcValidation.STRUCTURES.MDF_COLLECTION_TYPE.(obj.confData.configurations.configuration{i}.constants.MDF_COLLECTION_TYPE);
+                
+            catch
+                throw(MException('mdfConf:start',...
+                    ['3: Invalid MDF collection type configuration!!!']));
+            end %try/catch
+%             switch upper(obj.confData.configurations.configuration{i}.constants.MDF_COLLECTION_TYPE)
+%                 case {'MIXED', 'M', 'V_1_4'}
+%                     obj.confData.configurations.configuration{i}.constants.MDF_COLLECTION_TYPE = 'MIXED';
+%                     obj.confData.configurations.configuration{i}.constants.MDF_COLLECTION = struct( ...
+%                         'DB' , 'MONGODB', ...
+%                         'YAML' , true, ...
+%                         'DATA' , 'MATFILE' ...
+%                     );
+% 
+%                 case {'DATABASE', 'DB', 'V_1_5'}
+%                     obj.confData.configurations.configuration{i}.constants.MDF_COLLECTION_TYPE = 'DATABASE';
+%                     obj.confData.configurations.configuration{i}.constants.MDF_COLLECTION = struct( ...
+%                         'DB' , 'MONGODB', ...
+%                         'YAML' , false, ...
+%                         'DATA' , 'DATABASE' ...
+%                     );
+%                     
+%                 otherwise
+%                     throw(MException('mdfConf:start',...
+%                             ['2: Invalid MDF collection type!!!']));
+% 
+%                 end %switch
 
             else
                 % we cannot proceed
                 throw(MException('mdfConf:start',...
-                    ['3: Configuration missing MDF collection configuration!!!']));
+                    ['4: Configuration missing MDF collection configuration!!!']));
             end %if
 
     end % for

@@ -78,7 +78,7 @@ function extractXml(obj)
             % append counter to machine name and user name
             mname = [mbasename '-' int2str(counter)];
             name = [basename ' (' int2str(counter) ')'];
-            counter = counter +1
+            counter = counter +1;
         end
         
         % create configuration structure

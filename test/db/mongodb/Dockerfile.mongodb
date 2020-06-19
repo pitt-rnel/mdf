@@ -9,8 +9,8 @@ LABEL maintainer="Max Novelli"
 LABEL mantainer_email="man8@pitt.edu"
 LABEL organization="RNEL, Physical Medicine and Rehabilitation, University of Pittsburgh"
 LABEL organization_website="http://rnel.pitt.edu"
-LABEL image_name="rnel_mongodb:2.0"
-LABEL image_version="v2.0.alpha.1"
+LABEL image_name="mdf_mongodb_test_v1_7:2.0"
+LABEL image_version="v1.7"
 LABEL service="mongodb"
 LABEL service_version="4.0"
 
@@ -21,13 +21,8 @@ RUN apt-get update && apt-get install -y gnupg2 wget
 
 #
 # Import MongoDB public GPG key AND create a MongoDB list file
-##RUN apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 0C49F3730359A14518585931BC711F9BA15703C6
-##RUN apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 9DA31620334BD75D9DCB49F368818C72E52529D4
-#RUN apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 4B7C549A058F8B6B
-#RUN apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 2930ADAE8CAF5059EE73BB4B58712A2291FA4AD5
 RUN wget -qO - https://www.mongodb.org/static/pgp/server-4.2.asc | apt-key add -
 
-#RUN echo "deb [ arch=amd64,arm64 ] http://repo.mongodb.org/apt/ubuntu bionic/mongodb-org/4.0 multiverse" | tee /etc/apt/sources.list.d/mongodb-org-4.0.list
 RUN echo "deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu bionic/mongodb-org/4.2 multiverse" | tee /etc/apt/sources.list.d/mongodb-org-4.2.list
 
 

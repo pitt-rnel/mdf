@@ -46,7 +46,11 @@ classdef mdfConf < handle
             'RNEL', ...
             'MATLAB', ...
             fullfile('Documents','MATLAB')};
-
+        
+        % file with data collection validation info
+        dcTypeValidationFile = '../../../etc/dc_type_validation.json';
+        % variable where we load the data collectionvalidation
+        dcValidation = struct();
     end
     
     properties (Dependent, Hidden)
@@ -169,6 +173,12 @@ classdef mdfConf < handle
                     end %if
                 end %for
             end %if
+            
+            % load data collection validation
+            fh = fopen(obj.dcTypeValidationFile);
+            rs = fread(fh);
+            obj.dcValidation = mdf.fromJson(char(rs'));
+            fclose(fh);
 
             % automate actions
             step = find(cellfun(@(s)any(strcmp(s,obj.automation)),obj.automationList));

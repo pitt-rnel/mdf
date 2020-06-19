@@ -4,6 +4,7 @@ classdef mdfConf < handle
         % if we need to use internal or external library for json
         matlab_json_api;
         json_api;
+        collection;
 
     end %properties
 
@@ -16,6 +17,7 @@ classdef mdfConf < handle
             else
                 obj.json_api = 'JSONLAB';
             end %if
+            obj.collection = 'FILE';
         end %function
     end %methods
 
@@ -29,6 +31,16 @@ classdef mdfConf < handle
                 case 'MDF_JSONAPI'
                     C = obj.json_api;
             end %switch
+        end %function
+        
+        % set values so collection data has data in mongodb gridfs
+        function setCollectionToMongodbGridfs(obj)
+            obj.collection = 'MONGODB_GRIDFS';
+        end %function
+        
+        % return if we are connecting to mongodb or mongodb gridfs DC
+        function res = isCollectionData(obj, collectionType)
+            res = strcmp(collectionType,obj.collection);
         end %function
     end %methods
 

@@ -9,7 +9,7 @@
 
 #
 # constants
-MONGODB_TAG="mdf_mongodb_test:2.0"
+MONGODB_TAG="mdf_mongodb_test_v1_7:2.0"
 
 #
 # check if we are sudoers

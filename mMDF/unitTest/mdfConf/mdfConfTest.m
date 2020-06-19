@@ -8,6 +8,7 @@ classdef mdfConfTest < matlab.unittest.TestCase
     % properties
     properties
         xmlConfFile = '';
+        dcTypeValidationFile= '';
         testFolder = '';
         indata = struct();
     end %properties
@@ -38,6 +39,10 @@ classdef mdfConfTest < matlab.unittest.TestCase
             %
             % set test configuration file, xml format
             testCase.xmlConfFile = fullfile(testCase.testFolder, '..', 'conf', 'mdf.xml.conf');
+            %
+            % set path to json file containing the info to validate data
+            % collection type
+            testCase.dcTypeValidationFile = fullfile(testCase.testFolder, '..', '..', '..', 'etc', 'dc_type_validation.json');
             % 
             % set up input data to instantiate the object and have it ready for use
             testCase.indata = [ ...
@@ -55,9 +60,15 @@ classdef mdfConfTest < matlab.unittest.TestCase
                     'fileName', testCase.xmlConfFile, ...
                     'automation', 'start', ...
                     'menuType', 'text', ...
-                    'selection', 3)];
+                    'selection', 3), ...
+                struct( ...
+                    'fileName', testCase.xmlConfFile, ...
+                    'automation', 'start', ...
+                    'menuType', 'text', ...
+                    'selection', 5)];
 
         end %function
+        
     end %methods
 
     methods (Test)
@@ -140,7 +151,7 @@ classdef mdfConfTest < matlab.unittest.TestCase
                 testCase.verifyClass(obj.confData,'struct');
                 % check that selection is correct
                 [~, ~, i] = obj.getSelectedConfiguration();
-                testCase.verifyEqual(i,collId);
+                testCase.verifyEqual(i,testCase.indata(collId).selection);
                 % delete singleton
                 mdfConf.getInstance('release');
             end %for
@@ -180,6 +191,9 @@ classdef mdfConfTest < matlab.unittest.TestCase
                 % test configuration
                 obj = mdfConf.getInstance(testCase.indata(collId));
                 %
+                % getconfiguration selection
+                collSel= testCase.indata(collId).selection;
+                %
                 % request the current full confguration structure
                 collConf = obj.getCollectionConf();
                 %
@@ -189,23 +203,23 @@ classdef mdfConfTest < matlab.unittest.TestCase
                 % test that the collection conf isset properly
                 testCase.verifyEqual( ...
                     collConf.YAML, ...
-                    obj.confData.configurations.configuration{collId}.constants.MDF_COLLECTION.YAML);
+                    obj.confData.configurations.configuration{collSel}.constants.MDF_COLLECTION.YAML);
                 testCase.verifyEqual( ...
                     collConf.DATA, ...
-                    obj.confData.configurations.configuration{collId}.constants.MDF_COLLECTION.DATA);
+                    obj.confData.configurations.configuration{collSel}.constants.MDF_COLLECTION.DATA);
                 %
                 % get directly yaml
                 yamlConf = obj.getCollectionYaml();
                 testCase.verifyClass(yamlConf,'logical');
                 testCase.verifyEqual( ...
                     yamlConf, ...
-                    obj.confData.configurations.configuration{collId}.constants.MDF_COLLECTION.YAML);
+                    obj.confData.configurations.configuration{collSel}.constants.MDF_COLLECTION.YAML);
                 
                 dataConf = obj.getCollectionData();
                 testCase.verifyClass(dataConf,'char');
                 testCase.verifyEqual( ...
                     dataConf, ...
-                    obj.confData.configurations.configuration{collId}.constants.MDF_COLLECTION.DATA);
+                    obj.confData.configurations.configuration{collSel}.constants.MDF_COLLECTION.DATA);
 
                 % delete singleton
                 mdfConf.getInstance('release');
