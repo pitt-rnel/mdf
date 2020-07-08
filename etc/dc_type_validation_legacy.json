@@ -1,7 +1,7 @@
 {
   "VALUES" : {
     "MDF_COLLECTION" : {
-      "METADATA" : {
+      "DATABASE" : {
         "DATABASE" : "MONGODB",
         "MONGODB"  : "MONGODB"
       },
@@ -11,11 +11,10 @@
         "FILE"           : "MAT_FILE",
         "MAT"            : "MAT_FILE",
         "M"              : "MAT_FILE",
-        "MONGODB_ALL"    : "MONGODB_ALL", 
-        "MONGODB"        : "MONGODB_ALL", 
-        "DATABASE"       : "MONGODB_ALL",
-        "DB"             : "MONGODB_ALL",
-        "D"              : "MONGODB_ALL",
+        "MONGODB"        : "MONGODB", 
+        "DATABASE"       : "MONGODB",
+        "DB"             : "MONGODB",
+        "D"              : "MONGODB",
         "MONGODB_GRIDFS" : "MONGODB_GRIDFS",
         "GRIDFS"         : "MONGODB_GRIDFS",
         "GFS"            : "MONGODB_GRIDFS",
@@ -37,22 +36,30 @@
       "MONGODB_GRIDFS"   : "MONGODB_GRIDFS",
       "GRIDFS"           : "MONGODB_GRIDFS",
       "GFS"              : "MONGODB_GRIDFS"
-    },
-    "MDF_STORAGES" : [
-      "MONGODB",
-      "MONGODB_ALL",
-      "MONGODB_GRIDFS",
-      "MAT_FILES",
-      "YAML_FILES",
-      "JSON_FILES"
-    ]
+    }
   },
-  "MDF_STORAGES" : {
+  "STRUCTURES" : {
     "MDF_COLLECTION_TYPE": {
-      "MAT_FILE" : [ "MONGODB", "YAML_FILE", "MAT_FILE" ],
-      "MAT_FILE_NO_YAML" : [ "MONGODB", "MAT_FILE" ],
-      "MONGODB" : ["MONGODB_ALL"],
-      "MONGODB_GRIDFS" : ["MONGODB", "MONGODB_GRIDFS"]
+      "MAT_FILE" : {
+        "DB" : "MONGODB",
+        "YAML" : true,
+        "DATA" : "MAT_FILE"
+      },
+      "MAT_FILE_NO_YAML" : {
+        "DB" : "MONGODB",
+        "YAML" : false,
+        "DATA" : "MAT_FILE"
+      },
+      "MONGODB" : {
+        "DB" : "MONGODB",
+        "YAML" : false,
+        "DATA" : "MONGODB"
+      },
+      "MONGODB_GRIDFS" : {
+        "DB" : "MONGODB",
+        "YAML" : false,
+        "DATA" : "MONGODB_GRIDFS"
+      }
     }
   }
 }

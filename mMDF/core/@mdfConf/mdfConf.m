@@ -460,10 +460,15 @@ classdef mdfConf < handle
         ct = getCollectionType(obj,selection)
         
         % function to retrieve the collection configuration 
+	% provided for backward compatibility
         [arg1,arg2,arg3] = getCollectionConf(obj,selection);
         yaml = getCollectionYaml(obj,selection);
         data = getCollectionData(obj,selection);
         res = isCollectionData(obj,value,selection);
+
+	% function to retrieve the storage options
+	storages = getStorages(obj,selection);
+	res = isStorageUsed(obj,value,selection);
     end
     
     methods (Static)
@@ -489,12 +494,6 @@ classdef mdfConf < handle
         % load xml conf file
         loadXml(obj);
             
-        % load json conf file
-        loadJson(obj);
-        
-        % load legacy conf file
-        loadLegacy(obj);
-                
         % extract data from xml tree
         % top level function
         extractXml(obj);
@@ -502,24 +501,6 @@ classdef mdfConf < handle
         S = extractXmlHelper(obj,items)
         % get attributes from xml tag
         A = getXmlAttributes(obj,item)
-        
-        % extract data from json string
-        extractJson(obj);
-        % recursive function to extract json elements
-        [D J] = parseJsonValue(obj,json);
-        % extract array from json string
-        [A J] = parseJsonArray(obj,J)
-        % extract object from json string
-        [D J] = parseJsonObject(obj,J)
-        % extract name/value pair from json string
-        [N V J] = parseJsonNameValue(obj, J)
-        % extract string from json string
-        [S J] = parseJsonString(obj, J)
-        % extract numeric value from json string
-        [N J] = parseJsonNumber(obj, J)
-        
-        % extract data fromlegacy configuration
-        extractLegacy(obj);
         
         % local import toolbox
         importToolbox(obj,toolbox_folder_name,dir_ignore);
