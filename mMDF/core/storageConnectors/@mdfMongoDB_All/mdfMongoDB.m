@@ -1,4 +1,4 @@
-classdef (Sealed) mdfDB < handle
+classdef mdfMongoDB < mdfStorageConnector
 
     properties (Constant)
         Jar =  '../../../java/mongo-java-driver-3.8.0.jar';
@@ -72,7 +72,13 @@ classdef (Sealed) mdfDB < handle
             obj.fieldsRequired = {t2{t1}}';
         end
     end
+
     methods (Static)
+        function res = getMapping()
+            res = "MONGODB";
+        end %function
+
+
         function obj = getInstance(varargin)
             % access the global variable containing reference to the main
             % mdf core objects
