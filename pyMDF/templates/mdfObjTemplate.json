@@ -1,0 +1,28 @@
+{
+  "mdf_def": {
+    "mdf_type" : "<MDF_TYPE>",
+    "mdf_uuid" : "<MDF_UUID>",
+    "mdf_vuuid" : "<MDF_VUUID>",
+    "mdf_created" : "<MDF_CREATED>",
+    "mdf_modified" : "<MDF_MODIFIED>",
+    "mdf_children" : {
+      "mdf_fields" : [], 
+      "mdf_types" : []},
+    "mdf_data" : {
+      "mdf_fields" : []},
+    "mdf_files" : {
+      "mdf_base" : "",
+      "mdf_data" : "",
+      "mdf_metadata" : ""},
+    "mdf_links" : {
+      "mdf_directions" : [], 
+      "mdf_fields" : [], 
+      "mdf_types" : []},
+    "mdf_metadata" : {},
+    "mdf_parents": [
+    ]
+  },
+  "mdf_metadata": {
+  },
+  "mdf_version" : 1
+}
