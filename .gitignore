@@ -1,0 +1,8 @@
+#
+# pycharm folders
+.idea
+
+#
+# test database folders
+test/db/mongodb/db
+test/db/mongodb/log
