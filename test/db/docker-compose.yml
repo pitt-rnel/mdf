@@ -12,5 +12,5 @@ services:
         - './mongodb/db:/mdf/mongodb/db'
         - './mongodb/log:/mdf/mongodb/log'
     ports:
-        - '15213:27017'
+        - '15213:15213'
 

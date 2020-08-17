@@ -1,0 +1,2 @@
+$MDF_PROJECT_ROOT_PATH/mMDF/libs/yaml/external/snakeyaml-1.9.jar                 
+$MDF_PROJECT_ROOT_PATH/java/mongo-java-driver-3.12.1.jar

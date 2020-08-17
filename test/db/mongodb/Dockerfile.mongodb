@@ -39,16 +39,17 @@ RUN apt-get install -y mongodb-org
 RUN groupadd -g 15213 rnel-docker
 RUN usermod -a -G rnel-docker mongodb
 
-# Create the MongoDB data directory
+# Create the MongoDB conf and data directory
 RUN mkdir -p /mdf/mongodb/conf
 RUN mkdir -p /mdf/mongodb/db
 RUN chown -R root:rnel-docker /mdf/mongodb
 RUN chmod -R ug+w /mdf/mongodb
 
-# Expose port #27017 from the container to the host
-EXPOSE 27017
+# Expose port #15213 from the container to the host
+EXPOSE 15213
 
 # Set /usr/bin/mongod as the dockerized entry-point application
+# will specify the conf file that we're exposing via a docker volume in the docker-compose file instead
 ENTRYPOINT ["/usr/bin/mongod"]
 
 # volumes

@@ -9,7 +9,7 @@
    <CORE_BASE relative_path_to="CODE_BASE">core</CORE_BASE>
    <DB>
     <HOST present_as="DB_HOST" present_in="constants">localhost</HOST>
-    <PORT present_as="DB_PORT" present_in="constants">27017</PORT>
+    <PORT present_as="DB_PORT" present_in="constants">15213</PORT>
     <DATABASE present_as="DB_DATABASE" present_in="constants">mdftest</DATABASE>
     <COLLECTION present_as="DB_COLLECTION" present_in="constants">mdftest</COLLECTION>
    </DB>
