@@ -1,0 +1,68 @@
+<configurations>
+ <configuration>
+  <name>File based collection 1</name>
+  <description>MDF file based data collection with yaml files. Used during unit testing</description>
+  <constants>
+   <MDF_COLLECTION_TYPE>mixed</MDF_COLLECTION_TYPE>
+   <CODE_BASE>$MDF_PROJECT_ROOT_PATH/mMDF</CODE_BASE>
+   <CORE_BASE relative_path_to="CODE_BASE">core</CORE_BASE>
+   <DATA_BASE relative_path_to="CODE_BASE">unitTest/data</DATA_BASE>
+   <DB>
+    <HOST present_as="DB_HOST" present_in="constants">127.0.0.1</HOST>
+    <PORT present_as="DB_PORT" present_in="constants">15213</PORT>
+    <DATABASE present_as="DB_DATABASE" present_in="constants">mdfDbTest</DATABASE>
+    <COLLECTION present_as="DB_COLLECTION" present_in="constants">mixed</COLLECTION>
+   </DB>
+  </constants>
+ </configuration>
+ <configuration>
+  <name>File based collection 2</name>
+  <description>MDF file based data collection without yaml files. Used during unit testing</description>
+  <constants>
+   <MDF_COLLECTION>
+    <YAML>false</YAML>
+    <DATA>MATFILE</DATA>
+   </MDF_COLLECTION>
+   <CODE_BASE>$MDF_PROJECT_ROOT_PATH/mMDF</CODE_BASE>
+   <CORE_BASE relative_path_to="CODE_BASE">core</CORE_BASE>
+   <DATA_BASE relative_path_to="CODE_BASE">unitTest/data</DATA_BASE>
+   <DB>
+    <HOST present_as="DB_HOST" present_in="constants">127.0.0.1</HOST>
+    <PORT present_as="DB_PORT" present_in="constants">15213</PORT>
+    <DATABASE present_as="DB_DATABASE" present_in="constants">mdfDbTest</DATABASE>
+    <COLLECTION present_as="DB_COLLECTION" present_in="constants">mixed</COLLECTION>
+   </DB>
+  </constants>
+ </configuration>
+ <configuration>
+  <name>Database based collection</name>
+  <description>MDF database only data collection. Used during unit testing</description>
+  <constants>
+   <MDF_COLLECTION_TYPE>database</MDF_COLLECTION_TYPE>
+   <CODE_BASE>$MDF_PROJECT_ROOT_PATH/mMDF</CODE_BASE>
+   <CORE_BASE relative_path_to="CODE_BASE">core</CORE_BASE>
+   <DB>
+    <HOST present_as="DB_HOST" present_in="constants">127.0.0.1</HOST>
+    <PORT present_as="DB_PORT" present_in="constants">15213</PORT>
+    <DATABASE present_as="DB_DATABASE" present_in="constants">mdfDbTest</DATABASE>
+    <COLLECTION present_as="DB_COLLECTION" present_in="constants">database</COLLECTION>
+   </DB>
+  </constants>
+ </configuration>
+ <configuration>
+  <name>Database based collection alternative</name>
+  <description>MDF database only data collection. Second configuration to test reinit. Used during unit testing</description>
+  <constants>
+   <MDF_COLLECTION_TYPE>database</MDF_COLLECTION_TYPE>
+   <CODE_BASE>$MDF_PROJECT_ROOT_PATH/mMDF</CODE_BASE>
+   <CORE_BASE relative_path_to="CODE_BASE">core</CORE_BASE>
+   <DB>
+    <HOST present_as="DB_HOST" present_in="constants">127.0.0.1</HOST>
+    <PORT present_as="DB_PORT" present_in="constants">15213</PORT>
+    <DATABASE present_as="DB_DATABASE" present_in="constants">mdfDbTest</DATABASE>
+    <COLLECTION present_as="DB_COLLECTION" present_in="constants">database_alternative</COLLECTION>
+   </DB>
+  </constants>
+ </configuration>
+</configurations>
+

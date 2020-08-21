@@ -1,4 +1,8 @@
 #
+# local configuration
+mMDF/unitTest/conf/mdf.xml.conf
+
+#
 # pycharm folders
 .idea
 
