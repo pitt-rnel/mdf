@@ -320,8 +320,9 @@ classdef mdfTest < matlab.unittest.TestCase
             temp = fread(fid,inf);
             testJsonString2 = char(temp');
             
-            % remove new lines, just in case
-            testJsonString2(strfind(testJsonString2,char(10))) = [];
+            % remove new lines and trailing spaces, just in case
+            testJsonString2(strfind(testJsonString2,newline)) = [];
+            testJsonString2 = deblank(testJsonString2);
             
             % check if the 2 of them are the same
             testCase.verifyEqual(testJsonString1,testJsonString2);
