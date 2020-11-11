@@ -133,7 +133,8 @@ classdef (Abstract) mdfObjConfTest < matlab.unittest.TestCase
             
             % load all the records
             for i = [1:length(testCase.recordFiles)]
-                testCase.jsonString{i} = fileread(testCase.recordFiles{i});
+                tmpJsonString = fileread(testCase.recordFiles{i});
+                testCase.jsonString{i} = strrep(tmpJsonString, '/', filesep);
                 testCase.records{i} = jsondecode(testCase.jsonString{i});
             end %for
 
