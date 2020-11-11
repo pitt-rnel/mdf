@@ -35,9 +35,9 @@ function res = testEnv1()
 
     % get mdf path
     % get all the paths
-    allpaths = strsplit(path,':');
+    allpaths = strsplit(path,pathsep);
     % extract mdf path
-    corepath = allpaths{cellfun(@(path) ~isempty(strfind(path,'mMDF/core')),allpaths)};
+    corepath = allpaths{cellfun(@(path) ~isempty(strfind(path,['mMDF' filesep 'core'])),allpaths)};
     temp1 = strsplit(corepath,filesep);
     mdfpath = strjoin(temp1(1:end-1),filesep);
     clear temp1
