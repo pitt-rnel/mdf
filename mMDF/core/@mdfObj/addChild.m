@@ -97,7 +97,6 @@ function res = addChild(obj,prop,child,pos)
                 'mdf_type', oChild.type, ...
                 'mdf_file', oChild.getMFN(false) ), ...
             propValue(pos:end)];
-
     end %if
     
     res = true;

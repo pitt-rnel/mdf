@@ -1,24 +1,35 @@
 # Dockerizing MongoDB: Dockerfile for building MongoDB images
-# Based on ubuntu:16.04, installs MongoDB following the instructions from:
+# Based on ubuntu:18.04, installs MongoDB following the instructions from:
 # http://docs.mongodb.org/manual/tutorial/install-mongodb-on-ubuntu/
 
-FROM ubuntu:16.04
+FROM ubuntu:18.04
 
 # File Author / Maintainer
 LABEL maintainer="Max Novelli"
 LABEL mantainer_email="man8@pitt.edu"
 LABEL organization="RNEL, Physical Medicine and Rehabilitation, University of Pittsburgh"
 LABEL organization_website="http://rnel.pitt.edu"
-LABEL image_name="rnel_mongodb:1.0"
-LABEL image_version="v1.0.alpha.1"
+LABEL image_name="rnel_mongodb:2.0"
+LABEL image_version="v2.0.alpha.1"
 LABEL service="mongodb"
-LABEL service_version="3.4"
+LABEL service_version="4.0"
 
 
 # Installation:
+# install gnupg2
+RUN apt-get update && apt-get install -y gnupg2 wget
+
+#
 # Import MongoDB public GPG key AND create a MongoDB list file
-RUN apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 0C49F3730359A14518585931BC711F9BA15703C6
-RUN echo "deb [ arch=amd64,arm64 ] http://repo.mongodb.org/apt/ubuntu xenial/mongodb-org/3.4 multiverse" | tee /etc/apt/sources.list.d/mongodb-org-3.4.list
+##RUN apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 0C49F3730359A14518585931BC711F9BA15703C6
+##RUN apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 9DA31620334BD75D9DCB49F368818C72E52529D4
+#RUN apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 4B7C549A058F8B6B
+#RUN apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 2930ADAE8CAF5059EE73BB4B58712A2291FA4AD5
+RUN wget -qO - https://www.mongodb.org/static/pgp/server-4.2.asc | apt-key add -
+
+#RUN echo "deb [ arch=amd64,arm64 ] http://repo.mongodb.org/apt/ubuntu bionic/mongodb-org/4.0 multiverse" | tee /etc/apt/sources.list.d/mongodb-org-4.0.list
+RUN echo "deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu bionic/mongodb-org/4.2 multiverse" | tee /etc/apt/sources.list.d/mongodb-org-4.2.list
+
 
 # Update apt-get sources AND install MongoDB
 RUN apt-get update 
@@ -28,16 +39,17 @@ RUN apt-get install -y mongodb-org
 RUN groupadd -g 15213 rnel-docker
 RUN usermod -a -G rnel-docker mongodb
 
-# Create the MongoDB data directory
+# Create the MongoDB conf and data directory
 RUN mkdir -p /mdf/mongodb/conf
 RUN mkdir -p /mdf/mongodb/db
 RUN chown -R root:rnel-docker /mdf/mongodb
 RUN chmod -R ug+w /mdf/mongodb
 
-# Expose port #27017 from the container to the host
-EXPOSE 27017
+# Expose port #15213 from the container to the host
+EXPOSE 15213
 
 # Set /usr/bin/mongod as the dockerized entry-point application
+# will specify the conf file that we're exposing via a docker volume in the docker-compose file instead
 ENTRYPOINT ["/usr/bin/mongod"]
 
 # volumes

@@ -18,6 +18,9 @@ function res = insert(obj,records)
     % import query object
     %import com.mongodb.BasicDBObject
 
+    % check if this version of matlab has json functions builtin
+    jsonapi = (exist('jsondecode') == 5);
+    
     % transform input in cell if needed
     if ~isa(records,'cell')
         records = {records};

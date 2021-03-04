@@ -124,6 +124,16 @@ function outdata = load(indata)
                 return;
             end %if
         end %if
+        % check if this object is part of this data collection
+        temp_data = odb.find([ ...
+            '{ "mdf_def.mdf_type" : "' mdf_data.mdf_def.mdf_type '" ' ...
+            ', "mdf_def.mdf_uuid" : "' mdf_data.mdf_def.mdf_uuid '" }']);
+        if isempty(temp_data)
+            disp([ ...
+                'IMPORTANT: mdf object type ' mdf_data.mdf_def.mdf_type ...
+                ' with uuid ' mdf_data.mdf_def.mdf_uuid ...
+                ' is not part of this data collection']);
+        end %if
     end %if
     
     % if mdf_data is still empty, next we check for json string
@@ -303,6 +313,22 @@ function outdata = load(indata)
                         outdata(end).mdf_def.mdf_links.(field) = mdf.c2s(outdata(end).mdf_def.mdf_links.(field));
                     end %for
                     
+                    % check if we loaded from file and we need to populate
+                    % the data too
+                    if isfield(cdata,'mdf_from_file') && strcmp(cdata.mdf_from_file,'mat') && ...
+                            isfield(cdata,'mdf_data_loaded') && cdata.mdf_data_loaded
+                        % transfer data to the object
+                        for i = 1:length(cdata.mdf_def.mdf_data.mdf_fields)
+                            dp = cdata.mdf_def.mdf_data.mdf_fields{i};
+                            % load the data property requested
+                            outdata(end).data.(dp) = cdata.mdf_data.(dp);
+                            % updates def properties
+                            outdata(end).setDataInfo(dp);
+                            % marked as loaded
+                            outdata(end).status.loaded.data.(dp) = 1;
+                        end %for
+                    end %if
+                    
                     % extract children
                     %outdata(i).children = cdata.mdf_def.mdf_children;
                     % extract parents
@@ -316,6 +342,11 @@ function outdata = load(indata)
                 
                 outdata = cellfun(@(x) x.mdf_def.mdf_uuid,mdf_data,'UniformOutput',0);
         end %switch
+        
+        % convert out put vector to a column vector
+        if isrow(outdata)
+            outdata = outdata';
+        end %if
         
         % clear mdf data from memory
         clear mdf_data;
