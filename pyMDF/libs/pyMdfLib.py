@@ -164,19 +164,85 @@ def getNewMdfObject(objType,objUuid='',objTemplate=None):
     return obj
 
 def addParent(obj,parent):
+    # add parent to child
+    # return code
+    res = False
     # extract uuids of current parents
     pUuids = [item['mdf_uuid'] for item in obj['mdf_def']['mdf_parents']] if obj['mdf_def']['mdf_parents'] else []
+    # check if this parent has been already added
     if parent['mdf_def']['mdf_uuid'] not in pUuids:
+        # we need to add new parent
         obj['mdf_def']['mdf_parents'].append(getReference(parent))
-        return True
-    return False
+        res = True
+    #end if
+    return res
+
+def addChildren(parent,child,prop):
+    # add child to parent
+    # return code
+    res = False
+    # check if we have the property
+    if prop not in parent['mdf_def']['mdf_children']['mdf_fields']:
+        # new property, adds it
+        parent['mdf_def']['mdf_children']['mdf_fields'].append(prop)
+        parent['mdf_def']['mdf_children']['mdf_types'].append(child['mdf_def']['mdf_type'])
+        parent['mdf_def']['mdf_children'][prop] = []
+    #end if
+
+    # extract children uuids
+    uuids = [item['mdf_uuid'] for item in parent['mdf_def']['mdf_children'][prop]]
+    # check if we need to add the child
+    if child['mdf_def']['mdf_uuid'] not in uuids:
+        # we need to add the child
+        parent['mdf_def']['mdf_children'][prop].append(getReference(child))
+        res = True
+    #end if
+    return res
+#end def
 
 def getReference(obj):
     return {
             'mdf_uuid' : obj['mdf_def']['mdf_uuid'],
             'mdf_type' : obj['mdf_def']['mdf_type'],
-            'mdf_file' : ''
+            'mdf_file' : getMetadataFile(obj)
         }
+
+def getMetadataFile(obj):
+    return obj['mdf_def']['mdf_files']['mdf_metadata']
+
+
+def setFiles(mdfObj,files):
+    '''
+    set files for the file base / mixed DC configuration
+    
+    mdfObj = mdf object that we need to set the files for
+    files = (string) base path for all files
+            (dictionary) base path, data file and metadata file
+            Fields:
+            - base
+            - metadata
+            - data
+    '''
+    # check if we got a single string, which is used as base, or a dictionary with all the paths
+    if isinstance(files,str):
+        # user provided only base path
+        mdfObj['mdf_def']['mdf_files']['mdf_base'] = files
+        mdfObj['mdf_def']['mdf_files']['mdf_data'] = files + '.data.mat'
+        mdfObj['mdf_def']['mdf_files']['mdf_metadata'] = files + '.md.yml'
+    elif isinstance(files,dict):
+        # user provded all three fields
+        mdfObj['mdf_def']['mdf_files']['mdf_base'] = files['base']
+        mdfObj['mdf_def']['mdf_files']['mdf_data'] = files['data']
+        mdfObj['mdf_def']['mdf_files']['mdf_metadata'] = files['metadata']
+    else:
+        # error
+        raise ValueError('setFiles: invalid value for files')
+    #end if
+#end def
+
+def getFiles(mdfObj):
+    return copy.deepcopy(mdfObj['mdf_def']['mdf_files'])
+#end def
 
 def getUuid():
     return str(uuid.uuid4())
@@ -286,7 +352,7 @@ def getMdfObjectByUuid(objUuid):
 
     return [item for item in dbColl.find({'mdf_def.mdf_uuid':objUuid},{'_id':0,'mdf_def':1,'mdf_metadata':1})][0]
 
-def getMdfObjectsByUuids(objUuids):
+def getMdfObjectsByUuids(objUuids,default='empty'):
     #
     # retrieve the mdf Objects given the list of uuids
     global dbColl

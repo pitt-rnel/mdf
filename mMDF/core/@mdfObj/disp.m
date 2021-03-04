@@ -297,7 +297,7 @@ function printKeyValue(key, value, keySize, valueSize)
     end %if
     fs = [fs 's'];
     % print on screen
-    disp(sprintf(fs, kd, vd))
+    disp(strip(sprintf(fs, kd, vd),'right'))
 end % function
 
 function printStruct(key, value, keySize, delta, valueSize)

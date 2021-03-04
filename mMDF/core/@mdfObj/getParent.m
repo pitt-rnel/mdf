@@ -66,11 +66,11 @@ function parents = getParent(obj, selector)
     end %if
     
     % find parent object to be returned
-    for i=1:length(indexes)
+    for i=1:min(length(obj.mdf_def.mdf_parents),length(indexes))
         % get index
         index = indexes(i);
         % check if it is a valide index
-        if ~isempty(index) && index>=1 && index <=length(obj.mdf_def.mdf_parents)
+        if ~isempty(index) && index>=1 && index<=length(obj.mdf_def.mdf_parents) && isstruct(obj.mdf_def.mdf_parents) && isfield(obj.mdf_def.mdf_parents(1),'mdf_uuid')
             % get child uuid 
             uuid = obj.mdf_def.mdf_parents(index).mdf_uuid;
             % get object from memory
